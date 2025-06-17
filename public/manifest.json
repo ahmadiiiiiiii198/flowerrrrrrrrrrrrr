@@ -1,0 +1,87 @@
+{
+  "name": "Francesco Fiori & Piante - Order Dashboard",
+  "short_name": "Order Dashboard",
+  "description": "Real-time order management dashboard for Francesco Fiori & Piante flower shop",
+  "start_url": "/orders",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Order Dashboard",
+      "short_name": "Orders",
+      "description": "View and manage orders",
+      "url": "/orders",
+      "icons": [
+        {
+          "src": "/favicon.ico",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Admin Panel",
+      "short_name": "Admin",
+      "description": "Access admin panel",
+      "url": "/admin",
+      "icons": [
+        {
+          "src": "/favicon.ico",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "platform": "wide",
+      "label": "Order Dashboard - Desktop View"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "platform": "narrow",
+      "label": "Order Dashboard - Mobile View"
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "permissions": [
+    "notifications",
+    "background-sync",
+    "persistent-notification"
+  ],
+  "protocol_handlers": [
+    {
+      "protocol": "web+order",
+      "url": "/orders?id=%s"
+    }
+  ]
+}
