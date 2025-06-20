@@ -193,7 +193,7 @@ const FixedSpecialties: React.FC = () => {
   
   // Debug info to show when data was last fetched
   const debugStyle = {
-    position: 'absolute' as 'absolute',
+    position: 'absolute' as const,
     bottom: '5px',
     right: '5px',
     fontSize: '10px',

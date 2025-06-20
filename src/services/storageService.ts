@@ -110,7 +110,7 @@ export class StorageService {
       // If it's a full URL, extract just the filename part
       if (path.includes('storage/v1/object/public/')) {
         // Extract path pattern for Supabase URLs
-        const pathMatch = path.match(/storage\/v1\/object\/public\/([^\/]+)\/(.+)$/);
+        const pathMatch = path.match(/storage\/v1\/object\/public\/([^/]+)\/(.+)$/);
         if (pathMatch && pathMatch.length >= 3) {
           // Use the extracted values
           filePath = pathMatch[2];

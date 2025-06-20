@@ -118,7 +118,7 @@ export async function verifyProductsData(): Promise<DatabaseVerificationResult> 
     // Check for products without proper category links
     const productsWithoutCategories = data.filter(product => !(product as any).categories);
 
-    let warnings = [];
+    const warnings = [];
     if (categoriesWithoutProducts.length > 0) {
       warnings.push(`Categories without products: ${categoriesWithoutProducts.join(', ')}`);
     }

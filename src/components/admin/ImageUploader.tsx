@@ -175,7 +175,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     } finally {
       setIsUploading(false);
       setUploadProgress({});
-    };
+    }
   };
 
   const handleUploadClick = () => {

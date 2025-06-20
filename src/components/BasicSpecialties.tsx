@@ -194,7 +194,7 @@ const BasicSpecialties: React.FC = () => {
 
   // Debug panel styles
   const debugPanelStyle = {
-    position: 'fixed' as 'fixed',
+    position: 'fixed' as const,
     bottom: '10px',
     right: '10px',
     background: 'rgba(0,0,0,0.7)',

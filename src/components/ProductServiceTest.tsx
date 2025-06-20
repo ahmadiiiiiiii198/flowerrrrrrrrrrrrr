@@ -60,7 +60,7 @@ const ProductServiceTest = () => {
         if (firstCategory && firstCategory.length > 0) {
           const firstProduct = firstCategory[0];
           const requiredFields = ['id', 'name', 'description', 'price', 'category', 'category_slug', 'image_url'];
-          const hasAllFields = requiredFields.every(field => firstProduct.hasOwnProperty(field));
+          const hasAllFields = requiredFields.every(field => Object.prototype.hasOwnProperty.call(firstProduct, field));
           
           addTestResult('Product Structure', hasAllFields, 
             hasAllFields ? 'Products have all required fields' : 'Missing required fields in products');
