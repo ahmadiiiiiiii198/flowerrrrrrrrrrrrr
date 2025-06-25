@@ -1,18 +1,22 @@
 #!/usr/bin/env node
 
 /**
- * Setup script for new Supabase project
- * This script will initialize your new Supabase database with all required tables and data
+ * Automated Supabase Project Setup Script
+ * This script will completely set up your new Supabase database with all required tables and data
+ * Run this after getting your anon key from the Supabase dashboard
  */
 
 import { createClient } from '@supabase/supabase-js';
 
 // New Supabase project configuration
 const SUPABASE_URL = 'https://ijhuoolcnxbdvpqmqofo.supabase.co';
-const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE'; // You need to get this from your Supabase dashboard
+const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE'; // Get this from: https://supabase.com/dashboard/project/ijhuoolcnxbdvpqmqofo/settings/api
 
-console.log('🚀 Setting up new Supabase project...');
+console.log('🚀 Automated Supabase Project Setup');
+console.log('=====================================');
 console.log('📍 Project URL:', SUPABASE_URL);
+console.log('🎯 This will set up your complete flower shop database');
+console.log('');
 
 async function setupDatabase() {
   if (SUPABASE_ANON_KEY === 'YOUR_ANON_KEY_HERE') {
