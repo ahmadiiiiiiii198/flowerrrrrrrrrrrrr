@@ -155,13 +155,13 @@ class StripeService {
       };
 
       // Call Supabase Edge Function for checkout session creation
-      const stripeServerUrl = 'https://despodpgvkszyexvcbft.supabase.co/functions/v1/create-checkout-session';
+      const stripeServerUrl = 'https://ijhuoolcnxbdvpqmqofo.supabase.co/functions/v1/create-checkout-session';
 
       const response = await fetch(stripeServerUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlc3BvZHBndmtzenlleHZjYmZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzNTcyMTAsImV4cCI6MjA2MzkzMzIxMH0.zyjFQA-Kr317M5l_6qjV_a-6ED2iU4wraRuYaa0iGEg'}`,
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqaHVvb2xjbnhiZHZwcW1xb2ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzUxMjcwNjcsImV4cCI6MjA1MDcwMzA2N30.Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8'}`,
         },
         body: JSON.stringify(checkoutData),
       });
