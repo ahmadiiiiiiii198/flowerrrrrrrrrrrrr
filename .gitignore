@@ -25,5 +25,6 @@ dist-ssr
 
 # Sensitive files
 stripe-keys.env
+configure-stripe-db.js
 *.env.local
 *.env.production

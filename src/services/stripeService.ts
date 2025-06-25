@@ -154,21 +154,32 @@ class StripeService {
         },
       };
 
-      // Call Stripe server (Netlify function in production, local server in development)
-      const stripeServerUrl = import.meta.env.PROD
-        ? '/.netlify/functions/create-checkout-session'
-        : 'http://localhost:3001/create-checkout-session';
+      // Call Supabase Edge Function for checkout session creation
+      const stripeServerUrl = 'https://despodpgvkszyexvcbft.supabase.co/functions/v1/create-checkout-session';
 
       const response = await fetch(stripeServerUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlc3BvZHBndmtzenlleHZjYmZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzNTcyMTAsImV4cCI6MjA2MzkzMzIxMH0.zyjFQA-Kr317M5l_6qjV_a-6ED2iU4wraRuYaa0iGEg'}`,
         },
         body: JSON.stringify(checkoutData),
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('Stripe checkout session creation failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorText
+        });
+
+        // If Edge Function is not available, provide helpful error message
+        if (response.status === 404) {
+          throw new Error('Stripe payment service is not available. Please contact support or try again later.');
+        }
+
+        throw new Error(`Payment service error (${response.status}): ${errorText || response.statusText}`);
       }
 
       const session = await response.json();
