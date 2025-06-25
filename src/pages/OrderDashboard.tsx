@@ -571,7 +571,7 @@ const OrderDashboard = () => {
 
         {/* Last Update Time */}
         <div className="mt-2 text-xs text-gray-500">
-          {t('lastUpdated')}: {lastUpdate.toLocaleTimeString()}
+          {t('lastUpdatedDashboard')}: {lastUpdate.toLocaleTimeString()}
         </div>
       </div>
 
