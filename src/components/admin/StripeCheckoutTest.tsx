@@ -110,8 +110,11 @@ const StripeCheckoutTest = () => {
       try {
         const supabaseUrl = supabase.supabaseUrl;
         const supabaseKey = supabase.supabaseKey;
+        const edgeFunctionUrl = `${supabaseUrl}/functions/v1/create-checkout-session`;
 
-        const testResponse = await fetch(`${supabaseUrl}/functions/v1/create-checkout-session`, {
+        console.log('Testing Edge Function at:', edgeFunctionUrl);
+
+        const testResponse = await fetch(edgeFunctionUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -134,16 +137,26 @@ const StripeCheckoutTest = () => {
           }),
         });
 
+        console.log('Edge Function response:', {
+          status: testResponse.status,
+          statusText: testResponse.statusText,
+          ok: testResponse.ok
+        });
+
         if (testResponse.ok || testResponse.status === 400) {
-          // 400 is OK for this test - means function is reachable
+          // 400 is OK for this test - means function is reachable but may have validation errors
           results.edgeFunctionReachable = true;
+          console.log('Edge Function is reachable');
+        } else if (testResponse.status === 404) {
+          throw new Error('Edge Function not deployed (404 Not Found)');
         } else {
-          throw new Error(`Edge function returned ${testResponse.status}`);
+          const errorText = await testResponse.text().catch(() => 'Unknown error');
+          throw new Error(`Edge function returned ${testResponse.status}: ${errorText}`);
         }
       } catch (error) {
+        console.error('Edge Function test failed:', error);
         results.error = `Edge function not reachable: ${error.message}`;
-        setApiTestResults(results);
-        return;
+        // Don't return here - continue with Stripe client test
       }
 
       // Test 3: Check if Stripe can be initialized
@@ -156,13 +169,26 @@ const StripeCheckoutTest = () => {
           .single();
 
         const config = data?.value as any;
+        console.log('Stripe config for initialization test:', {
+          hasPublishableKey: !!config?.publishableKey,
+          keyPrefix: config?.publishableKey?.substring(0, 10),
+          isTestMode: config?.isTestMode
+        });
+
         if (config?.publishableKey) {
           const stripe = await loadStripe(config.publishableKey);
           if (stripe) {
             results.stripeInitialized = true;
+            console.log('Stripe client initialized successfully');
+          } else {
+            console.error('Stripe client returned null');
+            results.error = 'Stripe client returned null - check publishable key format';
           }
+        } else {
+          results.error = 'No publishable key found in configuration';
         }
       } catch (error) {
+        console.error('Stripe initialization error:', error);
         results.error = `Stripe initialization failed: ${error.message}`;
       }
 
