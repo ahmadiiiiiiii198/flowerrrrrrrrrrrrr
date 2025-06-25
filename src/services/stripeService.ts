@@ -104,8 +104,25 @@ class StripeService {
     metadata?: Record<string, string>
   ): Promise<CheckoutSession> {
     try {
-      // Calculate total amount
-      const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      // First try Edge Function, then fallback to direct Stripe
+      return await this.createCheckoutSessionWithEdgeFunction(items, customerInfo, orderId, metadata);
+    } catch (error) {
+      console.warn('Edge Function failed, trying direct Stripe checkout:', error);
+      return await this.createDirectStripeCheckout(items, customerInfo, orderId, metadata);
+    }
+  }
+
+  /**
+   * Create checkout session using Supabase Edge Function
+   */
+  private async createCheckoutSessionWithEdgeFunction(
+    items: CheckoutItem[],
+    customerInfo: CustomerInfo,
+    orderId: string,
+    metadata?: Record<string, string>
+  ): Promise<CheckoutSession> {
+    // Calculate total amount
+    const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
       // Create line items for Stripe
       const lineItems = items.map(item => {
@@ -189,7 +206,75 @@ class StripeService {
         url: session.url,
       };
     } catch (error) {
-      console.error('Error creating checkout session:', error);
+      console.error('Error creating checkout session with Edge Function:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create checkout session using direct Stripe (fallback method)
+   */
+  private async createDirectStripeCheckout(
+    items: CheckoutItem[],
+    customerInfo: CustomerInfo,
+    orderId: string,
+    metadata?: Record<string, string>
+  ): Promise<CheckoutSession> {
+    try {
+      const stripe = await this.getStripeInstance();
+      if (!stripe) {
+        throw new Error('Failed to initialize Stripe');
+      }
+
+      // Calculate total amount
+      const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+      console.log('Creating direct Stripe checkout session for order:', orderId);
+
+      // Prepare line items for Stripe
+      const lineItems = items.map(item => ({
+        price_data: {
+          currency: 'eur',
+          product_data: {
+            name: item.name,
+            description: item.description || '',
+            images: item.image ? [item.image] : [],
+          },
+          unit_amount: Math.round(item.price * 100), // Convert to cents
+        },
+        quantity: item.quantity,
+      }));
+
+      // Create checkout session directly with Stripe
+      const { error } = await stripe.redirectToCheckout({
+        mode: 'payment',
+        lineItems,
+        customerEmail: customerInfo.email,
+        billingAddressCollection: 'required',
+        shippingAddressCollection: {
+          allowedCountries: ['IT', 'FR', 'DE', 'ES', 'AT', 'CH'],
+        },
+        successUrl: `${window.location.origin}/payment/success?session_id={CHECKOUT_SESSION_ID}&order_id=${orderId}`,
+        cancelUrl: `${window.location.origin}/payment/cancel?order_id=${orderId}`,
+        metadata: {
+          order_id: orderId,
+          customer_name: customerInfo.name,
+          customer_phone: customerInfo.phone || '',
+          ...metadata,
+        },
+      });
+
+      if (error) {
+        throw new Error(error.message || 'Failed to redirect to Stripe checkout');
+      }
+
+      // This won't be reached as redirectToCheckout redirects the page
+      return {
+        sessionId: 'direct_redirect',
+        url: 'redirecting...',
+      };
+    } catch (error) {
+      console.error('Error creating direct Stripe checkout:', error);
       throw new Error('Failed to create checkout session. Please try again.');
     }
   }
@@ -228,6 +313,13 @@ class StripeService {
   ): Promise<void> {
     try {
       const session = await this.createCheckoutSession(items, customerInfo, orderId, metadata);
+
+      // If using direct checkout, the redirect already happened
+      if (session.sessionId === 'direct_redirect') {
+        return;
+      }
+
+      // Otherwise, redirect to the session URL
       await this.redirectToCheckout(session.sessionId);
     } catch (error) {
       console.error('Error in checkout flow:', error);
