@@ -176,7 +176,7 @@ class StripeService {
 
         // If Edge Function is not available, provide helpful error message
         if (response.status === 404) {
-          throw new Error('Stripe payment service is not available. Please contact support or try again later.');
+          throw new Error('Payment service is not deployed. Please contact support or try again later.');
         }
 
         throw new Error(`Payment service error (${response.status}): ${errorText || response.statusText}`);
@@ -355,6 +355,8 @@ class StripeService {
   async getPublicStripeInstance(): Promise<Stripe | null> {
     return await this.getStripeInstance();
   }
+
+
 }
 
 // Export singleton instance
