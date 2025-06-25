@@ -61,7 +61,7 @@ INSERT INTO settings (key, value) VALUES
   ),
   (
     'logoSettings',
-    '{"logoUrl": "https://despodpgvkszyexvcbft.supabase.co/storage/v1/object/public/uploads/logos/1749735172947-oi6nr6gnk7.png", "altText": "Francesco Fiori & Piante Logo"}'
+    '{"logoUrl": "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80", "altText": "Francesco Fiori & Piante Logo"}'
   ),
   (
     'aboutContent',
