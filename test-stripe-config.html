@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Stripe Configuration</title>
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+    <h1>Stripe Configuration Test</h1>
+    <button onclick="testStripe()">Test Stripe Configuration</button>
+    <div id="results"></div>
+
+    <script>
+        async function testStripe() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Testing Stripe configuration...</p>';
+
+            try {
+                // Test with your publishable key
+                const stripe = Stripe('pk_live_51RGNdrDOJ63odpAzQO3MOKACOOOEZrts38zjpFfiZYL9ynVjweBR6j9WJfcWzrdsZNoMOMinSUuJ9jxf8z8PjqWT00oqoe6KCn');
+                
+                if (stripe) {
+                    results.innerHTML = '<p style="color: green;">✅ Stripe initialized successfully!</p>';
+                    
+                    // Test creating a payment method
+                    const { error, paymentMethod } = await stripe.createPaymentMethod({
+                        type: 'card',
+                        card: {
+                            number: '4242424242424242',
+                            exp_month: 12,
+                            exp_year: 2025,
+                            cvc: '123',
+                        },
+                    });
+
+                    if (error) {
+                        results.innerHTML += '<p style="color: orange;">⚠️ Payment method test failed: ' + error.message + '</p>';
+                    } else {
+                        results.innerHTML += '<p style="color: green;">✅ Payment method creation test passed!</p>';
+                    }
+                } else {
+                    results.innerHTML = '<p style="color: red;">❌ Failed to initialize Stripe</p>';
+                }
+            } catch (error) {
+                results.innerHTML = '<p style="color: red;">❌ Error: ' + error.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html>
