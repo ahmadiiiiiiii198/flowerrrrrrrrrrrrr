@@ -54,6 +54,9 @@ class ShippingZoneService {
   private async loadSettings() {
     try {
       const { supabase } = await import('@/integrations/supabase/client');
+
+      console.log('🔄 Loading shipping settings from database...');
+
       const { data, error } = await supabase
         .from('settings')
         .select('value')
@@ -62,6 +65,9 @@ class ShippingZoneService {
 
       if (!error && data) {
         this.settings = { ...this.settings, ...data.value };
+        console.log('✅ Shipping settings loaded from database');
+      } else {
+        console.log('⚠️ No shipping settings found in database, using defaults');
       }
 
       // Load delivery zones
@@ -73,17 +79,28 @@ class ShippingZoneService {
 
       if (!zonesError && zonesData && zonesData.value !== null) {
         this.deliveryZones = zonesData.value;
+        console.log('✅ Delivery zones loaded from database:', this.deliveryZones.length, 'zones');
+
+        // Clear localStorage to prevent conflicts
+        localStorage.removeItem('deliveryZones');
+        localStorage.removeItem('shippingZoneSettings');
+      } else {
+        console.log('⚠️ No delivery zones found in database');
+        this.deliveryZones = [];
       }
     } catch (error) {
-      console.warn('Failed to load shipping zone settings:', error);
-      // Fallback to localStorage
+      console.error('Failed to load shipping zone settings:', error);
+      // Only use localStorage as absolute last resort
+      console.log('🔄 Attempting localStorage fallback...');
       const saved = localStorage.getItem('shippingZoneSettings');
       if (saved) {
         this.settings = { ...this.settings, ...JSON.parse(saved) };
+        console.log('📦 Loaded settings from localStorage');
       }
       const savedZones = localStorage.getItem('deliveryZones');
       if (savedZones) {
         this.deliveryZones = JSON.parse(savedZones);
+        console.log('📦 Loaded zones from localStorage:', this.deliveryZones.length, 'zones');
       }
     }
   }
@@ -318,6 +335,16 @@ class ShippingZoneService {
   public updateDeliveryZones(zones: DeliveryZone[]) {
     this.deliveryZones = zones;
     this.saveSettings();
+
+    // Clear localStorage to prevent conflicts
+    localStorage.removeItem('deliveryZones');
+    localStorage.removeItem('shippingZoneSettings');
+  }
+
+  // Force reload from database (useful after admin changes)
+  public async reloadFromDatabase(): Promise<void> {
+    console.log('🔄 Force reloading shipping zones from database...');
+    await this.loadSettings();
   }
 
   // Get current settings

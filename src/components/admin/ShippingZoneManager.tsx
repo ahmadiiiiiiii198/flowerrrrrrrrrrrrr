@@ -41,12 +41,30 @@ const ShippingZoneManager = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Load current settings
-    const currentSettings = shippingZoneService.getSettings();
-    setSettings(currentSettings);
-    
-    const currentZones = shippingZoneService.getDeliveryZones();
-    setDeliveryZones(currentZones);
+    // Load settings and zones on component mount
+    const loadData = async () => {
+      try {
+        // Force reload from database to get latest data
+        await shippingZoneService.reloadFromDatabase();
+
+        const currentSettings = shippingZoneService.getSettings();
+        setSettings(currentSettings);
+
+        const currentZones = shippingZoneService.getDeliveryZones();
+        setDeliveryZones(currentZones);
+
+        console.log('📊 Loaded shipping zones:', currentZones.length, 'zones');
+      } catch (error) {
+        console.error('Failed to load shipping data:', error);
+        toast({
+          title: 'Loading Error',
+          description: 'Failed to load shipping zone data. Using defaults.',
+          variant: 'destructive',
+        });
+      }
+    };
+
+    loadData();
   }, []);
 
   const handleSettingsChange = (key: string, value: any) => {
@@ -134,6 +152,13 @@ const ShippingZoneManager = () => {
       // Force save all current settings and zones
       shippingZoneService.updateSettings(settings);
       shippingZoneService.updateDeliveryZones(deliveryZones);
+
+      // Force reload from database to ensure consistency
+      await shippingZoneService.reloadFromDatabase();
+
+      // Update local state with fresh data
+      const freshZones = shippingZoneService.getDeliveryZones();
+      setDeliveryZones(freshZones);
 
       toast({
         title: 'Settings Saved! ✅',
