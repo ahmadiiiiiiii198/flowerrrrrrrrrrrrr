@@ -158,58 +158,96 @@ const ProductOrderModal: React.FC<ProductOrderModalProps> = ({ product, isOpen, 
   };
 
   const createOrder = async () => {
-    if (!product) return null;
+    if (!product) {
+      console.error('❌ createOrder: No product available');
+      return null;
+    }
 
     try {
+      console.log('📝 Creating order...');
+      console.log('📦 Product:', product);
+      console.log('👤 Order data:', orderData);
+
       const orderNumber = generateOrderNumber();
       const totalAmount = calculateTotal();
+
+      console.log('🔢 Order number:', orderNumber);
+      console.log('💰 Total amount:', totalAmount);
+
+      const orderPayload = {
+        order_number: orderNumber,
+        customer_name: orderData.customerName,
+        customer_email: orderData.customerEmail,
+        customer_phone: orderData.customerPhone || null,
+        total_amount: totalAmount,
+        status: 'payment_pending',
+        payment_status: 'pending',
+        billing_address: {
+          street: orderData.deliveryAddress,
+          city: '',
+          postalCode: '',
+          country: 'Italy'
+        },
+        shipping_address: {
+          street: orderData.deliveryAddress,
+          city: '',
+          postalCode: '',
+          country: 'Italy'
+        },
+        notes: `Product Order - ${product.name}\nQuantity: ${orderData.quantity}\nSpecial Requests: ${orderData.specialRequests}\nDelivery Date: ${orderData.deliveryDate}`
+      };
+
+      console.log('📤 Order payload:', orderPayload);
 
       // Create order with payment_pending status
       const { data: order, error: orderError } = await supabase
         .from('orders')
-        .insert({
-          order_number: orderNumber,
-          customer_name: orderData.customerName,
-          customer_email: orderData.customerEmail,
-          customer_phone: orderData.customerPhone || null,
-          total_amount: totalAmount,
-          status: 'payment_pending',
-          payment_status: 'pending',
-          billing_address: {
-            street: orderData.deliveryAddress,
-            city: '',
-            postalCode: '',
-            country: 'Italy'
-          },
-          shipping_address: {
-            street: orderData.deliveryAddress,
-            city: '',
-            postalCode: '',
-            country: 'Italy'
-          },
-          notes: `Product Order - ${product.name}\nQuantity: ${orderData.quantity}\nSpecial Requests: ${orderData.specialRequests}\nDelivery Date: ${orderData.deliveryDate}`
-        })
+        .insert(orderPayload)
         .select()
         .single();
 
-      if (orderError) throw orderError;
+      console.log('📊 Order creation result:', { order, orderError });
+
+      if (orderError) {
+        console.error('❌ Order creation error:', orderError);
+        throw orderError;
+      }
+
+      console.log('✅ Order created successfully:', order);
 
       // Create order item
+      const itemPayload = {
+        order_id: order.id,
+        product_id: product.id,
+        product_name: product.name,
+        quantity: orderData.quantity,
+        price: product.price
+      };
+
+      console.log('📤 Order item payload:', itemPayload);
+
       const { error: itemError } = await supabase
         .from('order_items')
-        .insert({
-          order_id: order.id,
-          product_id: product.id,
-          product_name: product.name,
-          quantity: orderData.quantity,
-          price: product.price
-        });
+        .insert(itemPayload);
 
-      if (itemError) throw itemError;
+      console.log('📊 Order item creation result:', { itemError });
 
+      if (itemError) {
+        console.error('❌ Order item creation error:', itemError);
+        throw itemError;
+      }
+
+      console.log('✅ Order and items created successfully');
       return order;
     } catch (error) {
-      console.error('Order creation error:', error);
+      console.error('❌ Order creation failed:', error);
+      console.error('❌ Error details:', {
+        name: error?.name,
+        message: error?.message,
+        details: error?.details,
+        hint: error?.hint,
+        code: error?.code
+      });
       throw error;
     }
   };
@@ -471,11 +509,20 @@ const ProductOrderModal: React.FC<ProductOrderModalProps> = ({ product, isOpen, 
                         phone: orderData.customerPhone || undefined,
                       }}
                       onCreateOrder={async () => {
-                        const order = await createOrder();
-                        if (!order) {
-                          throw new Error('Failed to create order');
+                        console.log('🚀 StripeCheckout onCreateOrder called');
+                        try {
+                          const order = await createOrder();
+                          console.log('📋 Order creation result:', order);
+                          if (!order) {
+                            console.error('❌ createOrder returned null');
+                            throw new Error('Failed to create order - createOrder returned null');
+                          }
+                          console.log('✅ Order created with ID:', order.id);
+                          return order.id;
+                        } catch (error) {
+                          console.error('❌ onCreateOrder failed:', error);
+                          throw error;
                         }
-                        return order.id;
                       }}
                       onSuccess={() => {
                         toast({
