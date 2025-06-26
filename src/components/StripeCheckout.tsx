@@ -120,6 +120,8 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
       };
 
       console.log('📤 Calling Stripe server...');
+      console.log('🔗 Server URL: http://localhost:3003/create-checkout-session');
+      console.log('📋 Request data:', JSON.stringify(requestData, null, 2));
 
       // Call Stripe server directly
       const response = await fetch('http://localhost:3003/create-checkout-session', {
@@ -130,30 +132,53 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
         body: JSON.stringify(requestData),
       });
 
+      console.log('📊 Response status:', response.status);
+      console.log('📄 Response headers:', Object.fromEntries(response.headers.entries()));
+
       if (!response.ok) {
         const errorText = await response.text();
+        console.error('❌ Server error response:', errorText);
         throw new Error(`Server error: ${response.status} - ${errorText}`);
       }
 
       const session = await response.json();
       console.log('✅ Session created:', session.id);
+      console.log('🔗 Session URL:', session.url);
 
       // Redirect immediately
       console.log('🚀 Redirecting to Stripe...');
-      window.location.href = session.url;
+
+      // Add a small delay to ensure logs are visible
+      setTimeout(() => {
+        window.location.href = session.url;
+      }, 100);
 
       // This code should not execute due to redirect
 
     } catch (error) {
       console.error('❌ Checkout failed:', error);
+      console.error('❌ Error type:', typeof error);
+      console.error('❌ Error name:', error?.name);
+      console.error('❌ Error message:', error?.message);
+      console.error('❌ Error stack:', error?.stack);
 
-      toast({
-        title: 'Errore nel Pagamento',
-        description: error instanceof Error ? error.message : 'Errore durante il pagamento',
-        variant: 'destructive',
-      });
+      // Check if it's a network error
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        toast({
+          title: 'Errore di Connessione',
+          description: 'Impossibile connettersi al server di pagamento. Verifica che il server sia attivo.',
+          variant: 'destructive',
+        });
+        onError?.('Connection error: Unable to reach payment server');
+      } else {
+        toast({
+          title: 'Errore nel Pagamento',
+          description: error instanceof Error ? error.message : 'Errore durante il pagamento',
+          variant: 'destructive',
+        });
+        onError?.(error instanceof Error ? error.message : 'Payment failed');
+      }
 
-      onError?.(error instanceof Error ? error.message : 'Payment failed');
       setIsProcessing(false);
     }
   };
