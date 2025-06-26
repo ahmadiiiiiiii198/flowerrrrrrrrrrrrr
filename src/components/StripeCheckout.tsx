@@ -74,7 +74,10 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
 
         console.log('🔄 Calling stripeService.checkoutAndRedirect...');
 
-        await stripeService.checkoutAndRedirect(
+        // Set a flag to prevent error handling during redirect
+        let redirectInProgress = false;
+
+        const redirectPromise = stripeService.checkoutAndRedirect(
           items,
           customerInfo,
           finalOrderId,
@@ -83,6 +86,12 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
             order_type: 'product_order',
           }
         );
+
+        // Set redirect flag immediately
+        redirectInProgress = true;
+
+        // Wait for the redirect (or error)
+        await redirectPromise;
 
         console.log('✅ Payment flow completed successfully');
 

@@ -271,10 +271,20 @@ class StripeService {
         console.log('💳 Real Stripe session detected - redirecting to Stripe checkout');
         console.log('🔗 Checkout URL:', session.url);
 
-        // Redirect directly to Stripe checkout URL
-        window.location.href = session.url;
+        // Use a more reliable redirect method
+        try {
+          // Try window.location.replace first (doesn't add to history)
+          window.location.replace(session.url);
+        } catch (e) {
+          // Fallback to href
+          window.location.href = session.url;
+        }
 
-        return Promise.resolve();
+        // Return a promise that never resolves to prevent further execution
+        return new Promise(() => {
+          // This promise never resolves, preventing the calling code from continuing
+          console.log('🔄 Redirect initiated, preventing further execution...');
+        });
       }
 
       // Fallback for other session types
