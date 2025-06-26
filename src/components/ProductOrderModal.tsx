@@ -35,32 +35,29 @@ const DirectPaymentButton: React.FC<DirectPaymentButtonProps> = ({
       // Step 1: Create order directly
       console.log('📝 Creating order directly...');
 
-      const orderNumber = `ORD-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
       const totalAmount = product.price * orderData.quantity;
 
+      // Create order with correct schema
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
-          order_number: orderNumber,
           customer_name: orderData.customerName,
           customer_email: orderData.customerEmail,
           customer_phone: orderData.customerPhone || null,
+          customer_address: orderData.deliveryAddress,
           total_amount: totalAmount,
           status: 'payment_pending',
           payment_status: 'pending',
-          billing_address: {
-            street: orderData.deliveryAddress,
-            city: '',
-            postalCode: '',
-            country: 'Italy'
-          },
-          shipping_address: {
-            street: orderData.deliveryAddress,
-            city: '',
-            postalCode: '',
-            country: 'Italy'
-          },
-          notes: `Product Order - ${product.name}\nQuantity: ${orderData.quantity}\nSpecial Requests: ${orderData.specialRequests}\nDelivery Date: ${orderData.deliveryDate}`
+          payment_method: 'stripe',
+          notes: `Product Order - ${product.name}\nQuantity: ${orderData.quantity}\nSpecial Requests: ${orderData.specialRequests}\nDelivery Date: ${orderData.deliveryDate}`,
+          metadata: {
+            product_id: product.id,
+            product_name: product.name,
+            quantity: orderData.quantity,
+            unit_price: product.price,
+            delivery_date: orderData.deliveryDate,
+            special_requests: orderData.specialRequests
+          }
         })
         .select()
         .single();
@@ -316,100 +313,7 @@ const ProductOrderModal: React.FC<ProductOrderModalProps> = ({ product, isOpen, 
     return `ORD-${timestamp.slice(-6)}${random}`;
   };
 
-  const createOrder = async () => {
-    if (!product) {
-      console.error('❌ createOrder: No product available');
-      return null;
-    }
-
-    try {
-      console.log('📝 Creating order...');
-      console.log('📦 Product:', product);
-      console.log('👤 Order data:', orderData);
-
-      const orderNumber = generateOrderNumber();
-      const totalAmount = calculateTotal();
-
-      console.log('🔢 Order number:', orderNumber);
-      console.log('💰 Total amount:', totalAmount);
-
-      const orderPayload = {
-        order_number: orderNumber,
-        customer_name: orderData.customerName,
-        customer_email: orderData.customerEmail,
-        customer_phone: orderData.customerPhone || null,
-        total_amount: totalAmount,
-        status: 'payment_pending',
-        payment_status: 'pending',
-        billing_address: {
-          street: orderData.deliveryAddress,
-          city: '',
-          postalCode: '',
-          country: 'Italy'
-        },
-        shipping_address: {
-          street: orderData.deliveryAddress,
-          city: '',
-          postalCode: '',
-          country: 'Italy'
-        },
-        notes: `Product Order - ${product.name}\nQuantity: ${orderData.quantity}\nSpecial Requests: ${orderData.specialRequests}\nDelivery Date: ${orderData.deliveryDate}`
-      };
-
-      console.log('📤 Order payload:', orderPayload);
-
-      // Create order with payment_pending status
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert(orderPayload)
-        .select()
-        .single();
-
-      console.log('📊 Order creation result:', { order, orderError });
-
-      if (orderError) {
-        console.error('❌ Order creation error:', orderError);
-        throw orderError;
-      }
-
-      console.log('✅ Order created successfully:', order);
-
-      // Create order item
-      const itemPayload = {
-        order_id: order.id,
-        product_id: product.id,
-        product_name: product.name,
-        quantity: orderData.quantity,
-        price: product.price
-      };
-
-      console.log('📤 Order item payload:', itemPayload);
-
-      const { error: itemError } = await supabase
-        .from('order_items')
-        .insert(itemPayload);
-
-      console.log('📊 Order item creation result:', { itemError });
-
-      if (itemError) {
-        console.error('❌ Order item creation error:', itemError);
-        throw itemError;
-      }
-
-      console.log('✅ Order and items created successfully');
-      return order;
-    } catch (error) {
-      console.error('❌ Order creation failed:', error);
-      console.error('❌ Error details:', {
-        name: error?.name,
-        message: error?.message,
-        details: error?.details,
-        hint: error?.hint,
-        code: error?.code
-      });
-      throw error;
-    }
-  };
+  // Old createOrder function removed - now using DirectPaymentButton
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
