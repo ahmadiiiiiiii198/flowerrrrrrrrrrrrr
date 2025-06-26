@@ -1,0 +1,21 @@
+{
+  "name": "francesco-fiori-stripe-server",
+  "version": "1.0.0",
+  "description": "Stripe payment server for Francesco Fiori flower shop",
+  "main": "stripe-server.js",
+  "scripts": {
+    "start": "node stripe-server.js",
+    "dev": "nodemon stripe-server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "stripe": "^14.21.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "keywords": ["stripe", "payment", "francesco-fiori", "flowers"],
+  "author": "Francesco Fiori",
+  "license": "MIT"
+}

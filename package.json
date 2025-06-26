@@ -38,8 +38,10 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "cmdk": "^0.2.1",
+    "cors": "^2.8.5",
     "date-fns": "^3.3.1",
     "embla-carousel-react": "^8.6.0",
+    "express": "^5.1.0",
     "framer-motion": "^12.18.1",
     "lovable-tagger": "^1.1.8",
     "lucide-react": "^0.344.0",
@@ -51,6 +53,7 @@
     "react-router-dom": "^6.22.3",
     "recharts": "^2.12.2",
     "sonner": "^1.4.3",
+    "stripe": "^18.2.1",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^11.1.0",
@@ -71,5 +74,18 @@
     "tailwindcss": "^3.4.1",
     "typescript": "^5.2.2",
     "vite": "^5.1.4"
-  }
+  },
+  "description": "**Beautiful flowers and exquisite plants for life's precious moments**",
+  "main": "console-test-script.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahmadiiiiiiii198/flowerrrrrrrrrrrrr.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ahmadiiiiiiii198/flowerrrrrrrrrrrrr/issues"
+  },
+  "homepage": "https://github.com/ahmadiiiiiiii198/flowerrrrrrrrrrrrr#readme"
 }

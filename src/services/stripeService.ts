@@ -28,21 +28,21 @@ export interface CheckoutSession {
   url: string;
 }
 
-// Simple Stripe configuration - no complex caching
+// Stripe instance
 let stripeInstance: Promise<Stripe | null> | null = null;
 
-// Test configuration for development
-const TEST_STRIPE_CONFIG = {
-  publishableKey: 'pk_test_51RGNdrDOJ63odpAzQO3MOKACOOOEZrts38zjpFfiZYL9ynVjweBR6j9WJfcWzrdsZNoMOMinSUuJ9jxf8z8PjqWT00oqoe6KCn',
-  secretKey: 'sk_test_51RGNdrDOJ63odpAzNmtKuz4uABkjyaOyDjgQ0ywqoUW41g2UdhjV6RL4A3fFENQnxaJcO1zAHVtcF063qaffs8Nv00C8E0C5PR',
-  isTestMode: true
+// Live Stripe configuration
+const LIVE_STRIPE_CONFIG = {
+  publishableKey: 'pk_live_51RGNdrDOJ63odpAzQO3MOKACOOOEZrts38zjpFfiZYL9ynVjweBR6j9WJfcWzrdsZNoMOMinSUuJ9jxf8z8PjqWT00oqoe6KCn',
+  secretKey: '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',
+  isTestMode: false
 };
 
 // Get Stripe configuration
 const getStripeConfig = async () => {
   try {
     console.log('🔧 Loading Stripe configuration...');
-    
+
     const { data, error } = await supabase
       .from('settings')
       .select('value')
@@ -50,8 +50,8 @@ const getStripeConfig = async () => {
       .single();
 
     if (error || !data?.value) {
-      console.warn('⚠️ Using fallback test configuration');
-      return TEST_STRIPE_CONFIG;
+      console.warn('⚠️ Using live configuration');
+      return LIVE_STRIPE_CONFIG;
     }
 
     const config = data.value;
@@ -62,8 +62,8 @@ const getStripeConfig = async () => {
 
     return config;
   } catch (error) {
-    console.error('❌ Config error, using test config:', error);
-    return TEST_STRIPE_CONFIG;
+    console.error('❌ Config error, using live config:', error);
+    return LIVE_STRIPE_CONFIG;
   }
 };
 
@@ -71,27 +71,78 @@ const getStripeConfig = async () => {
 const initializeStripe = async (): Promise<Stripe | null> => {
   if (!stripeInstance) {
     const config = await getStripeConfig();
-    
+
     if (!config?.publishableKey) {
       throw new Error('Stripe publishable key not available');
     }
 
-    console.log('🔧 Initializing Stripe...');
+    console.log('🔧 Initializing Stripe with live keys...');
     stripeInstance = loadStripe(config.publishableKey);
   }
-  
+
   return stripeInstance;
 };
 
-// Create mock checkout session for fallback
-const createMockSession = (orderId: string): CheckoutSession => {
-  const mockSessionId = `cs_mock_${Date.now()}`;
-  const mockUrl = `${window.location.origin}/payment/success?session_id=${mockSessionId}&order_id=${orderId}&mock=true`;
-  
-  console.log('🎭 Created mock session:', mockSessionId);
+// Create real Stripe checkout session via local server
+const createRealStripeSession = async (
+  items: CheckoutItem[],
+  customerInfo: CustomerInfo,
+  orderId: string,
+  metadata?: Record<string, string>
+): Promise<CheckoutSession> => {
+  console.log('💳 Creating real Stripe checkout session...');
+
+  // Prepare line items for Stripe
+  const lineItems = items.map(item => ({
+    price_data: {
+      currency: 'eur',
+      product_data: {
+        name: item.name,
+        description: item.description || '',
+        images: item.image ? [item.image] : [],
+      },
+      unit_amount: Math.round(item.price * 100), // Convert to cents
+    },
+    quantity: item.quantity,
+  }));
+
+  // Prepare request data
+  const requestData = {
+    line_items: lineItems,
+    customer_email: customerInfo.email,
+    success_url: `${window.location.origin}/payment/success?session_id={CHECKOUT_SESSION_ID}&order_id=${orderId}`,
+    cancel_url: `${window.location.origin}/payment/cancel?order_id=${orderId}`,
+    metadata: {
+      order_id: orderId,
+      customer_name: customerInfo.name,
+      customer_phone: customerInfo.phone || '',
+      ...metadata
+    }
+  };
+
+  console.log('📡 Sending request to Stripe server...');
+
+  // Call local Stripe server
+  const response = await fetch('http://localhost:3003/create-checkout-session', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestData),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(`Stripe server error: ${errorData.message || response.statusText}`);
+  }
+
+  const session = await response.json();
+
+  console.log('✅ Stripe session created:', session.id);
+
   return {
-    sessionId: mockSessionId,
-    url: mockUrl
+    sessionId: session.id,
+    url: session.url
   };
 };
 
@@ -130,7 +181,7 @@ class StripeService {
   }
 
   /**
-   * Create checkout session - SIMPLIFIED VERSION
+   * Create checkout session - REAL STRIPE VERSION
    */
   async createCheckoutSession(
     items: CheckoutItem[],
@@ -138,18 +189,39 @@ class StripeService {
     orderId: string,
     metadata?: Record<string, string>
   ): Promise<CheckoutSession> {
-    console.log('🚀 Creating checkout session...');
+    console.log('🚀 Creating real Stripe checkout session...');
     console.log('📦 Items:', items);
     console.log('👤 Customer:', customerInfo.name, customerInfo.email);
     console.log('🆔 Order ID:', orderId);
 
-    // ALWAYS use mock session for now to avoid Edge Function issues
-    console.log('🎭 Using mock session (bypassing Edge Function)');
-    return createMockSession(orderId);
+    try {
+      // Use real Stripe API via local server
+      return await createRealStripeSession(items, customerInfo, orderId, metadata);
+    } catch (error) {
+      console.error('❌ Failed to create Stripe session:', error);
+      throw new Error(`Payment system error: ${error.message}`);
+    }
   }
 
   /**
-   * Complete checkout flow - SIMPLIFIED VERSION
+   * Redirect to Stripe checkout
+   */
+  async redirectToCheckout(sessionId: string): Promise<void> {
+    console.log('🔄 Redirecting to Stripe checkout:', sessionId);
+
+    const stripe = await initializeStripe();
+    if (!stripe) {
+      throw new Error('Stripe not initialized');
+    }
+
+    const { error } = await stripe.redirectToCheckout({ sessionId });
+    if (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Complete checkout flow - REAL STRIPE VERSION
    */
   async checkoutAndRedirect(
     items: CheckoutItem[],
@@ -157,33 +229,61 @@ class StripeService {
     orderId: string,
     metadata?: Record<string, string>
   ): Promise<void> {
-    console.log('🎯 Starting simplified checkout flow...');
-    
+    console.log('🎯 Starting real Stripe checkout flow...');
+
     try {
-      // Create session (will be mock)
+      // Create real Stripe session
       const session = await this.createCheckoutSession(items, customerInfo, orderId, metadata);
-      
+
       console.log('✅ Session created:', session.sessionId);
       console.log('🔗 Redirect URL:', session.url);
-      
-      // For mock sessions, redirect directly
-      if (session.sessionId.startsWith('cs_mock_')) {
-        console.log('🎭 Mock session detected - redirecting directly');
-        
-        // Use setTimeout to ensure clean redirect
-        setTimeout(() => {
-          window.location.href = session.url;
-        }, 100);
-        
-        return;
-      }
-      
-      // This shouldn't happen with current implementation
-      throw new Error('Non-mock session not supported in current implementation');
-      
+
+      // Redirect to Stripe checkout
+      await this.redirectToCheckout(session.sessionId);
+
     } catch (error) {
       console.error('❌ Checkout flow error:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Verify payment status
+   */
+  async verifyPayment(sessionId: string): Promise<{
+    status: 'paid' | 'unpaid' | 'no_payment_required';
+    paymentIntentId?: string;
+    customerEmail?: string;
+    amountTotal?: number;
+  }> {
+    try {
+      console.log('🔍 Verifying payment:', sessionId);
+
+      const response = await fetch(`http://localhost:3003/verify-payment?session_id=${sessionId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Verification failed: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      console.log('✅ Payment verification result:', data);
+
+      return {
+        status: data.status,
+        paymentIntentId: data.paymentIntentId,
+        customerEmail: data.customerEmail,
+        amountTotal: data.amountTotal
+      };
+
+    } catch (error) {
+      console.error('❌ Payment verification error:', error);
+      throw new Error('Failed to verify payment status');
     }
   }
 
