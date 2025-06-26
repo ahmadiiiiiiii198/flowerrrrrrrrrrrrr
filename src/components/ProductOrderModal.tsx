@@ -127,7 +127,12 @@ const DirectPaymentButton: React.FC<DirectPaymentButtonProps> = ({
         }
       };
 
-      const response = await fetch('http://localhost:3003/create-checkout-session', {
+      // Use Netlify function for production, localhost for development
+      const apiUrl = window.location.hostname === 'localhost'
+        ? 'http://localhost:3003/create-checkout-session'
+        : '/.netlify/functions/create-checkout-session';
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(stripeData),

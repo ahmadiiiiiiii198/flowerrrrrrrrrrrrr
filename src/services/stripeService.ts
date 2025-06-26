@@ -135,8 +135,13 @@ const createRealStripeSession = async (
     console.log('📤 Sending request to Stripe server...');
     console.log('📋 Request data:', JSON.stringify(requestData, null, 2));
 
-    // Call our local Stripe server
-    const response = await fetch('http://localhost:3003/create-checkout-session', {
+    // Use Netlify function for production, localhost for development
+    const apiUrl = window.location.hostname === 'localhost'
+      ? 'http://localhost:3003/create-checkout-session'
+      : '/.netlify/functions/create-checkout-session';
+
+    // Call Stripe server
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
