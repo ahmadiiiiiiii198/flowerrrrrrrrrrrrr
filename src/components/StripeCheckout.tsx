@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { CreditCard, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import stripeService, { CheckoutItem, CustomerInfo } from '@/services/stripeService';
-import mockStripeService from '@/services/mockStripeService';
 
 interface StripeCheckoutProps {
   items: CheckoutItem[];
@@ -66,9 +65,9 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
         description: `Processing payment of €${total.toFixed(2)}...`,
       });
 
-      // Use real Stripe service with local server
+      // Use simplified Stripe service
       try {
-        console.log('🚀 Creating Stripe checkout session...');
+        console.log('🚀 Starting Francesco Fiori payment...');
         console.log('📦 Items:', items);
         console.log('👤 Customer:', customerInfo);
         console.log('🆔 Order ID:', finalOrderId);
@@ -83,15 +82,10 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
           }
         );
 
-        console.log('✅ Checkout and redirect completed successfully');
+        console.log('✅ Payment flow completed successfully');
 
       } catch (error) {
-        console.error('❌ Stripe checkout failed:', error);
-        console.error('❌ Error details:', {
-          name: error.name,
-          message: error.message,
-          stack: error.stack
-        });
+        console.error('❌ Payment flow failed:', error);
         throw error;
       }
 
