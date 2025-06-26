@@ -18,6 +18,7 @@ import NotFound from "./pages/NotFound";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCancel from "./pages/PaymentCancel";
 import DatabaseSetup from "./components/DatabaseSetup";
+import SimpleStripeTest from "./components/SimpleStripeTest";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +71,13 @@ const App = () => (
                 <div className="min-h-screen bg-gray-50 py-12">
                   <ErrorBoundary componentName="DatabaseSetup">
                     <DatabaseSetup />
+                  </ErrorBoundary>
+                </div>
+              } />
+              <Route path="/stripe-test" element={
+                <div className="min-h-screen bg-gray-50 py-12">
+                  <ErrorBoundary componentName="SimpleStripeTest">
+                    <SimpleStripeTest />
                   </ErrorBoundary>
                 </div>
               } />
