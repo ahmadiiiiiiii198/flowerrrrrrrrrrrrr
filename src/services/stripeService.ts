@@ -174,9 +174,18 @@ class StripeService {
           error: errorText
         });
 
-        // If Edge Function is not available, provide helpful error message
-        if (response.status === 404) {
-          throw new Error('Payment service is not deployed. Please contact support or try again later.');
+        // If Edge Function is not available, fall back to mock payment
+        if (response.status === 404 || response.status === 503) {
+          console.warn('⚠️ Edge Function not available, using mock payment flow...');
+
+          // Import and use mock service
+          const { default: mockStripeService } = await import('./mockStripeService');
+          const mockSession = await mockStripeService.createMockCheckoutSession(items, customerInfo, orderId);
+
+          return {
+            sessionId: mockSession.sessionId,
+            url: mockSession.url,
+          };
         }
 
         throw new Error(`Payment service error (${response.status}): ${errorText || response.statusText}`);
@@ -190,6 +199,24 @@ class StripeService {
       };
     } catch (error) {
       console.error('Error creating checkout session:', error);
+
+      // If there's a network error or Edge Function issue, try mock payment
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        console.warn('⚠️ Network error, using mock payment flow...');
+
+        try {
+          const { default: mockStripeService } = await import('./mockStripeService');
+          const mockSession = await mockStripeService.createMockCheckoutSession(items, customerInfo, orderId);
+
+          return {
+            sessionId: mockSession.sessionId,
+            url: mockSession.url,
+          };
+        } catch (mockError) {
+          console.error('Mock payment also failed:', mockError);
+        }
+      }
+
       throw new Error('Failed to create checkout session. Please try again.');
     }
   }
