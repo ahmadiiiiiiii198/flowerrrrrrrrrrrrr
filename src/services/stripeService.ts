@@ -175,7 +175,7 @@ class StripeService {
         });
 
         // If Edge Function is not available, fall back to mock payment
-        if (response.status === 404 || response.status === 503) {
+        if (response.status === 400 || response.status === 404 || response.status === 503) {
           console.warn('⚠️ Edge Function not available, using mock payment flow...');
 
           // Import and use mock service
