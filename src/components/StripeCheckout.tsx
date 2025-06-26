@@ -2,13 +2,33 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { CreditCard, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import stripeService, { CheckoutItem, CustomerInfo } from '@/services/stripeService';
+
+export interface CheckoutItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  image?: string;
+  description?: string;
+}
+
+export interface CustomerInfo {
+  name: string;
+  email: string;
+  phone?: string;
+  address?: {
+    street: string;
+    city: string;
+    postalCode: string;
+    country: string;
+  };
+}
 
 interface StripeCheckoutProps {
   items: CheckoutItem[];
   customerInfo: CustomerInfo;
   orderId?: string;
-  onCreateOrder?: () => Promise<string>; // Function to create order and return order ID
+  onCreateOrder?: () => Promise<string>;
   onSuccess?: () => void;
   onError?: (error: string) => void;
   disabled?: boolean;
@@ -32,122 +52,109 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
 
 
 
+  // Simple, clean checkout function
   const handleCheckout = async () => {
+    // Basic validation
     if (!items.length || !customerInfo.name || !customerInfo.email) {
-      const error = 'Missing required information for checkout';
       toast({
-        title: 'Checkout Error',
-        description: error,
+        title: 'Informazioni Mancanti',
+        description: 'Compila tutti i campi obbligatori per procedere.',
         variant: 'destructive',
       });
-      onError?.(error);
       return;
     }
 
-    try {
-      setIsProcessing(true);
+    setIsProcessing(true);
 
-      // Create order first if onCreateOrder is provided
+    try {
+      // Create order if needed
       let finalOrderId = orderId;
       if (onCreateOrder && !orderId) {
+        console.log('📝 Creating order...');
         finalOrderId = await onCreateOrder();
       }
 
       if (!finalOrderId) {
-        throw new Error('Order ID is required for payment processing');
+        throw new Error('Order ID is required');
       }
 
-      // Calculate total for display
+      // Calculate total
       const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      console.log('💰 Total amount:', total);
 
+      // Show processing message
       toast({
-        title: 'Redirecting to Payment',
-        description: `Processing payment of €${total.toFixed(2)}...`,
+        title: 'Elaborazione Pagamento',
+        description: `Reindirizzamento a Stripe per €${total.toFixed(2)}...`,
       });
 
-      // Use simplified Stripe service
-      try {
-        console.log('🚀 Starting Francesco Fiori payment...');
-        console.log('📦 Items:', items);
-        console.log('👤 Customer:', customerInfo);
-        console.log('🆔 Order ID:', finalOrderId);
-
-        console.log('🔄 Calling stripeService.checkoutAndRedirect...');
-
-        // Set a flag to prevent error handling during redirect
-        let redirectInProgress = false;
-
-        const redirectPromise = stripeService.checkoutAndRedirect(
-          items,
-          customerInfo,
-          finalOrderId,
-          {
-            source: 'francesco_fiori_website',
-            order_type: 'product_order',
-          }
-        );
-
-        // Set redirect flag immediately
-        redirectInProgress = true;
-
-        // Wait for the redirect (or error)
-        await redirectPromise;
-
-        // Check if redirect is in progress
-        if ((window as any).__stripeRedirectInProgress) {
-          console.log('🔄 Redirect in progress, stopping execution');
-          return; // Stop execution if redirect is happening
+      // Prepare request data
+      const requestData = {
+        payment_method_types: ['card'],
+        line_items: items.map(item => ({
+          price_data: {
+            currency: 'eur',
+            product_data: {
+              name: item.name,
+              description: item.description || '',
+            },
+            unit_amount: Math.round(item.price * 100), // Convert to cents
+          },
+          quantity: item.quantity,
+        })),
+        mode: 'payment',
+        customer_email: customerInfo.email,
+        billing_address_collection: 'required',
+        shipping_address_collection: {
+          allowed_countries: ['IT', 'FR', 'DE', 'ES', 'AT', 'CH'],
+        },
+        success_url: `${window.location.origin}/payment/success?session_id={CHECKOUT_SESSION_ID}&order_id=${finalOrderId}`,
+        cancel_url: `${window.location.origin}/payment/cancel?order_id=${finalOrderId}`,
+        metadata: {
+          order_id: finalOrderId,
+          customer_name: customerInfo.name,
+          customer_phone: customerInfo.phone || '',
+          source: 'francesco_fiori_website',
+          order_type: 'product_order',
         }
+      };
 
-        console.log('✅ Payment flow completed successfully');
+      console.log('📤 Calling Stripe server...');
 
-        // If we reach here, the redirect is happening asynchronously
-        console.log('🔄 Redirect should happen shortly...');
+      // Call Stripe server directly
+      const response = await fetch('http://localhost:3003/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
 
-        // Don't call onSuccess here as the redirect will handle it
-        return;
-
-      } catch (error) {
-        console.error('❌ Payment flow failed:', error);
-        console.error('❌ Error type:', typeof error);
-        console.error('❌ Error message:', error?.message);
-        console.error('❌ Error stack:', error?.stack);
-        throw error;
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Server error: ${response.status} - ${errorText}`);
       }
 
-      // This line should not be reached due to redirect
+      const session = await response.json();
+      console.log('✅ Session created:', session.id);
+
+      // Redirect immediately
+      console.log('🚀 Redirecting to Stripe...');
+      window.location.href = session.url;
+
+      // This code should not execute due to redirect
 
     } catch (error) {
-      console.error('Checkout error:', error);
-
-      // Check if redirect is in progress
-      if ((window as any).__stripeRedirectInProgress) {
-        console.log('🔄 Redirect in progress, ignoring error');
-        return; // Don't show error during redirect
-      }
-
-      // Check if this is a redirect-related error (which is expected)
-      if (error?.message?.includes('redirect') || error?.name === 'AbortError') {
-        console.log('🔄 Redirect in progress, this is expected');
-        return; // Don't show error for redirect
-      }
-
-      const errorMessage = error instanceof Error ? error.message : 'Payment processing failed';
-
-      console.error('❌ Actual payment error (not redirect):', errorMessage);
+      console.error('❌ Checkout failed:', error);
 
       toast({
         title: 'Errore nel Pagamento',
-        description: errorMessage,
+        description: error instanceof Error ? error.message : 'Errore durante il pagamento',
         variant: 'destructive',
       });
 
-      onError?.(errorMessage);
-    } finally {
-      // Only reset processing state if redirect is not in progress
-      if (!(window as any).__stripeRedirectInProgress) {
-        setIsProcessing(false);
-      }
+      onError?.(error instanceof Error ? error.message : 'Payment failed');
+      setIsProcessing(false);
     }
   };
 

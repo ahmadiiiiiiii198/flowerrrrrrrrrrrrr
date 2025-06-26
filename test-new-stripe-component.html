@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test New Stripe Component</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .button {
+            background: #22c55e;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .button:hover {
+            background: #16a34a;
+        }
+        .log-container {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .error { color: #ef4444; }
+        .success { color: #22c55e; }
+        .info { color: #3b82f6; }
+        .warning { color: #f59e0b; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test New Stripe Component Logic</h1>
+    
+    <div class="container">
+        <h2>Simplified Stripe Component Test</h2>
+        <p>This tests the new simplified logic without React complexity.</p>
+        
+        <button class="button" onclick="testNewStripeLogic()">
+            🧪 Test New Stripe Logic
+        </button>
+        
+        <button class="button" onclick="clearLogs()">
+            🗑️ Clear Logs
+        </button>
+    </div>
+    
+    <div class="container">
+        <h3>Test Logs</h3>
+        <div id="logs" class="log-container">
+            Ready to test new Stripe component logic...
+        </div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById('logs');
+            const className = type === 'error' ? 'error' : 
+                             type === 'success' ? 'success' : 
+                             type === 'warning' ? 'warning' : 'info';
+            
+            logElement.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = 'Logs cleared...\n';
+        }
+
+        async function testNewStripeLogic() {
+            log('🧪 Testing New Simplified Stripe Logic', 'info');
+            
+            try {
+                // Test data - same as React component
+                const items = [{
+                    id: 'centrotavola-matrimonio',
+                    name: 'Centrotavola Matrimonio',
+                    price: 45.00,
+                    quantity: 1,
+                    description: 'Elegant wedding centerpiece'
+                }];
+
+                const customerInfo = {
+                    name: 'Test Customer',
+                    email: 'test@francescofiori.it',
+                    phone: '+393498851455'
+                };
+
+                const finalOrderId = `test_order_${Date.now()}`;
+
+                // Calculate total
+                const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                log(`💰 Total amount: €${total}`, 'info');
+
+                // Prepare request data - exact same as new component
+                const requestData = {
+                    payment_method_types: ['card'],
+                    line_items: items.map(item => ({
+                        price_data: {
+                            currency: 'eur',
+                            product_data: {
+                                name: item.name,
+                                description: item.description || '',
+                            },
+                            unit_amount: Math.round(item.price * 100), // Convert to cents
+                        },
+                        quantity: item.quantity,
+                    })),
+                    mode: 'payment',
+                    customer_email: customerInfo.email,
+                    billing_address_collection: 'required',
+                    shipping_address_collection: {
+                        allowed_countries: ['IT', 'FR', 'DE', 'ES', 'AT', 'CH'],
+                    },
+                    success_url: `${window.location.origin}/payment/success?session_id={CHECKOUT_SESSION_ID}&order_id=${finalOrderId}`,
+                    cancel_url: `${window.location.origin}/payment/cancel?order_id=${finalOrderId}`,
+                    metadata: {
+                        order_id: finalOrderId,
+                        customer_name: customerInfo.name,
+                        customer_phone: customerInfo.phone || '',
+                        source: 'francesco_fiori_website',
+                        order_type: 'product_order',
+                    }
+                };
+
+                log('📤 Calling Stripe server...', 'info');
+                log(`📋 Request data: ${JSON.stringify(requestData, null, 2)}`, 'info');
+                
+                // Call Stripe server directly - same as new component
+                const response = await fetch('http://localhost:3003/create-checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData),
+                });
+
+                log(`📊 Response status: ${response.status}`, 'info');
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Server error: ${response.status} - ${errorText}`);
+                }
+
+                const session = await response.json();
+                log(`✅ Session created: ${session.id}`, 'success');
+                log(`🔗 Checkout URL: ${session.url}`, 'success');
+
+                // Test redirect
+                log('🔄 Will redirect in 3 seconds...', 'warning');
+                log('⚠️ This will redirect the page!', 'warning');
+                
+                setTimeout(() => {
+                    log('🚀 Redirecting to Stripe...', 'success');
+                    window.location.href = session.url;
+                }, 3000);
+                
+                return session;
+                
+            } catch (error) {
+                log(`❌ Test failed: ${error.message}`, 'error');
+                log(`❌ Error details: ${JSON.stringify({
+                    name: error.name,
+                    message: error.message,
+                    stack: error.stack
+                }, null, 2)}`, 'error');
+                throw error;
+            }
+        }
+
+        // Log initial state
+        log('✅ New Stripe component test page loaded', 'success');
+        log('🎯 This tests the exact same logic as the new React component', 'info');
+        log('💡 Click "Test New Stripe Logic" to test', 'info');
+    </script>
+</body>
+</html>

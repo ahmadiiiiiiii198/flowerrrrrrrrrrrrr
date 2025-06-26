@@ -4,8 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { CreditCard, TestTube, CheckCircle, XCircle, Loader2 } from 'lucide-react';
-import StripeCheckout from '../StripeCheckout';
-import { CheckoutItem, CustomerInfo } from '@/services/stripeService';
+import StripeCheckout, { CheckoutItem, CustomerInfo } from '../StripeCheckout';
 import { supabase } from '@/integrations/supabase/client';
 
 const StripeCheckoutTest = () => {
