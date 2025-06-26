@@ -222,11 +222,14 @@ class StripeService {
         console.log('🎭 Mock session detected - redirecting immediately');
         console.log('🔗 Redirect URL:', session.url);
 
-        // Immediate redirect without setTimeout
-        window.location.href = session.url;
+        // Use a small delay to ensure the console logs are visible
+        setTimeout(() => {
+          console.log('🚀 Executing redirect now...');
+          window.location.href = session.url;
+        }, 50);
 
-        // This return should never be reached due to redirect
-        return;
+        // Return immediately to prevent further execution
+        return Promise.resolve();
       }
 
       // For real sessions, redirect to Stripe checkout

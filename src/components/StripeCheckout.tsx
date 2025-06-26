@@ -84,7 +84,13 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
           }
         );
 
-        console.log('✅ Payment flow completed successfully (this should not be reached if redirect works)');
+        console.log('✅ Payment flow completed successfully');
+
+        // If we reach here, the redirect is happening asynchronously
+        console.log('🔄 Redirect should happen shortly...');
+
+        // Don't call onSuccess here as the redirect will handle it
+        return;
 
       } catch (error) {
         console.error('❌ Payment flow failed:', error);
@@ -94,15 +100,23 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
         throw error;
       }
 
-      // If we reach here, the redirect didn't happen (shouldn't normally occur)
-      onSuccess?.();
+      // This line should not be reached due to redirect
 
     } catch (error) {
       console.error('Checkout error:', error);
+
+      // Check if this is a redirect-related error (which is expected)
+      if (error?.message?.includes('redirect') || error?.name === 'AbortError') {
+        console.log('🔄 Redirect in progress, this is expected');
+        return; // Don't show error for redirect
+      }
+
       const errorMessage = error instanceof Error ? error.message : 'Payment processing failed';
 
+      console.error('❌ Actual payment error (not redirect):', errorMessage);
+
       toast({
-        title: 'Payment Error',
+        title: 'Errore nel Pagamento',
         description: errorMessage,
         variant: 'destructive',
       });
