@@ -33,8 +33,8 @@ let stripeInstance: Promise<Stripe | null> | null = null;
 
 // Live Stripe configuration
 const LIVE_STRIPE_CONFIG = {
-  publishableKey: 'pk_live_51RGNdrDOJ63odpAzQO3MOKACOOOEZrts38zjpFfiZYL9ynVjweBR6j9WJfcWzrdsZNoMOMinSUuJ9jxf8z8PjqWT00oqoe6KCn',
-  secretKey: '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',
+  publishableKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
+  secretKey: import.meta.env.STRIPE_SECRET_KEY,
   isTestMode: false
 };
 

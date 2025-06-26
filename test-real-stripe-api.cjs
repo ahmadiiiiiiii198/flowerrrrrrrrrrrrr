@@ -1,8 +1,9 @@
 // Test real Stripe API with live keys
 const https = require('https');
+require('dotenv').config();
 
-// Live Stripe secret key
-const STRIPE_SECRET_KEY = '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';
+// Use environment variable for Stripe secret key
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 
 console.log('🧪 Testing Real Stripe API with Live Keys');
 console.log('💳 Using live secret key:', STRIPE_SECRET_KEY.substring(0, 20) + '...');

@@ -1,13 +1,14 @@
 const express = require('express');
 const cors = require('cors');
 const Stripe = require('stripe');
+require('dotenv').config();
 
 // Initialize Express app
 const app = express();
 const PORT = 3003;
 
-// Live Stripe secret key
-const stripe = new Stripe('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', {
+// Use environment variable for Stripe secret key
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2023-10-16',
 });
 
