@@ -69,15 +69,22 @@ const DirectPaymentButton: React.FC<DirectPaymentButtonProps> = ({
 
       console.log('✅ Order created:', order.id);
 
-      // Step 2: Create order item
+      // Step 2: Create order item with correct schema
+      const subtotal = product.price * orderData.quantity;
+
       const { error: itemError } = await supabase
         .from('order_items')
         .insert({
           order_id: order.id,
           product_id: product.id,
           product_name: product.name,
+          product_price: product.price,  // Correct column name
           quantity: orderData.quantity,
-          price: product.price
+          subtotal: subtotal,  // Required field
+          metadata: {
+            delivery_date: orderData.deliveryDate,
+            special_requests: orderData.specialRequests
+          }
         });
 
       if (itemError) {
