@@ -132,6 +132,9 @@ const createRealStripeSession = async (
   console.log('📡 Calling Stripe API directly...');
 
   try {
+    console.log('📤 Sending request to Stripe server...');
+    console.log('📋 Request data:', JSON.stringify(requestData, null, 2));
+
     // Call our local Stripe server
     const response = await fetch('http://localhost:3003/create-checkout-session', {
       method: 'POST',
@@ -141,14 +144,20 @@ const createRealStripeSession = async (
       body: JSON.stringify(requestData),
     });
 
+    console.log('📊 Response status:', response.status);
+    console.log('📄 Response headers:', Object.fromEntries(response.headers.entries()));
+
     if (!response.ok) {
-      throw new Error(`Stripe server error: ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('❌ Server error response:', errorText);
+      throw new Error(`Stripe server error: ${response.status} ${response.statusText} - ${errorText}`);
     }
 
     const session = await response.json();
 
     console.log('✅ REAL Stripe session created:', session.id);
     console.log('🔗 Checkout URL:', session.url);
+    console.log('📋 Full session response:', session);
 
     return {
       sessionId: session.id,
@@ -157,6 +166,10 @@ const createRealStripeSession = async (
 
   } catch (error) {
     console.error('❌ Failed to create real Stripe session:', error);
+    console.error('❌ Error type:', typeof error);
+    console.error('❌ Error name:', error?.name);
+    console.error('❌ Error message:', error?.message);
+    console.error('❌ Error stack:', error?.stack);
     throw new Error(`Failed to create Stripe checkout session: ${error.message}`);
   }
 };
