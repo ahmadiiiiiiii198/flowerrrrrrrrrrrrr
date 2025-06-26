@@ -265,8 +265,15 @@ class StripeService {
       // Check if this is a mock session (fallback was used)
       if (session.sessionId.startsWith('cs_mock_') || session.sessionId.startsWith('cs_test_mock_')) {
         console.log('🎭 Mock session detected, redirecting directly to URL:', session.url);
+        console.log('✅ Bypassing Stripe redirect to prevent errors');
+
         // For mock sessions, redirect directly to the URL instead of using Stripe
-        window.location.href = session.url;
+        // Use setTimeout to ensure the redirect happens after the function returns
+        setTimeout(() => {
+          window.location.href = session.url;
+        }, 100);
+
+        // Return immediately to prevent any further processing
         return;
       }
 

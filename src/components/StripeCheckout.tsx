@@ -68,7 +68,10 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
 
       // Use real Stripe service with local server
       try {
-        console.log('Creating real Stripe checkout session...');
+        console.log('🚀 Creating Stripe checkout session...');
+        console.log('📦 Items:', items);
+        console.log('👤 Customer:', customerInfo);
+        console.log('🆔 Order ID:', finalOrderId);
 
         await stripeService.checkoutAndRedirect(
           items,
@@ -80,8 +83,15 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
           }
         );
 
+        console.log('✅ Checkout and redirect completed successfully');
+
       } catch (error) {
-        console.error('Real Stripe checkout failed:', error);
+        console.error('❌ Stripe checkout failed:', error);
+        console.error('❌ Error details:', {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        });
         throw error;
       }
 
