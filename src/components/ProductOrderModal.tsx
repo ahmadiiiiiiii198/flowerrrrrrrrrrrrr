@@ -9,9 +9,168 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, ShoppingCart, Plus, Minus, User, Mail, Phone, MapPin, CreditCard, AlertCircle, CheckCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/types/category';
-import StripeCheckout from './StripeCheckout';
-import { CheckoutItem, CustomerInfo } from '@/services/stripeService';
 import shippingZoneService from '@/services/shippingZoneService';
+
+// Direct payment button component - no abstractions
+interface DirectPaymentButtonProps {
+  product: Product;
+  orderData: any;
+  onSuccess: () => void;
+  onError: (error: string) => void;
+}
+
+const DirectPaymentButton: React.FC<DirectPaymentButtonProps> = ({
+  product,
+  orderData,
+  onSuccess,
+  onError
+}) => {
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleDirectPayment = async () => {
+    console.log('🚀 Direct payment button clicked');
+    setIsProcessing(true);
+
+    try {
+      // Step 1: Create order directly
+      console.log('📝 Creating order directly...');
+
+      const orderNumber = `ORD-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+      const totalAmount = product.price * orderData.quantity;
+
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          order_number: orderNumber,
+          customer_name: orderData.customerName,
+          customer_email: orderData.customerEmail,
+          customer_phone: orderData.customerPhone || null,
+          total_amount: totalAmount,
+          status: 'payment_pending',
+          payment_status: 'pending',
+          billing_address: {
+            street: orderData.deliveryAddress,
+            city: '',
+            postalCode: '',
+            country: 'Italy'
+          },
+          shipping_address: {
+            street: orderData.deliveryAddress,
+            city: '',
+            postalCode: '',
+            country: 'Italy'
+          },
+          notes: `Product Order - ${product.name}\nQuantity: ${orderData.quantity}\nSpecial Requests: ${orderData.specialRequests}\nDelivery Date: ${orderData.deliveryDate}`
+        })
+        .select()
+        .single();
+
+      if (orderError) {
+        console.error('❌ Order creation failed:', orderError);
+        throw new Error(`Order creation failed: ${orderError.message}`);
+      }
+
+      console.log('✅ Order created:', order.id);
+
+      // Step 2: Create order item
+      const { error: itemError } = await supabase
+        .from('order_items')
+        .insert({
+          order_id: order.id,
+          product_id: product.id,
+          product_name: product.name,
+          quantity: orderData.quantity,
+          price: product.price
+        });
+
+      if (itemError) {
+        console.error('❌ Order item creation failed:', itemError);
+        throw new Error(`Order item creation failed: ${itemError.message}`);
+      }
+
+      console.log('✅ Order item created');
+
+      // Step 3: Create Stripe session directly
+      console.log('💳 Creating Stripe session...');
+
+      const stripeData = {
+        payment_method_types: ['card'],
+        line_items: [{
+          price_data: {
+            currency: 'eur',
+            product_data: {
+              name: product.name,
+              description: product.description || '',
+            },
+            unit_amount: Math.round(product.price * 100),
+          },
+          quantity: orderData.quantity,
+        }],
+        mode: 'payment',
+        customer_email: orderData.customerEmail,
+        billing_address_collection: 'required',
+        shipping_address_collection: {
+          allowed_countries: ['IT', 'FR', 'DE', 'ES', 'AT', 'CH'],
+        },
+        success_url: `${window.location.origin}/payment/success?session_id={CHECKOUT_SESSION_ID}&order_id=${order.id}`,
+        cancel_url: `${window.location.origin}/payment/cancel?order_id=${order.id}`,
+        metadata: {
+          order_id: order.id,
+          customer_name: orderData.customerName,
+          customer_phone: orderData.customerPhone || '',
+          source: 'francesco_fiori_website',
+          order_type: 'product_order',
+        }
+      };
+
+      const response = await fetch('http://localhost:3003/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(stripeData),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Stripe error: ${response.status} - ${errorText}`);
+      }
+
+      const session = await response.json();
+      console.log('✅ Stripe session created:', session.id);
+
+      // Step 4: Redirect
+      console.log('🚀 Redirecting to Stripe...');
+      window.location.href = session.url;
+
+    } catch (error) {
+      console.error('❌ Direct payment failed:', error);
+      onError(error.message);
+      setIsProcessing(false);
+    }
+  };
+
+  const total = product.price * orderData.quantity;
+
+  return (
+    <Button
+      onClick={handleDirectPayment}
+      disabled={isProcessing}
+      className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+      size="lg"
+    >
+      {isProcessing ? (
+        <>
+          <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+          Processing Payment...
+        </>
+      ) : (
+        <>
+          <CreditCard className="h-5 w-5 mr-2" />
+          Pay €{total.toFixed(2)} with Stripe
+        </>
+      )}
+    </Button>
+  );
+};
 
 interface ProductOrderModalProps {
   product: Product | null;
@@ -494,42 +653,14 @@ const ProductOrderModal: React.FC<ProductOrderModalProps> = ({ product, isOpen, 
 
                   {orderData.customerName && orderData.customerEmail && orderData.deliveryAddress &&
                    addressValidation?.isValid && addressValidation?.isWithinZone ? (
-                    <StripeCheckout
-                      items={[{
-                        id: product.id,
-                        name: product.name,
-                        price: product.price,
-                        quantity: orderData.quantity,
-                        image: product.image_url || undefined,
-                        description: product.description || undefined,
-                      }]}
-                      customerInfo={{
-                        name: orderData.customerName,
-                        email: orderData.customerEmail,
-                        phone: orderData.customerPhone || undefined,
-                      }}
-                      onCreateOrder={async () => {
-                        console.log('🚀 StripeCheckout onCreateOrder called');
-                        try {
-                          const order = await createOrder();
-                          console.log('📋 Order creation result:', order);
-                          if (!order) {
-                            console.error('❌ createOrder returned null');
-                            throw new Error('Failed to create order - createOrder returned null');
-                          }
-                          console.log('✅ Order created with ID:', order.id);
-                          return order.id;
-                        } catch (error) {
-                          console.error('❌ onCreateOrder failed:', error);
-                          throw error;
-                        }
-                      }}
+                    <DirectPaymentButton
+                      product={product}
+                      orderData={orderData}
                       onSuccess={() => {
                         toast({
                           title: 'Ordine Completato! 🎉',
                           description: 'Il pagamento è stato elaborato con successo.',
                         });
-                        // Reset form and close modal
                         setOrderData({
                           customerName: '',
                           customerEmail: '',

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { CreditCard, Loader2 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 
 export interface CheckoutItem {
   id: string;
@@ -36,6 +35,66 @@ interface StripeCheckoutProps {
   children?: React.ReactNode;
 }
 
+// Direct payment function - no complex abstractions
+async function processStripePayment(
+  items: CheckoutItem[],
+  customerInfo: CustomerInfo,
+  orderId: string
+): Promise<void> {
+  console.log('💳 Starting direct Stripe payment...');
+
+  // Build request data
+  const requestData = {
+    payment_method_types: ['card'],
+    line_items: items.map(item => ({
+      price_data: {
+        currency: 'eur',
+        product_data: {
+          name: item.name,
+          description: item.description || '',
+        },
+        unit_amount: Math.round(item.price * 100),
+      },
+      quantity: item.quantity,
+    })),
+    mode: 'payment',
+    customer_email: customerInfo.email,
+    billing_address_collection: 'required',
+    shipping_address_collection: {
+      allowed_countries: ['IT', 'FR', 'DE', 'ES', 'AT', 'CH'],
+    },
+    success_url: `${window.location.origin}/payment/success?session_id={CHECKOUT_SESSION_ID}&order_id=${orderId}`,
+    cancel_url: `${window.location.origin}/payment/cancel?order_id=${orderId}`,
+    metadata: {
+      order_id: orderId,
+      customer_name: customerInfo.name,
+      customer_phone: customerInfo.phone || '',
+      source: 'francesco_fiori_website',
+      order_type: 'product_order',
+    }
+  };
+
+  console.log('📤 Sending to Stripe server...');
+
+  // Make request
+  const response = await fetch('http://localhost:3003/create-checkout-session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(requestData),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Stripe server error: ${response.status} - ${errorText}`);
+  }
+
+  const session = await response.json();
+  console.log('✅ Stripe session created:', session.id);
+
+  // Redirect immediately
+  window.location.href = session.url;
+}
+
 const StripeCheckout: React.FC<StripeCheckoutProps> = ({
   items,
   customerInfo,
@@ -48,135 +107,52 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
   children
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const { toast } = useToast();
 
 
 
-  // Simple, clean checkout function
+  // Ultra-simple checkout handler
   const handleCheckout = async () => {
-    // Basic validation
+    console.log('🚀 Checkout button clicked');
+
+    // Validation
     if (!items.length || !customerInfo.name || !customerInfo.email) {
-      toast({
-        title: 'Informazioni Mancanti',
-        description: 'Compila tutti i campi obbligatori per procedere.',
-        variant: 'destructive',
-      });
+      alert('Please fill in all required fields');
       return;
     }
 
     setIsProcessing(true);
+    console.log('⏳ Processing started');
 
     try {
-      // Create order if needed
+      // Get order ID
       let finalOrderId = orderId;
+
       if (onCreateOrder && !orderId) {
-        console.log('📝 Creating order...');
+        console.log('📝 Creating order via callback...');
         finalOrderId = await onCreateOrder();
+        console.log('📋 Order created with ID:', finalOrderId);
       }
 
       if (!finalOrderId) {
-        throw new Error('Order ID is required');
+        throw new Error('No order ID available');
       }
 
-      // Calculate total
-      const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      console.log('💰 Total amount:', total);
+      // Process payment
+      console.log('💳 Processing Stripe payment...');
+      await processStripePayment(items, customerInfo, finalOrderId);
 
-      // Show processing message
-      toast({
-        title: 'Elaborazione Pagamento',
-        description: `Reindirizzamento a Stripe per €${total.toFixed(2)}...`,
-      });
-
-      // Prepare request data
-      const requestData = {
-        payment_method_types: ['card'],
-        line_items: items.map(item => ({
-          price_data: {
-            currency: 'eur',
-            product_data: {
-              name: item.name,
-              description: item.description || '',
-            },
-            unit_amount: Math.round(item.price * 100), // Convert to cents
-          },
-          quantity: item.quantity,
-        })),
-        mode: 'payment',
-        customer_email: customerInfo.email,
-        billing_address_collection: 'required',
-        shipping_address_collection: {
-          allowed_countries: ['IT', 'FR', 'DE', 'ES', 'AT', 'CH'],
-        },
-        success_url: `${window.location.origin}/payment/success?session_id={CHECKOUT_SESSION_ID}&order_id=${finalOrderId}`,
-        cancel_url: `${window.location.origin}/payment/cancel?order_id=${finalOrderId}`,
-        metadata: {
-          order_id: finalOrderId,
-          customer_name: customerInfo.name,
-          customer_phone: customerInfo.phone || '',
-          source: 'francesco_fiori_website',
-          order_type: 'product_order',
-        }
-      };
-
-      console.log('📤 Calling Stripe server...');
-      console.log('🔗 Server URL: http://localhost:3003/create-checkout-session');
-      console.log('📋 Request data:', JSON.stringify(requestData, null, 2));
-
-      // Call Stripe server directly
-      const response = await fetch('http://localhost:3003/create-checkout-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData),
-      });
-
-      console.log('📊 Response status:', response.status);
-      console.log('📄 Response headers:', Object.fromEntries(response.headers.entries()));
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ Server error response:', errorText);
-        throw new Error(`Server error: ${response.status} - ${errorText}`);
-      }
-
-      const session = await response.json();
-      console.log('✅ Session created:', session.id);
-      console.log('🔗 Session URL:', session.url);
-
-      // Redirect immediately
-      console.log('🚀 Redirecting to Stripe...');
-
-      // Add a small delay to ensure logs are visible
-      setTimeout(() => {
-        window.location.href = session.url;
-      }, 100);
-
-      // This code should not execute due to redirect
+      // This line should not be reached due to redirect
+      console.log('⚠️ Unexpected: code after redirect');
 
     } catch (error) {
-      console.error('❌ Checkout failed:', error);
-      console.error('❌ Error type:', typeof error);
-      console.error('❌ Error name:', error?.name);
-      console.error('❌ Error message:', error?.message);
-      console.error('❌ Error stack:', error?.stack);
+      console.error('❌ Payment failed:', error);
 
-      // Check if it's a network error
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        toast({
-          title: 'Errore di Connessione',
-          description: 'Impossibile connettersi al server di pagamento. Verifica che il server sia attivo.',
-          variant: 'destructive',
-        });
-        onError?.('Connection error: Unable to reach payment server');
-      } else {
-        toast({
-          title: 'Errore nel Pagamento',
-          description: error instanceof Error ? error.message : 'Errore durante il pagamento',
-          variant: 'destructive',
-        });
-        onError?.(error instanceof Error ? error.message : 'Payment failed');
+      // Show error
+      alert(`Payment Error: ${error.message}`);
+
+      // Call error callback
+      if (onError) {
+        onError(error.message);
       }
 
       setIsProcessing(false);
