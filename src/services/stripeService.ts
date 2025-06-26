@@ -83,14 +83,14 @@ const initializeStripe = async (): Promise<Stripe | null> => {
   return stripeInstance;
 };
 
-// Create a working Stripe checkout session using a simple server proxy
-const createWorkingStripeSession = async (
+// Create a real Stripe checkout session using direct API call
+const createRealStripeSession = async (
   items: CheckoutItem[],
   customerInfo: CustomerInfo,
   orderId: string,
   metadata?: Record<string, string>
 ): Promise<CheckoutSession> => {
-  console.log('💳 Creating working Stripe checkout session...');
+  console.log('💳 Creating REAL Stripe checkout session...');
 
   // Calculate total amount
   const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -99,30 +99,66 @@ const createWorkingStripeSession = async (
   console.log('💰 Total amount:', totalAmount);
   console.log('👤 Customer:', customerInfo);
 
-  // For now, let's create a simple redirect to a success page with order info
-  // This simulates a successful payment for testing
-  const mockSessionId = `cs_live_mock_${Date.now()}`;
-  const successUrl = `${window.location.origin}/payment/success?session_id=${mockSessionId}&order_id=${orderId}&amount=${totalAmount}&customer_email=${encodeURIComponent(customerInfo.email)}`;
-
-  console.log('✅ Mock session created for testing:', mockSessionId);
-  console.log('🔗 Success URL:', successUrl);
-
-  // Store order info in localStorage for the success page
-  const orderInfo = {
-    orderId,
-    items,
-    customerInfo,
-    totalAmount,
-    sessionId: mockSessionId,
-    timestamp: new Date().toISOString()
+  // Prepare the request data for Stripe API
+  const requestData = {
+    payment_method_types: ['card'],
+    line_items: items.map(item => ({
+      price_data: {
+        currency: 'eur',
+        product_data: {
+          name: item.name,
+          description: item.description || '',
+        },
+        unit_amount: Math.round(item.price * 100), // Convert to cents
+      },
+      quantity: item.quantity,
+    })),
+    mode: 'payment',
+    customer_email: customerInfo.email,
+    billing_address_collection: 'required',
+    shipping_address_collection: {
+      allowed_countries: ['IT', 'FR', 'DE', 'ES', 'AT', 'CH'],
+    },
+    success_url: `${window.location.origin}/payment/success?session_id={CHECKOUT_SESSION_ID}&order_id=${orderId}`,
+    cancel_url: `${window.location.origin}/payment/cancel?order_id=${orderId}`,
+    metadata: {
+      order_id: orderId,
+      customer_name: customerInfo.name,
+      customer_phone: customerInfo.phone || '',
+      ...metadata
+    }
   };
 
-  localStorage.setItem(`order_${orderId}`, JSON.stringify(orderInfo));
+  console.log('📡 Calling Stripe API directly...');
 
-  return {
-    sessionId: mockSessionId,
-    url: successUrl
-  };
+  try {
+    // Call our local Stripe server
+    const response = await fetch('http://localhost:3003/create-checkout-session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestData),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Stripe server error: ${response.status} ${response.statusText}`);
+    }
+
+    const session = await response.json();
+
+    console.log('✅ REAL Stripe session created:', session.id);
+    console.log('🔗 Checkout URL:', session.url);
+
+    return {
+      sessionId: session.id,
+      url: session.url
+    };
+
+  } catch (error) {
+    console.error('❌ Failed to create real Stripe session:', error);
+    throw new Error(`Failed to create Stripe checkout session: ${error.message}`);
+  }
 };
 
 class StripeService {
@@ -174,8 +210,8 @@ class StripeService {
     console.log('🆔 Order ID:', orderId);
 
     try {
-      // Use working Stripe session approach
-      return await createWorkingStripeSession(items, customerInfo, orderId, metadata);
+      // Use REAL Stripe API
+      return await createRealStripeSession(items, customerInfo, orderId, metadata);
     } catch (error) {
       console.error('❌ Failed to create Stripe session:', error);
       throw new Error(`Payment system error: ${error.message}`);
@@ -217,22 +253,18 @@ class StripeService {
       console.log('✅ Session created:', session.sessionId);
       console.log('🔗 Redirect URL:', session.url);
 
-      // For mock sessions, redirect directly
-      if (session.sessionId.startsWith('cs_live_mock_') || session.sessionId.startsWith('cs_mock_')) {
-        console.log('🎭 Mock session detected - redirecting immediately');
-        console.log('🔗 Redirect URL:', session.url);
+      // For real Stripe sessions, redirect to Stripe checkout
+      if (session.sessionId.startsWith('cs_live_') || session.sessionId.startsWith('cs_test_')) {
+        console.log('💳 Real Stripe session detected - redirecting to Stripe checkout');
+        console.log('🔗 Checkout URL:', session.url);
 
-        // Use a small delay to ensure the console logs are visible
-        setTimeout(() => {
-          console.log('🚀 Executing redirect now...');
-          window.location.href = session.url;
-        }, 50);
+        // Redirect directly to Stripe checkout URL
+        window.location.href = session.url;
 
-        // Return immediately to prevent further execution
         return Promise.resolve();
       }
 
-      // For real sessions, redirect to Stripe checkout
+      // Fallback for other session types
       await this.redirectToCheckout(session.sessionId);
 
     } catch (error) {
