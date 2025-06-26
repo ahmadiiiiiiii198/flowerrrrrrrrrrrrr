@@ -219,13 +219,13 @@ class StripeService {
 
       // For mock sessions, redirect directly
       if (session.sessionId.startsWith('cs_live_mock_') || session.sessionId.startsWith('cs_mock_')) {
-        console.log('🎭 Mock session detected - redirecting directly');
+        console.log('🎭 Mock session detected - redirecting immediately');
+        console.log('🔗 Redirect URL:', session.url);
 
-        // Use setTimeout to ensure clean redirect
-        setTimeout(() => {
-          window.location.href = session.url;
-        }, 100);
+        // Immediate redirect without setTimeout
+        window.location.href = session.url;
 
+        // This return should never be reached due to redirect
         return;
       }
 

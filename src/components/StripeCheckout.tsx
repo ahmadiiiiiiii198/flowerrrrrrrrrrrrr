@@ -72,6 +72,8 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
         console.log('👤 Customer:', customerInfo);
         console.log('🆔 Order ID:', finalOrderId);
 
+        console.log('🔄 Calling stripeService.checkoutAndRedirect...');
+
         await stripeService.checkoutAndRedirect(
           items,
           customerInfo,
@@ -82,10 +84,13 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
           }
         );
 
-        console.log('✅ Payment flow completed successfully');
+        console.log('✅ Payment flow completed successfully (this should not be reached if redirect works)');
 
       } catch (error) {
         console.error('❌ Payment flow failed:', error);
+        console.error('❌ Error type:', typeof error);
+        console.error('❌ Error message:', error?.message);
+        console.error('❌ Error stack:', error?.stack);
         throw error;
       }
 

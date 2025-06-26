@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Francesco Fiori Payment Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-button {
+            background: #22c55e;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .test-button:hover {
+            background: #16a34a;
+        }
+        .log-container {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .error { color: #ef4444; }
+        .success { color: #22c55e; }
+        .info { color: #3b82f6; }
+        .warning { color: #f59e0b; }
+    </style>
+</head>
+<body>
+    <h1>🌸 Francesco Fiori Payment System Test</h1>
+    
+    <div class="test-container">
+        <h2>Payment Flow Test</h2>
+        <p>This page tests the payment flow directly without the React components.</p>
+        
+        <button class="test-button" onclick="testPaymentFlow()">
+            🧪 Test Payment Flow
+        </button>
+        
+        <button class="test-button" onclick="testDirectRedirect()">
+            🔗 Test Direct Redirect
+        </button>
+        
+        <button class="test-button" onclick="clearLogs()">
+            🗑️ Clear Logs
+        </button>
+    </div>
+    
+    <div class="test-container">
+        <h3>Test Logs</h3>
+        <div id="logs" class="log-container">
+            Ready to test Francesco Fiori payment system...
+        </div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById('logs');
+            const className = type === 'error' ? 'error' : 
+                             type === 'success' ? 'success' : 
+                             type === 'warning' ? 'warning' : 'info';
+            
+            logElement.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = 'Logs cleared...\n';
+        }
+
+        async function testPaymentFlow() {
+            log('🚀 Starting Francesco Fiori Payment Flow Test', 'info');
+            
+            try {
+                // Test data
+                const testItems = [{
+                    id: 'centrotavola-matrimonio',
+                    name: 'Centrotavola Matrimonio',
+                    price: 45.00,
+                    quantity: 1,
+                    description: 'Elegant wedding centerpiece'
+                }];
+                
+                const testCustomer = {
+                    name: 'Test Customer',
+                    email: 'test@example.com',
+                    phone: '+393498851455',
+                    address: {
+                        street: 'Via Test 123',
+                        city: 'Milano',
+                        postalCode: '20100',
+                        country: 'IT'
+                    }
+                };
+                
+                const testOrderId = `test_order_${Date.now()}`;
+                
+                log(`📦 Items: ${JSON.stringify(testItems, null, 2)}`, 'info');
+                log(`👤 Customer: ${JSON.stringify(testCustomer, null, 2)}`, 'info');
+                log(`🆔 Order ID: ${testOrderId}`, 'info');
+                
+                // Simulate the payment flow
+                const totalAmount = testItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                const mockSessionId = `cs_live_mock_${Date.now()}`;
+                const successUrl = `${window.location.origin}/payment/success?session_id=${mockSessionId}&order_id=${testOrderId}&amount=${totalAmount}&customer_email=${encodeURIComponent(testCustomer.email)}`;
+                
+                log(`💰 Total Amount: €${totalAmount}`, 'success');
+                log(`🎭 Mock Session ID: ${mockSessionId}`, 'info');
+                log(`🔗 Success URL: ${successUrl}`, 'info');
+                
+                // Store order info in localStorage
+                const orderInfo = {
+                    orderId: testOrderId,
+                    items: testItems,
+                    customerInfo: testCustomer,
+                    totalAmount: totalAmount,
+                    sessionId: mockSessionId,
+                    timestamp: new Date().toISOString()
+                };
+                
+                localStorage.setItem(`order_${testOrderId}`, JSON.stringify(orderInfo));
+                log(`💾 Order info stored in localStorage`, 'success');
+                
+                // Test the redirect
+                log(`🔄 Testing redirect in 3 seconds...`, 'warning');
+                setTimeout(() => {
+                    log(`🚀 Redirecting to success page...`, 'success');
+                    window.location.href = successUrl;
+                }, 3000);
+                
+            } catch (error) {
+                log(`❌ Test failed: ${error.message}`, 'error');
+                console.error('Test error:', error);
+            }
+        }
+
+        async function testDirectRedirect() {
+            log('🔗 Testing direct redirect to success page', 'info');
+            
+            const testOrderId = `direct_test_${Date.now()}`;
+            const mockSessionId = `cs_live_mock_${Date.now()}`;
+            const successUrl = `${window.location.origin}/payment/success?session_id=${mockSessionId}&order_id=${testOrderId}&amount=45&customer_email=test@example.com`;
+            
+            log(`🎯 Direct redirect URL: ${successUrl}`, 'info');
+            log(`🚀 Redirecting in 2 seconds...`, 'warning');
+            
+            setTimeout(() => {
+                window.location.href = successUrl;
+            }, 2000);
+        }
+
+        // Log initial state
+        log('✅ Francesco Fiori Payment Test Page Loaded', 'success');
+        log('🌐 Current URL: ' + window.location.href, 'info');
+        log('📱 User Agent: ' + navigator.userAgent, 'info');
+    </script>
+</body>
+</html>
