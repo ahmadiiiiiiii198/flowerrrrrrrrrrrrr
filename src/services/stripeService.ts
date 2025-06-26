@@ -226,6 +226,12 @@ class StripeService {
    */
   async redirectToCheckout(sessionId: string): Promise<void> {
     try {
+      // Check if this is a mock session ID
+      if (sessionId.startsWith('cs_mock_') || sessionId.startsWith('cs_test_mock_')) {
+        console.log('🎭 Mock session ID detected in redirectToCheckout, cannot use Stripe redirect');
+        throw new Error('Mock session cannot be used with Stripe redirect');
+      }
+
       const stripe = await this.getStripeInstance();
       if (!stripe) {
         throw new Error('Stripe failed to initialize');
@@ -255,6 +261,16 @@ class StripeService {
   ): Promise<void> {
     try {
       const session = await this.createCheckoutSession(items, customerInfo, orderId, metadata);
+
+      // Check if this is a mock session (fallback was used)
+      if (session.sessionId.startsWith('cs_mock_') || session.sessionId.startsWith('cs_test_mock_')) {
+        console.log('🎭 Mock session detected, redirecting directly to URL:', session.url);
+        // For mock sessions, redirect directly to the URL instead of using Stripe
+        window.location.href = session.url;
+        return;
+      }
+
+      // For real Stripe sessions, use the normal redirect
       await this.redirectToCheckout(session.sessionId);
     } catch (error) {
       console.error('Error in checkout flow:', error);
