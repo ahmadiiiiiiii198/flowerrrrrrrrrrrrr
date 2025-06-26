@@ -93,6 +93,12 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
         // Wait for the redirect (or error)
         await redirectPromise;
 
+        // Check if redirect is in progress
+        if ((window as any).__stripeRedirectInProgress) {
+          console.log('🔄 Redirect in progress, stopping execution');
+          return; // Stop execution if redirect is happening
+        }
+
         console.log('✅ Payment flow completed successfully');
 
         // If we reach here, the redirect is happening asynchronously
@@ -114,6 +120,12 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
     } catch (error) {
       console.error('Checkout error:', error);
 
+      // Check if redirect is in progress
+      if ((window as any).__stripeRedirectInProgress) {
+        console.log('🔄 Redirect in progress, ignoring error');
+        return; // Don't show error during redirect
+      }
+
       // Check if this is a redirect-related error (which is expected)
       if (error?.message?.includes('redirect') || error?.name === 'AbortError') {
         console.log('🔄 Redirect in progress, this is expected');
@@ -132,7 +144,10 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
 
       onError?.(errorMessage);
     } finally {
-      setIsProcessing(false);
+      // Only reset processing state if redirect is not in progress
+      if (!(window as any).__stripeRedirectInProgress) {
+        setIsProcessing(false);
+      }
     }
   };
 
