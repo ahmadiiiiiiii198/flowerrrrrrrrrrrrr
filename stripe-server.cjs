@@ -13,8 +13,10 @@ const stripe = new Stripe('sk_live_51RGNdrDOJ63odpAzNmtKuz4uABkjyaOyDjgQ0ywqoUW4
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3002', 'http://localhost:3000'],
-  credentials: true
+  origin: ['http://localhost:3002', 'http://localhost:3000', 'http://127.0.0.1:3002'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 app.use(express.json());
 
@@ -30,8 +32,12 @@ app.post('/create-checkout-session', async (req, res) => {
     console.log('📦 Request body:', req.body);
 
     const {
+      payment_method_types,
       line_items,
+      mode,
       customer_email,
+      billing_address_collection,
+      shipping_address_collection,
       success_url,
       cancel_url,
       metadata
@@ -44,23 +50,36 @@ app.post('/create-checkout-session', async (req, res) => {
       });
     }
 
-    // Create Stripe checkout session
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
+    // Create Stripe checkout session using all provided fields
+    const sessionConfig = {
+      payment_method_types: payment_method_types || ['card'],
       line_items: line_items,
-      mode: 'payment',
+      mode: mode || 'payment',
       customer_email: customer_email,
-      billing_address_collection: 'required',
-      shipping_address_collection: {
-        allowed_countries: ['IT', 'FR', 'DE', 'ES', 'AT', 'CH', 'US', 'GB'],
-      },
       success_url: success_url,
       cancel_url: cancel_url,
-      metadata: metadata || {},
-      payment_intent_data: {
-        metadata: metadata || {}
-      }
-    });
+      metadata: metadata || {}
+    };
+
+    // Add optional fields if provided
+    if (billing_address_collection) {
+      sessionConfig.billing_address_collection = billing_address_collection;
+    }
+
+    if (shipping_address_collection) {
+      sessionConfig.shipping_address_collection = shipping_address_collection;
+    }
+
+    // Add payment intent metadata if metadata exists
+    if (metadata && Object.keys(metadata).length > 0) {
+      sessionConfig.payment_intent_data = {
+        metadata: metadata
+      };
+    }
+
+    console.log('📋 Session config:', JSON.stringify(sessionConfig, null, 2));
+
+    const session = await stripe.checkout.sessions.create(sessionConfig);
 
     console.log('✅ Checkout session created:', session.id);
 
@@ -71,9 +90,17 @@ app.post('/create-checkout-session', async (req, res) => {
 
   } catch (error) {
     console.error('❌ Error creating checkout session:', error);
+    console.error('❌ Error details:', {
+      message: error.message,
+      type: error.type,
+      code: error.code,
+      stack: error.stack
+    });
+
     res.status(500).json({
       error: 'Failed to create checkout session',
-      message: error.message
+      message: error.message,
+      type: error.type || 'unknown_error'
     });
   }
 });
