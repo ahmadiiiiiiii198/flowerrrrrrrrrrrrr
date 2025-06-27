@@ -15,6 +15,7 @@ import LogoEditor from '@/components/admin/LogoEditor';
 import ShippingZoneManager from '@/components/admin/ShippingZoneManager';
 import CategoryPicturesManager from '@/components/admin/CategoryPicturesManager';
 import StripeSettings from '@/components/admin/StripeSettings';
+import SoundManager from '@/components/SoundManager';
 
 import HeroDebugger from '@/components/admin/HeroDebugger';
 import HeroContentEditor from '@/components/admin/HeroContentEditor';
@@ -456,18 +457,13 @@ const Admin = () => {
 
           <TabsContent value="notifications" className="space-y-2 md:space-y-4 animate-fade-in-up">
             <div className="bg-white/95 backdrop-blur-sm rounded-xl p-3 md:p-6 shadow-lg border border-rose-100">
-              <div className="text-center py-8">
-                <h2 className="text-xl font-semibold mb-4">🔔 Notification System</h2>
-                <p className="text-gray-600 mb-6">
-                  Notification settings are now built into the Order Dashboard
-                </p>
-                <a
-                  href="/orders"
-                  className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  🚀 Open Order Dashboard
-                </a>
-              </div>
+              <h2 className="text-xl md:text-2xl font-semibold mb-4 md:mb-6 text-rose-800 animate-fade-in-left flex items-center gap-3">
+                <div className="p-2 bg-rose-100 rounded-lg">
+                  <span className="text-rose-600 text-xl">🔔</span>
+                </div>
+                Gestione Suoni di Notifica
+              </h2>
+              <SoundManager />
             </div>
           </TabsContent>
 

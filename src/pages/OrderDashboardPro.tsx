@@ -81,9 +81,32 @@ class ContinuousAudioNotifier {
   private isRinging = false;
   private timeoutId: NodeJS.Timeout | null = null;
   private isInitialized = false;
+  private customAudio: HTMLAudioElement | null = null;
+  private activeSound: any = null;
 
   constructor() {
     this.initializeAudio();
+    this.loadActiveSound();
+  }
+
+  private async loadActiveSound() {
+    try {
+      const { data, error } = await supabase
+        .from('notification_sounds')
+        .select('*')
+        .eq('is_active', true)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error loading active sound:', error);
+        return;
+      }
+
+      this.activeSound = data;
+      console.log('🎵 Active sound loaded:', data?.name || 'Default');
+    } catch (error) {
+      console.error('Error loading active sound:', error);
+    }
   }
 
   private initializeAudio() {
@@ -130,21 +153,67 @@ class ContinuousAudioNotifier {
   }
 
   private playRingTone() {
-    if (!this.isRinging || !this.audioContext) return;
+    if (!this.isRinging) return;
 
     try {
-      // Create a pleasant phone-like ringing sound with dual tones
-      this.playDualToneRing();
+      // Check if we have a custom sound
+      if (this.activeSound && this.activeSound.sound_type === 'custom' && this.activeSound.file_url) {
+        this.playCustomSound();
+      } else {
+        // Play built-in sound
+        if (!this.audioContext) return;
+        this.playDualToneRing();
+      }
 
-      // Schedule next ring cycle (ring-ring pattern)
+      // Schedule next ring cycle
+      const interval = this.activeSound?.sound_type === 'custom' ? 5000 : 4000;
       this.timeoutId = setTimeout(() => {
         if (this.isRinging) {
           this.playRingTone();
         }
-      }, 4000); // 4 second intervals between ring cycles
+      }, interval);
 
     } catch (error) {
       console.error('❌ Audio playback error:', error);
+    }
+  }
+
+  private playCustomSound() {
+    if (!this.activeSound?.file_url) return;
+
+    try {
+      // Stop any existing custom audio
+      if (this.customAudio) {
+        this.customAudio.pause();
+        this.customAudio.currentTime = 0;
+      }
+
+      // Create new audio instance
+      this.customAudio = new Audio(this.activeSound.file_url);
+      this.customAudio.volume = 0.7;
+
+      this.customAudio.onerror = () => {
+        console.error('❌ Custom sound playback failed, falling back to built-in');
+        // Fallback to built-in sound
+        if (this.audioContext) {
+          this.playDualToneRing();
+        }
+      };
+
+      this.customAudio.play().catch(error => {
+        console.error('❌ Custom sound play failed:', error);
+        // Fallback to built-in sound
+        if (this.audioContext) {
+          this.playDualToneRing();
+        }
+      });
+
+    } catch (error) {
+      console.error('❌ Custom sound error:', error);
+      // Fallback to built-in sound
+      if (this.audioContext) {
+        this.playDualToneRing();
+      }
     }
   }
 
@@ -210,14 +279,28 @@ class ContinuousAudioNotifier {
   stopRinging() {
     console.log('🔇 STOPPING CONTINUOUS RINGING');
     this.isRinging = false;
+
+    // Clear timeout
     if (this.timeoutId) {
       clearTimeout(this.timeoutId);
       this.timeoutId = null;
+    }
+
+    // Stop custom audio if playing
+    if (this.customAudio) {
+      this.customAudio.pause();
+      this.customAudio.currentTime = 0;
+      this.customAudio = null;
     }
   }
 
   get isActive() {
     return this.isRinging;
+  }
+
+  async refreshActiveSound() {
+    await this.loadActiveSound();
+    console.log('🔄 Active sound refreshed:', this.activeSound?.name || 'Default');
   }
 
   // Test function
@@ -232,6 +315,9 @@ class ContinuousAudioNotifier {
 }
 
 const audioNotifier = new ContinuousAudioNotifier();
+
+// Expose audio notifier globally for sound management
+(window as any).audioNotifier = audioNotifier;
 
 const OrderDashboardPro: React.FC = () => {
   // State management
