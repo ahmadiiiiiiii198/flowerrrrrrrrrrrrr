@@ -95,7 +95,10 @@ class PhoneNotificationService {
   }
 
   private createPhoneRingTone() {
+    console.log('🎵 createPhoneRingTone() called, audioContext:', !!this.audioContext);
+
     if (!this.audioContext) {
+      console.log('📱 No audioContext, using fallback...');
       // Fallback to HTML5 audio for mobile compatibility
       this.createFallbackRingTone();
       return;
@@ -280,7 +283,12 @@ class PhoneNotificationService {
   }
 
   public async notifyNewOrder(orderNumber: string, customerName: string) {
-    if (!this.settings.enabled) return;
+    console.log('🚨 NOTIFICATION SERVICE CALLED:', { orderNumber, customerName, enabled: this.settings.enabled });
+
+    if (!this.settings.enabled) {
+      console.log('❌ Notification service is DISABLED');
+      return;
+    }
 
     const currentPage = window.location.pathname;
     console.log(`📞 Phone notification for order #${orderNumber} from ${customerName} - Page: ${currentPage}`);
@@ -295,6 +303,7 @@ class PhoneNotificationService {
     }
 
     console.log('🔊 Playing notification sound - admin page confirmed');
+    console.log('🎵 Starting audio notification...');
 
     // Request wake lock to keep screen active on mobile
     await this.requestWakeLock();
@@ -309,19 +318,30 @@ class PhoneNotificationService {
     this.triggerContinuousVibration();
 
     // Start phone ringing (will continue until manually stopped)
+    console.log('🔔 Calling startRinging()...');
     this.startRinging();
+    console.log('🎶 startRinging() completed, isRinging:', this.isRinging);
   }
 
   private startRinging() {
-    if (this.isRinging) return;
+    console.log('🔔 startRinging() called, current isRinging:', this.isRinging);
 
+    if (this.isRinging) {
+      console.log('⚠️ Already ringing, skipping...');
+      return;
+    }
+
+    console.log('🎵 Starting new ringing session...');
     this.isRinging = true;
     this.ringCount = 0;
     this.initializeAudioContext();
 
     const ring = () => {
+      console.log(`🔊 Ring #${this.ringCount + 1}, isRinging: ${this.isRinging}`);
+
       // Continue ringing indefinitely until manually stopped (removed maxRings limit)
       if (!this.isRinging) {
+        console.log('🔇 Ringing stopped, exiting ring loop');
         return;
       }
 
@@ -336,6 +356,7 @@ class PhoneNotificationService {
       }, (this.settings.ringDuration + this.settings.ringInterval) * 1000);
     };
 
+    console.log('🎶 Starting first ring...');
     ring();
   }
 

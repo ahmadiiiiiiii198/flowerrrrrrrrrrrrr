@@ -160,7 +160,8 @@ const OrderDashboard = () => {
               payload.new.order_number,
               payload.new.customer_name
             );
-          }
+            // Set ringing state to show stop button
+            setIsPhoneRinging(true);
 
             // Show persistent toast notification
             toast({
@@ -178,6 +179,7 @@ const OrderDashboard = () => {
                 requireInteraction: true, // Keep notification until user interacts
               });
             }
+          }
 
           refetch();
           refetchNotifications();
@@ -560,18 +562,7 @@ const OrderDashboard = () => {
               <span className="hidden sm:inline">{t('testSound')}</span>
             </Button>
 
-            {/* Phone Ringing Indicator */}
-            {isPhoneRinging && (
-              <Button
-                onClick={() => phoneNotificationService.stopRinging()}
-                variant="destructive"
-                size="sm"
-                className="animate-pulse flex items-center gap-1 sm:gap-2 px-2 sm:px-3"
-              >
-                <Phone className="w-4 h-4" />
-                <span className="hidden sm:inline">{t('stopRinging')}</span>
-              </Button>
-            )}
+
 
             {/* Notifications */}
             <div className="flex-shrink-0">
