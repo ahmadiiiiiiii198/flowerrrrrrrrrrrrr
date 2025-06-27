@@ -391,7 +391,7 @@ const Admin = () => {
           <TabsContent value="gallery" className="space-y-2 md:space-y-4 animate-fade-in-up">
             <div className="bg-white/95 backdrop-blur-sm rounded-xl p-3 md:p-6 shadow-lg border border-teal-100">
               <div className="animate-scale-in">
-                <CategoriesGalleryAdmin />
+                <MainGalleryManager />
               </div>
             </div>
           </TabsContent>
