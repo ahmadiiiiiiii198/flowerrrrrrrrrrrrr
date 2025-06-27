@@ -72,6 +72,16 @@ const OrderDashboard = () => {
   const { toast } = useToast();
   const { t } = useLanguage();
 
+  // Stop notification function
+  const stopNotificationMusic = () => {
+    phoneNotificationService.stopRinging();
+    setIsPhoneRinging(false);
+    toast({
+      title: '🔇 Notification Stopped',
+      description: 'Order notification music has been stopped',
+    });
+  };
+
   // Fetch orders with real-time updates
   const { data: orders, isLoading, refetch, error } = useQuery({
     queryKey: ['orders-dashboard'],
@@ -195,6 +205,8 @@ const OrderDashboard = () => {
                 payload.new.order_number,
                 payload.new.customer_name
               );
+              // Set ringing state to show stop button
+              setIsPhoneRinging(true);
             }
 
             // Show persistent toast notification
@@ -513,6 +525,29 @@ const OrderDashboard = () => {
               {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
               <span className="hidden sm:inline">{soundEnabled ? t('soundOn') : t('soundOff')}</span>
             </Button>
+
+            {/* Stop Notification Button - Only show when ringing */}
+            {isPhoneRinging && (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={stopNotificationMusic}
+                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 animate-pulse bg-red-600 hover:bg-red-700 text-white font-bold"
+              >
+                <VolumeX className="w-4 h-4" />
+                <span className="hidden sm:inline">🔔 STOP NOTIFICATION</span>
+                <span className="sm:hidden">🔇 STOP</span>
+              </Button>
+            )}
+
+            {/* Notification Status Indicator */}
+            {isPhoneRinging && (
+              <div className="flex items-center gap-1 px-2 py-1 bg-red-100 border border-red-300 rounded text-red-700 text-xs animate-pulse">
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
+                <span className="hidden sm:inline">New Order Alert Active</span>
+                <span className="sm:hidden">Alert</span>
+              </div>
+            )}
 
             {/* Test Notification Button */}
             <Button

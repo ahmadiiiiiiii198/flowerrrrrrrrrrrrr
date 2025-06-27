@@ -197,6 +197,23 @@ class PhoneNotificationService {
     }
   }
 
+  private async requestWakeLock() {
+    try {
+      if ('wakeLock' in navigator) {
+        const wakeLock = await (navigator as any).wakeLock.request('screen');
+        console.log('📱 Wake lock acquired for mobile notification');
+
+        // Release wake lock after 60 seconds to preserve battery
+        setTimeout(() => {
+          wakeLock.release();
+          console.log('📱 Wake lock released');
+        }, 60000);
+      }
+    } catch (error) {
+      console.log('📱 Wake lock not supported or failed:', error);
+    }
+  }
+
   private triggerVibration() {
     if (!this.settings.vibrationEnabled) return;
 
@@ -206,6 +223,29 @@ class PhoneNotificationService {
         navigator.vibrate([500, 200, 500, 200, 500]);
       } catch (error) {
         console.warn('Failed to trigger vibration:', error);
+      }
+    }
+  }
+
+  private triggerContinuousVibration() {
+    if (!this.settings.vibrationEnabled) return;
+
+    if ('vibrate' in navigator) {
+      try {
+        // Initial vibration pattern
+        const vibratePattern = [500, 200, 500, 200, 500, 200, 500];
+        navigator.vibrate(vibratePattern);
+
+        // Continue vibrating every 3 seconds until ringing stops
+        const vibrateInterval = setInterval(() => {
+          if (this.isRinging && 'vibrate' in navigator) {
+            navigator.vibrate(vibratePattern);
+          } else {
+            clearInterval(vibrateInterval);
+          }
+        }, 3000);
+      } catch (error) {
+        console.warn('Failed to trigger continuous vibration:', error);
       }
     }
   }
@@ -256,16 +296,19 @@ class PhoneNotificationService {
 
     console.log('🔊 Playing notification sound - admin page confirmed');
 
+    // Request wake lock to keep screen active on mobile
+    await this.requestWakeLock();
+
     // Send SMS notification
     await this.sendSMSNotification(orderNumber, customerName);
 
     // Show browser notification
     this.showBrowserNotification(orderNumber, customerName);
 
-    // Trigger mobile vibration
-    this.triggerVibration();
+    // Trigger mobile vibration (enhanced for continuous notification)
+    this.triggerContinuousVibration();
 
-    // Start phone ringing
+    // Start phone ringing (will continue until manually stopped)
     this.startRinging();
   }
 
@@ -277,15 +320,15 @@ class PhoneNotificationService {
     this.initializeAudioContext();
 
     const ring = () => {
-      if (this.ringCount >= this.settings.maxRings) {
-        this.stopRinging();
+      // Continue ringing indefinitely until manually stopped (removed maxRings limit)
+      if (!this.isRinging) {
         return;
       }
 
       this.createPhoneRingTone();
       this.ringCount++;
 
-      // Schedule next ring
+      // Schedule next ring - continue until manually stopped
       this.ringTimeout = setTimeout(() => {
         if (this.isRinging) {
           ring();
@@ -309,6 +352,13 @@ class PhoneNotificationService {
       clearInterval(this.ringInterval);
       this.ringInterval = null;
     }
+
+    // Stop vibration
+    if ('vibrate' in navigator) {
+      navigator.vibrate(0); // Stop any ongoing vibration
+    }
+
+    console.log('🔇 Notification ringing and vibration stopped');
   }
 
   public updateSettings(newSettings: Partial<PhoneNotificationSettings>) {

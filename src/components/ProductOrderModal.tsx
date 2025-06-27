@@ -325,7 +325,58 @@ const ProductOrderModal: React.FC<ProductOrderModalProps> = ({ product, isOpen, 
     return `ORD-${timestamp.slice(-6)}${random}`;
   };
 
-  // Old createOrder function removed - now using DirectPaymentButton
+  // Create order function for "pay later" option
+  const createOrder = async () => {
+    if (!product || !addressValidation?.isValid) {
+      throw new Error('Product or address validation missing');
+    }
+
+    const orderNumber = generateOrderNumber();
+    const totalAmount = (product.price * orderData.quantity) + addressValidation.deliveryFee;
+
+    // Create order with "pending" status for pay later
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .insert({
+        order_number: orderNumber,
+        customer_name: orderData.customerName,
+        customer_email: orderData.customerEmail,
+        customer_phone: orderData.customerPhone || null,
+        total_amount: totalAmount,
+        status: 'pending', // Pay later orders start as pending
+        payment_status: 'pending',
+        shipping_address: {
+          street: addressValidation.formattedAddress,
+          coordinates: addressValidation.coordinates,
+          deliveryFee: addressValidation.deliveryFee,
+          estimatedTime: addressValidation.estimatedTime
+        },
+        notes: `Pay Later Order - Product: ${product.name}\nQuantity: ${orderData.quantity}\nSpecial Requests: ${orderData.specialRequests}\nDelivery Date: ${orderData.deliveryDate}`
+      })
+      .select()
+      .single();
+
+    if (orderError) {
+      throw new Error(`Order creation failed: ${orderError.message}`);
+    }
+
+    // Create order item
+    const { error: itemError } = await supabase
+      .from('order_items')
+      .insert({
+        order_id: order.id,
+        product_id: product.id,
+        product_name: product.name,
+        quantity: orderData.quantity,
+        price: product.price
+      });
+
+    if (itemError) {
+      throw new Error(`Order item creation failed: ${itemError.message}`);
+    }
+
+    return order;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
