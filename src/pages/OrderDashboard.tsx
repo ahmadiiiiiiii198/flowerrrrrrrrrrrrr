@@ -392,35 +392,29 @@ const OrderDashboard = () => {
     try {
       console.log('🗑️ Deleting all orders...');
 
-      // First, delete all related records to avoid foreign key constraint violations
-      // Delete order notifications first
+      // First, delete all order notifications to avoid foreign key constraint violations
       const { error: notificationsError } = await supabase
         .from('order_notifications')
         .delete()
         .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
 
-      if (notificationsError) {
-        console.error('Error deleting order notifications:', notificationsError);
-        toast({
-          title: 'Deletion Failed',
-          description: `Error deleting notifications: ${notificationsError.message}`,
-          variant: 'destructive',
-        });
-        return;
+      if (notificationsError && !notificationsError.message.includes('does not exist')) {
+        console.warn('Warning deleting order notifications:', notificationsError);
+        // Continue anyway - notifications are not critical
       }
 
-      // Delete order status history if it exists
+      // Second, delete all order status history
       const { error: statusHistoryError } = await supabase
         .from('order_status_history')
         .delete()
         .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
 
-      // Don't fail if this table doesn't exist or has no records
       if (statusHistoryError && !statusHistoryError.message.includes('does not exist')) {
         console.warn('Warning deleting order status history:', statusHistoryError);
+        // Continue anyway - status history is not critical
       }
 
-      // Delete order items (these should have CASCADE delete, but let's be safe)
+      // Third, delete all order items
       const { error: itemsError } = await supabase
         .from('order_items')
         .delete()

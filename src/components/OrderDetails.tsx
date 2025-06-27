@@ -154,29 +154,29 @@ const OrderDetails = ({ order, onUpdate, onDelete }: OrderDetailsProps) => {
     console.log('Starting manual deletion process for order:', order.id);
 
     try {
-      // 1. Delete order notifications
+      // 1. Delete order notifications first (if they exist)
       console.log('Deleting order notifications...');
       const { error: notificationsError } = await supabase
         .from('order_notifications')
         .delete()
         .eq('order_id', order.id);
 
-      if (notificationsError) {
-        console.warn('Failed to delete notifications:', notificationsError);
+      if (notificationsError && !notificationsError.message.includes('does not exist')) {
+        console.warn('Warning deleting notifications:', notificationsError);
         // Continue anyway - notifications are not critical
       } else {
         console.log('✓ Order notifications deleted');
       }
 
-      // 2. Delete order status history
+      // 2. Delete order status history (if it exists)
       console.log('Deleting order status history...');
       const { error: statusHistoryError } = await supabase
         .from('order_status_history')
         .delete()
         .eq('order_id', order.id);
 
-      if (statusHistoryError) {
-        console.warn('Failed to delete status history:', statusHistoryError);
+      if (statusHistoryError && !statusHistoryError.message.includes('does not exist')) {
+        console.warn('Warning deleting status history:', statusHistoryError);
         // Continue anyway - status history is not critical
       } else {
         console.log('✓ Order status history deleted');
@@ -207,7 +207,7 @@ const OrderDetails = ({ order, onUpdate, onDelete }: OrderDetailsProps) => {
         console.error('Failed to delete order:', orderError);
         throw new Error(`Failed to delete order: ${orderError.message}`);
       } else {
-        console.log('✓ Order deleted successfully');
+        console.log('✅ Order deleted successfully');
       }
 
     } catch (error) {

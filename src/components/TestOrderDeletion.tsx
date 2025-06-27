@@ -109,43 +109,19 @@ const TestOrderDeletion = () => {
       // Manual deletion process
       const steps = [];
 
-      // 1. Delete order notifications
-      const { error: notificationsError } = await supabase
-        .from('order_notifications')
-        .delete()
-        .eq('order_id', orderId);
-      
-      steps.push({
-        step: 'Delete notifications',
-        success: !notificationsError,
-        error: notificationsError?.message
-      });
-
-      // 2. Delete order status history
-      const { error: statusHistoryError } = await supabase
-        .from('order_status_history')
-        .delete()
-        .eq('order_id', orderId);
-      
-      steps.push({
-        step: 'Delete status history',
-        success: !statusHistoryError,
-        error: statusHistoryError?.message
-      });
-
-      // 3. Delete order items
+      // 1. Delete order items (only table that actually exists with foreign key constraint)
       const { error: itemsError } = await supabase
         .from('order_items')
         .delete()
         .eq('order_id', orderId);
-      
+
       steps.push({
         step: 'Delete order items',
         success: !itemsError,
         error: itemsError?.message
       });
 
-      // 4. Delete the order itself
+      // 2. Delete the order itself
       const { error: orderError } = await supabase
         .from('orders')
         .delete()
