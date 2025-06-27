@@ -37,6 +37,7 @@ class PhoneNotificationService {
     };
     this.loadSettings();
     this.requestNotificationPermission();
+    this.initializeAudioOnUserInteraction();
   }
 
   private async loadSettings() {
@@ -254,6 +255,35 @@ class PhoneNotificationService {
         console.warn('Failed to request notification permission:', error);
       }
     }
+  }
+
+  private initializeAudioOnUserInteraction() {
+    // Set up audio context initialization on first user interaction
+    const initAudio = async () => {
+      try {
+        console.log('🔊 Initializing audio context on user interaction...');
+
+        // Create audio context
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioContext.state === 'suspended') {
+          await audioContext.resume();
+        }
+        console.log('✅ Audio context initialized:', audioContext.state);
+
+        // Remove event listeners after first interaction
+        document.removeEventListener('click', initAudio);
+        document.removeEventListener('touchstart', initAudio);
+        document.removeEventListener('keydown', initAudio);
+
+      } catch (error) {
+        console.warn('❌ Failed to initialize audio context:', error);
+      }
+    };
+
+    // Add event listeners for user interaction
+    document.addEventListener('click', initAudio, { once: true });
+    document.addEventListener('touchstart', initAudio, { once: true });
+    document.addEventListener('keydown', initAudio, { once: true });
   }
 
   private async requestWakeLock() {
