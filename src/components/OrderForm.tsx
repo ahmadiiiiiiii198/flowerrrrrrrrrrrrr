@@ -145,10 +145,12 @@ const OrderForm = () => {
           customer_name: formData.customerName,
           customer_email: formData.customerEmail,
           customer_phone: formData.customerPhone || null,
+          customer_address: shippingAddress, // Use customer_address column
           total_amount: estimatedPrice,
           status: 'pending',
-          billing_address: billingAddress,
-          shipping_address: shippingAddress,
+          metadata: {
+            billing_address: billingAddress
+          },
           notes: `Category: ${formData.category}\nProduct: ${formData.productDescription}\nQuantity: ${formData.quantity}\nSpecial Requests: ${formData.specialRequests}\nDelivery Date: ${formData.deliveryDate}`
         })
         .select()

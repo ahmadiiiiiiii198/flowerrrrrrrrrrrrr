@@ -123,10 +123,10 @@ const EnhancedOrderForm = () => {
         customer_name: formData.customerName,
         customer_email: formData.customerEmail,
         customer_phone: formData.customerPhone || null,
+        customer_address: addressValidation.formattedAddress, // Use customer_address column
         total_amount: totalAmount,
         status: 'payment_pending',
-        shipping_address: {
-          street: addressValidation.formattedAddress,
+        metadata: {
           coordinates: addressValidation.coordinates,
           deliveryFee: addressValidation.deliveryFee,
           estimatedTime: addressValidation.estimatedTime

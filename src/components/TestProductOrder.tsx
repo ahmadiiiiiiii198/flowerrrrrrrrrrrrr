@@ -71,19 +71,16 @@ const TestProductOrder = () => {
           customer_name: testCustomer.name,
           customer_email: testCustomer.email,
           customer_phone: testCustomer.phone,
+          customer_address: 'Via Roma 123, Milano, 20100, Italy', // Use customer_address column
           total_amount: totalAmount,
           status: 'pending',
-          billing_address: {
-            street: 'Via Roma 123',
-            city: 'Milano',
-            postalCode: '20100',
-            country: 'Italy'
-          },
-          shipping_address: {
-            street: 'Via Roma 123',
-            city: 'Milano',
-            postalCode: '20100',
-            country: 'Italy'
+          metadata: {
+            billing_address: {
+              street: 'Via Roma 123',
+              city: 'Milano',
+              postalCode: '20100',
+              country: 'Italy'
+            }
           },
           notes: `Test Product Order - ${product.name}\nQuantity: ${quantity}\nCategory: ${product.category}`
         })

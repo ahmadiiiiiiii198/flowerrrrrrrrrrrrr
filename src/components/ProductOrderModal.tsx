@@ -342,14 +342,15 @@ const ProductOrderModal: React.FC<ProductOrderModalProps> = ({ product, isOpen, 
         customer_name: orderData.customerName,
         customer_email: orderData.customerEmail,
         customer_phone: orderData.customerPhone || null,
+        customer_address: orderData.deliveryAddress, // Use customer_address column
         total_amount: totalAmount,
         status: 'pending', // Pay later orders start as pending
         payment_status: 'pending',
-        shipping_address: {
-          street: addressValidation.formattedAddress,
-          coordinates: addressValidation.coordinates,
+        metadata: {
           deliveryFee: addressValidation.deliveryFee,
-          estimatedTime: addressValidation.estimatedTime
+          estimatedTime: addressValidation.estimatedTime,
+          coordinates: addressValidation.coordinates,
+          formattedAddress: addressValidation.formattedAddress
         },
         notes: `Pay Later Order - Product: ${product.name}\nQuantity: ${orderData.quantity}\nSpecial Requests: ${orderData.specialRequests}\nDelivery Date: ${orderData.deliveryDate}`
       })

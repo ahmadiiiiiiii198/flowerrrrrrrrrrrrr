@@ -44,19 +44,16 @@ const TestOrderButton = () => {
           customer_name: customer.name,
           customer_email: customer.email,
           customer_phone: customer.phone,
+          customer_address: 'Via Roma 123, Milano, 20100, Italy', // Use customer_address column
           total_amount: product.price * quantity,
           status: 'pending',
-          billing_address: {
-            street: 'Via Roma 123',
-            city: 'Milano',
-            postalCode: '20100',
-            country: 'Italy'
-          },
-          shipping_address: {
-            street: 'Via Roma 123',
-            city: 'Milano',
-            postalCode: '20100',
-            country: 'Italy'
+          metadata: {
+            billing_address: {
+              street: 'Via Roma 123',
+              city: 'Milano',
+              postalCode: '20100',
+              country: 'Italy'
+            }
           },
           notes: `Test order for ${product.category} - ${product.name}`
         })
