@@ -70,7 +70,8 @@ const TestOrderButton = () => {
           product_id: 'test-product',
           product_name: product.name,
           quantity: quantity,
-          price: product.price
+          product_price: product.price,
+          subtotal: product.price * quantity
         });
 
       if (itemError) throw itemError;

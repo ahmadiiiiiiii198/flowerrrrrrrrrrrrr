@@ -74,7 +74,8 @@ const DatabaseTest = () => {
           product_id: 'test-product',
           product_name: 'Test Product',
           quantity: 1,
-          price: 50.00
+          product_price: 50.00,
+          subtotal: 50.00
         });
 
       if (itemError) throw itemError;

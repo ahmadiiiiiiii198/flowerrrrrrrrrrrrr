@@ -369,7 +369,8 @@ const ProductOrderModal: React.FC<ProductOrderModalProps> = ({ product, isOpen, 
         product_id: product.id,
         product_name: product.name,
         quantity: orderData.quantity,
-        price: product.price
+        product_price: product.price,
+        subtotal: product.price * orderData.quantity
       });
 
     if (itemError) {

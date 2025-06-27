@@ -139,6 +139,7 @@ const EnhancedOrderForm = () => {
     if (orderError) throw orderError;
 
     // Create order item
+    const itemPrice = (totalAmount - addressValidation.deliveryFee) / formData.quantity;
     const { error: itemError } = await supabase
       .from('order_items')
       .insert({
@@ -146,7 +147,8 @@ const EnhancedOrderForm = () => {
         product_id: 'custom-order',
         product_name: `${categories.find(c => c.value === formData.category)?.label} - ${formData.productDescription}`,
         quantity: formData.quantity,
-        price: (totalAmount - addressValidation.deliveryFee) / formData.quantity
+        product_price: itemPrice,
+        subtotal: itemPrice * formData.quantity
       });
 
     if (itemError) throw itemError;

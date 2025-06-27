@@ -198,7 +198,8 @@ const DatabaseConnectionTest = () => {
           product_id: products[0].id,
           product_name: products[0].name,
           quantity: 1,
-          price: products[0].price
+          product_price: products[0].price,
+          subtotal: products[0].price
         };
 
         const { error: itemError } = await supabase
