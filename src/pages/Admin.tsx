@@ -12,7 +12,6 @@ import TextContentEditor from '@/components/admin/TextContentEditor';
 // OrderManagement moved to dedicated OrderDashboard page
 import CategoriesGalleryAdmin from '@/components/admin/CategoriesGalleryAdmin';
 import MainGalleryManager from '@/components/admin/MainGalleryManager';
-import GalleryFunctionalityTest from '@/components/admin/GalleryFunctionalityTest';
 import ProductsAdmin from '@/components/admin/ProductsAdmin';
 import LogoEditor from '@/components/admin/LogoEditor';
 import ShippingZoneManager from '@/components/admin/ShippingZoneManager';
@@ -392,8 +391,7 @@ const Admin = () => {
 
           <TabsContent value="gallery" className="space-y-2 md:space-y-4 animate-fade-in-up">
             <div className="bg-white/95 backdrop-blur-sm rounded-xl p-3 md:p-6 shadow-lg border border-teal-100">
-              <div className="animate-scale-in space-y-6">
-                <GalleryFunctionalityTest />
+              <div className="animate-scale-in">
                 <MainGalleryManager />
               </div>
             </div>
