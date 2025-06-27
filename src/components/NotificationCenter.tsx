@@ -24,7 +24,7 @@ import notificationService from '@/services/notificationService';
 import audioNotificationService from '@/services/audioNotificationService';
 import { NotificationData, NotificationType } from '@/types/notifications';
 import { formatDistanceToNow } from 'date-fns';
-import orderEventHandler from '@/services/orderEventHandler';
+import audioNotificationService from '@/services/audioNotificationService';
 
 interface NotificationCenterProps {
   className?: string;
@@ -255,14 +255,38 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ className }) =>
                   )}
 
                   {process.env.NODE_ENV === 'development' && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => orderEventHandler.createTestNotification()}
-                      className="text-purple-600"
-                    >
-                      Test
-                    </Button>
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          console.log('🧪 Testing Pay Later audio (continuous)...');
+                          audioNotificationService.testNotificationSound('payment_failed');
+                          toast({
+                            title: '🔄 Pay Later Test',
+                            description: 'Testing continuous notification (payment_failed pattern)',
+                          });
+                        }}
+                        className="text-orange-600"
+                      >
+                        Pay Later
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          console.log('🧪 Testing Stripe audio (single)...');
+                          audioNotificationService.testNotificationSound('payment_completed');
+                          toast({
+                            title: '💳 Stripe Test',
+                            description: 'Testing single notification (payment_completed pattern)',
+                          });
+                        }}
+                        className="text-green-600"
+                      >
+                        Stripe
+                      </Button>
+                    </>
                   )}
                 </div>
               </div>
