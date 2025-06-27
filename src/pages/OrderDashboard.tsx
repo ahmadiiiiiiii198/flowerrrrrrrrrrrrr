@@ -1,29 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import {
-  Bell,
-  VolumeX,
-  Volume2,
-  Phone,
-  Mail,
-  MapPin,
+  Package,
   DollarSign,
   Clock,
-  Package,
-  RotateCcw,
-  User,
-  Calendar,
-  CreditCard,
-  AlertCircle,
   CheckCircle2,
   XCircle
 } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
 
 // Types
 interface Order {
