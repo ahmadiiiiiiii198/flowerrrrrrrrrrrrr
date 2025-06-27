@@ -14,7 +14,7 @@ import CategoriesGalleryAdmin from '@/components/admin/CategoriesGalleryAdmin';
 import ProductsAdmin from '@/components/admin/ProductsAdmin';
 import LogoEditor from '@/components/admin/LogoEditor';
 import ShippingZoneManager from '@/components/admin/ShippingZoneManager';
-import CategoryPicturesManager from '@/components/admin/CategoryPicturesManager';
+// CategoryPicturesManager removed - using CategoriesGalleryAdmin instead
 import StripeSettings from '@/components/admin/StripeSettings';
 import SoundManager from '@/components/SoundManager';
 
@@ -375,7 +375,7 @@ const Admin = () => {
           <TabsContent value="category-pics" className="space-y-2 md:space-y-4 animate-fade-in-up">
             <div className="bg-white/95 backdrop-blur-sm rounded-xl p-3 md:p-6 shadow-lg border border-pink-100">
               <div className="animate-scale-in">
-                <CategoryPicturesManager />
+                <CategoriesGalleryAdmin />
               </div>
             </div>
           </TabsContent>
