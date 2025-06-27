@@ -26,7 +26,18 @@ import {
   TrendingUp,
   Eye,
   Filter,
-  Search
+  Search,
+  Trash2,
+  Edit,
+  MoreVertical,
+  Download,
+  Settings,
+  Zap,
+  Activity,
+  Users,
+  ShoppingBag,
+  ArrowUpRight,
+  ArrowDownRight
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -278,16 +289,120 @@ const OrderDashboardPro: React.FC = () => {
         .eq('id', notificationId);
 
       if (error) throw error;
-      
-      setNotifications(prev => 
-        prev.map(n => 
-          n.id === notificationId 
+
+      setNotifications(prev =>
+        prev.map(n =>
+          n.id === notificationId
             ? { ...n, is_read: true }
             : n
         )
       );
     } catch (error) {
       console.error('Failed to mark notification as read:', error);
+    }
+  };
+
+  const deleteOrder = async (orderId: string) => {
+    if (!confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      // Delete related notifications first
+      await supabase
+        .from('order_notifications')
+        .delete()
+        .eq('order_id', orderId);
+
+      // Delete the order
+      const { error } = await supabase
+        .from('orders')
+        .delete()
+        .eq('id', orderId);
+
+      if (error) throw error;
+
+      setOrders(prev => prev.filter(order => order.id !== orderId));
+      setSelectedOrder(null);
+
+      toast({
+        title: '✅ Order Deleted',
+        description: 'Order has been successfully deleted',
+      });
+    } catch (error) {
+      console.error('Failed to delete order:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete order',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const deleteAllOrders = async () => {
+    if (!confirm(`⚠️ DELETE ALL ORDERS?\n\nThis will permanently delete ALL ${orders.length} orders.\nThis action CANNOT be undone!\n\nClick OK to delete all orders, or Cancel to abort.`)) {
+      return;
+    }
+
+    try {
+      // Delete all notifications first
+      await supabase
+        .from('order_notifications')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+
+      // Delete all orders
+      const { error } = await supabase
+        .from('orders')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+
+      if (error) throw error;
+
+      setOrders([]);
+      setNotifications([]);
+      setSelectedOrder(null);
+
+      toast({
+        title: '✅ All Orders Deleted',
+        description: `Successfully deleted all ${orders.length} orders`,
+      });
+    } catch (error) {
+      console.error('Failed to delete all orders:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete all orders',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('id', orderId);
+
+      if (error) throw error;
+
+      setOrders(prev => prev.map(order =>
+        order.id === orderId
+          ? { ...order, status: newStatus, updated_at: new Date().toISOString() }
+          : order
+      ));
+
+      toast({
+        title: '✅ Status Updated',
+        description: `Order status changed to ${newStatus}`,
+      });
+    } catch (error) {
+      console.error('Failed to update order status:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update order status',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -344,26 +459,39 @@ const OrderDashboardPro: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800">
+      {/* Animated Background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -inset-10 opacity-50">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
+          <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
+          <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000"></div>
+        </div>
+      </div>
+
+      <div className="relative z-10 container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Order Management Dashboard
+        <div className="mb-12">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div className="text-center lg:text-left">
+              <h1 className="text-6xl font-black bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent mb-4">
+                Order Command Center
               </h1>
-              <p className="text-gray-600 mt-2">Monitor and manage your orders in real-time</p>
+              <p className="text-xl text-blue-100 font-medium">Real-time order management & analytics</p>
+              <div className="flex items-center gap-2 mt-3 justify-center lg:justify-start">
+                <Activity className="w-5 h-5 text-green-400 animate-pulse" />
+                <span className="text-green-300 font-medium">Live System Active</span>
+              </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-4 justify-center lg:justify-end">
               {isAudioActive && (
                 <Button
                   onClick={handleStopAudio}
-                  variant="destructive"
-                  className="animate-pulse shadow-lg"
+                  className="bg-red-500 hover:bg-red-600 text-white shadow-2xl animate-pulse border-2 border-red-300"
+                  size="lg"
                 >
-                  <VolumeX className="w-4 h-4 mr-2" />
+                  <VolumeX className="w-5 h-5 mr-2" />
                   Stop Alert
                 </Button>
               )}
@@ -371,75 +499,110 @@ const OrderDashboardPro: React.FC = () => {
               <Button
                 onClick={toggleSound}
                 variant="outline"
-                className={`shadow-md ${soundEnabled ? 'text-green-600 border-green-200' : 'text-gray-400'}`}
+                size="lg"
+                className={`shadow-xl border-2 backdrop-blur-sm ${
+                  soundEnabled
+                    ? 'bg-green-500/20 border-green-300 text-green-100 hover:bg-green-500/30'
+                    : 'bg-gray-500/20 border-gray-400 text-gray-300 hover:bg-gray-500/30'
+                }`}
               >
-                {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+                {soundEnabled ? <Volume2 className="w-5 h-5 mr-2" /> : <VolumeX className="w-5 h-5 mr-2" />}
+                {soundEnabled ? 'Sound On' : 'Sound Off'}
               </Button>
 
               <Button
                 onClick={loadOrders}
                 variant="outline"
-                className="shadow-md"
+                size="lg"
+                className="bg-blue-500/20 border-blue-300 text-blue-100 hover:bg-blue-500/30 shadow-xl border-2 backdrop-blur-sm"
               >
-                <RotateCcw className="w-4 h-4" />
+                <RotateCcw className="w-5 h-5 mr-2" />
+                Refresh
+              </Button>
+
+              <Button
+                onClick={deleteAllOrders}
+                variant="outline"
+                size="lg"
+                className="bg-red-500/20 border-red-300 text-red-100 hover:bg-red-500/30 shadow-xl border-2 backdrop-blur-sm"
+                disabled={orders.length === 0}
+              >
+                <Trash2 className="w-5 h-5 mr-2" />
+                Clear All
               </Button>
             </div>
           </div>
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-white/80 backdrop-blur-sm shadow-xl border-0">
-            <CardContent className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          <Card className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 backdrop-blur-xl border border-blue-300/30 shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 hover:scale-105">
+            <CardContent className="p-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Orders</p>
-                  <p className="text-3xl font-bold text-gray-900">{orders.length}</p>
+                  <p className="text-blue-100 font-semibold text-sm uppercase tracking-wider">Total Orders</p>
+                  <p className="text-5xl font-black text-white mt-2">{orders.length}</p>
+                  <div className="flex items-center gap-2 mt-3">
+                    <ArrowUpRight className="w-4 h-4 text-green-400" />
+                    <span className="text-green-300 text-sm font-medium">All time</span>
+                  </div>
                 </div>
-                <div className="p-3 bg-blue-100 rounded-full">
-                  <Package className="w-6 h-6 text-blue-600" />
+                <div className="p-4 bg-blue-500/30 rounded-2xl border border-blue-300/50">
+                  <ShoppingBag className="w-8 h-8 text-blue-100" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/80 backdrop-blur-sm shadow-xl border-0">
-            <CardContent className="p-6">
+          <Card className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-xl border border-emerald-300/30 shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300 hover:scale-105">
+            <CardContent className="p-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Today's Orders</p>
-                  <p className="text-3xl font-bold text-gray-900">{todayOrders.length}</p>
+                  <p className="text-emerald-100 font-semibold text-sm uppercase tracking-wider">Today's Orders</p>
+                  <p className="text-5xl font-black text-white mt-2">{todayOrders.length}</p>
+                  <div className="flex items-center gap-2 mt-3">
+                    <Zap className="w-4 h-4 text-yellow-400" />
+                    <span className="text-yellow-300 text-sm font-medium">Live today</span>
+                  </div>
                 </div>
-                <div className="p-3 bg-green-100 rounded-full">
-                  <Calendar className="w-6 h-6 text-green-600" />
+                <div className="p-4 bg-emerald-500/30 rounded-2xl border border-emerald-300/50">
+                  <Calendar className="w-8 h-8 text-emerald-100" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/80 backdrop-blur-sm shadow-xl border-0">
-            <CardContent className="p-6">
+          <Card className="bg-gradient-to-br from-amber-500/20 to-orange-500/20 backdrop-blur-xl border border-amber-300/30 shadow-2xl hover:shadow-amber-500/25 transition-all duration-300 hover:scale-105">
+            <CardContent className="p-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Pending Orders</p>
-                  <p className="text-3xl font-bold text-amber-600">{pendingOrders.length}</p>
+                  <p className="text-amber-100 font-semibold text-sm uppercase tracking-wider">Pending Orders</p>
+                  <p className="text-5xl font-black text-white mt-2">{pendingOrders.length}</p>
+                  <div className="flex items-center gap-2 mt-3">
+                    <Clock className="w-4 h-4 text-amber-400 animate-pulse" />
+                    <span className="text-amber-300 text-sm font-medium">Awaiting</span>
+                  </div>
                 </div>
-                <div className="p-3 bg-amber-100 rounded-full">
-                  <Clock className="w-6 h-6 text-amber-600" />
+                <div className="p-4 bg-amber-500/30 rounded-2xl border border-amber-300/50">
+                  <Clock className="w-8 h-8 text-amber-100" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/80 backdrop-blur-sm shadow-xl border-0">
-            <CardContent className="p-6">
+          <Card className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 backdrop-blur-xl border border-green-300/30 shadow-2xl hover:shadow-green-500/25 transition-all duration-300 hover:scale-105">
+            <CardContent className="p-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                  <p className="text-3xl font-bold text-green-600">€{totalRevenue.toFixed(2)}</p>
+                  <p className="text-green-100 font-semibold text-sm uppercase tracking-wider">Total Revenue</p>
+                  <p className="text-5xl font-black text-white mt-2">€{totalRevenue.toFixed(2)}</p>
+                  <div className="flex items-center gap-2 mt-3">
+                    <TrendingUp className="w-4 h-4 text-green-400" />
+                    <span className="text-green-300 text-sm font-medium">Earnings</span>
+                  </div>
                 </div>
-                <div className="p-3 bg-green-100 rounded-full">
-                  <TrendingUp className="w-6 h-6 text-green-600" />
+                <div className="p-4 bg-green-500/30 rounded-2xl border border-green-300/50">
+                  <DollarSign className="w-8 h-8 text-green-100" />
                 </div>
               </div>
             </CardContent>
@@ -449,130 +612,183 @@ const OrderDashboardPro: React.FC = () => {
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
           {/* Orders List */}
           <div className="xl:col-span-3">
-            <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-              <CardHeader className="border-b border-gray-100">
+            <Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl">
+              <CardHeader className="border-b border-white/10 bg-white/5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <CardTitle className="flex items-center gap-3">
-                    <Package className="w-6 h-6 text-blue-600" />
-                    <span>Orders ({filteredOrders.length})</span>
+                    <div className="p-2 bg-blue-500/30 rounded-xl">
+                      <Package className="w-6 h-6 text-blue-100" />
+                    </div>
+                    <span className="text-white font-bold text-xl">Orders ({filteredOrders.length})</span>
                   </CardTitle>
 
                   <div className="flex items-center gap-3">
                     <div className="relative">
-                      <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60" />
                       <input
                         type="text"
                         placeholder="Search orders..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/60 focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm"
                       />
                     </div>
 
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
-                      className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm"
                     >
-                      <option value="all">All Status</option>
-                      <option value="pending">Pending</option>
-                      <option value="paid">Paid</option>
-                      <option value="processing">Processing</option>
-                      <option value="shipped">Shipped</option>
-                      <option value="delivered">Delivered</option>
-                      <option value="cancelled">Cancelled</option>
+                      <option value="all" className="bg-gray-800">All Status</option>
+                      <option value="pending" className="bg-gray-800">Pending</option>
+                      <option value="paid" className="bg-gray-800">Paid</option>
+                      <option value="processing" className="bg-gray-800">Processing</option>
+                      <option value="shipped" className="bg-gray-800">Shipped</option>
+                      <option value="delivered" className="bg-gray-800">Delivered</option>
+                      <option value="cancelled" className="bg-gray-800">Cancelled</option>
                     </select>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="p-0">
                 {filteredOrders.length === 0 ? (
-                  <div className="text-center py-16">
-                    <Package className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                    <p className="text-gray-500 text-lg">No orders found</p>
-                    <p className="text-gray-400 text-sm">Orders will appear here when customers place them</p>
+                  <div className="text-center py-20">
+                    <div className="p-6 bg-white/10 rounded-3xl inline-block mb-6">
+                      <Package className="w-20 h-20 mx-auto text-white/40" />
+                    </div>
+                    <p className="text-white/80 text-xl font-semibold">No orders found</p>
+                    <p className="text-white/60 text-sm mt-2">Orders will appear here when customers place them</p>
                   </div>
                 ) : (
-                  <div className="divide-y divide-gray-100 max-h-96 overflow-y-auto">
-                    {filteredOrders.map((order) => (
+                  <div className="max-h-[600px] overflow-y-auto">
+                    {filteredOrders.map((order, index) => (
                       <div
                         key={order.id}
-                        className={`p-6 hover:bg-gray-50/50 transition-all duration-200 cursor-pointer ${
-                          selectedOrder?.id === order.id ? 'bg-blue-50/50 border-l-4 border-blue-500' : ''
+                        className={`p-6 border-b border-white/10 hover:bg-white/5 transition-all duration-300 ${
+                          selectedOrder?.id === order.id ? 'bg-blue-500/20 border-l-4 border-blue-400' : ''
                         }`}
-                        onClick={() => setSelectedOrder(order)}
                       >
-                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                           <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-3">
-                              <h3 className="font-bold text-lg text-gray-900">
+                            <div className="flex items-center gap-4 mb-4">
+                              <h3 className="font-black text-xl text-white">
                                 #{order.order_number}
                               </h3>
-                              <Badge className={`${getStatusColor(order.status)} border`}>
-                                <span className="flex items-center gap-1">
+                              <Badge className={`${getStatusColor(order.status)} border-0 px-3 py-1 text-sm font-semibold`}>
+                                <span className="flex items-center gap-2">
                                   {getStatusIcon(order.status)}
-                                  {order.status}
+                                  {order.status.toUpperCase()}
                                 </span>
                               </Badge>
+
+                              {/* Status Update Dropdown */}
+                              <select
+                                value={order.status}
+                                onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                                className="px-3 py-1 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-400 backdrop-blur-sm"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <option value="pending" className="bg-gray-800">Pending</option>
+                                <option value="paid" className="bg-gray-800">Paid</option>
+                                <option value="processing" className="bg-gray-800">Processing</option>
+                                <option value="shipped" className="bg-gray-800">Shipped</option>
+                                <option value="delivered" className="bg-gray-800">Delivered</option>
+                                <option value="cancelled" className="bg-gray-800">Cancelled</option>
+                              </select>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div className="space-y-2">
-                                <div className="flex items-center gap-2">
-                                  <User className="w-4 h-4 text-gray-400" />
-                                  <span className="font-medium text-gray-900">{order.customer_name}</span>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              <div className="space-y-3">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2 bg-blue-500/20 rounded-lg">
+                                    <User className="w-4 h-4 text-blue-300" />
+                                  </div>
+                                  <span className="font-semibold text-white">{order.customer_name}</span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  <Mail className="w-4 h-4 text-gray-400" />
-                                  <span className="text-gray-600">{order.customer_email}</span>
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2 bg-purple-500/20 rounded-lg">
+                                    <Mail className="w-4 h-4 text-purple-300" />
+                                  </div>
+                                  <span className="text-white/80">{order.customer_email}</span>
                                 </div>
                                 {order.customer_phone && (
-                                  <div className="flex items-center gap-2">
-                                    <Phone className="w-4 h-4 text-gray-400" />
-                                    <span className="text-gray-600">{order.customer_phone}</span>
+                                  <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-green-500/20 rounded-lg">
+                                      <Phone className="w-4 h-4 text-green-300" />
+                                    </div>
+                                    <span className="text-white/80">{order.customer_phone}</span>
                                   </div>
                                 )}
                               </div>
 
-                              <div className="space-y-2">
+                              <div className="space-y-3">
                                 {order.customer_address && (
-                                  <div className="flex items-center gap-2">
-                                    <MapPin className="w-4 h-4 text-gray-400" />
-                                    <span className="text-gray-600 text-sm">{order.customer_address}</span>
+                                  <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-red-500/20 rounded-lg">
+                                      <MapPin className="w-4 h-4 text-red-300" />
+                                    </div>
+                                    <span className="text-white/80 text-sm">{order.customer_address}</span>
                                   </div>
                                 )}
-                                <div className="flex items-center gap-2">
-                                  <Calendar className="w-4 h-4 text-gray-400" />
-                                  <span className="text-gray-600 text-sm">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2 bg-yellow-500/20 rounded-lg">
+                                    <Calendar className="w-4 h-4 text-yellow-300" />
+                                  </div>
+                                  <span className="text-white/80 text-sm">
                                     {formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}
                                   </span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  <CreditCard className="w-4 h-4 text-gray-400" />
-                                  <span className="text-gray-600 text-sm">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2 bg-indigo-500/20 rounded-lg">
+                                    <CreditCard className="w-4 h-4 text-indigo-300" />
+                                  </div>
+                                  <span className="text-white/80 text-sm">
                                     Payment: {order.payment_status}
                                   </span>
                                 </div>
                               </div>
                             </div>
+
+                            {order.notes && (
+                              <div className="mt-4 p-4 bg-white/10 rounded-xl border border-white/20">
+                                <p className="text-white/90 text-sm">{order.notes}</p>
+                              </div>
+                            )}
                           </div>
 
-                          <div className="text-right">
-                            <div className="flex items-center gap-2 mb-2">
-                              <DollarSign className="w-5 h-5 text-gray-400" />
-                              <span className="font-bold text-2xl text-green-600">€{order.total_amount}</span>
+                          <div className="text-right space-y-4">
+                            <div className="flex items-center gap-2 justify-end">
+                              <DollarSign className="w-6 h-6 text-green-400" />
+                              <span className="font-black text-3xl text-green-400">€{order.total_amount}</span>
                             </div>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedOrder(order);
-                              }}
-                            >
-                              <Eye className="w-4 h-4 mr-2" />
-                              View Details
-                            </Button>
+
+                            <div className="flex flex-col gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedOrder(order);
+                                }}
+                                className="bg-blue-500/20 border-blue-300 text-blue-100 hover:bg-blue-500/30"
+                              >
+                                <Eye className="w-4 h-4 mr-2" />
+                                View Details
+                              </Button>
+
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteOrder(order.id);
+                                }}
+                                className="bg-red-500/20 border-red-300 text-red-100 hover:bg-red-500/30"
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Delete
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </div>
