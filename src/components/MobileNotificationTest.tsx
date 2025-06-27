@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Smartphone, Bell, Vibrate, Volume2, VolumeX } from 'lucide-react';
-import { phoneNotificationService } from '@/services/phoneNotificationService';
+import audioNotificationService from '@/services/audioNotificationService';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const MobileNotificationTest = () => {

@@ -24,12 +24,11 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/hooks/use-language';
 import OrderDetails from '@/components/OrderDetails';
-import OrderNotifications from '@/components/OrderNotifications';
+
 import OrderSystemTester from '@/components/OrderSystemTester';
-import phoneNotificationService from '@/services/phoneNotificationService';
 import NotificationCenter from '@/components/NotificationCenter';
 import notificationSystem from '@/services/notificationSystem';
-import backgroundOrderService from '@/services/backgroundOrderService';
+import audioNotificationService from '@/services/audioNotificationService';
 
 interface Order {
   id: string;
@@ -76,7 +75,7 @@ const OrderDashboard = () => {
 
   // Stop notification function
   const stopNotificationMusic = () => {
-    phoneNotificationService.stopRinging();
+    audioNotificationService.stopNotificationSound();
     setIsPhoneRinging(false);
     toast({
       title: '🔇 Notification Stopped',
@@ -181,10 +180,7 @@ const OrderDashboard = () => {
             // Only trigger notifications if we're on the order dashboard page
             if (window.location.pathname === '/orders') {
               // Trigger enhanced notifications (SINGLE SOURCE)
-              phoneNotificationService.notifyNewOrder(
-                payload.new.order_number,
-                payload.new.customer_name
-              );
+              audioNotificationService.playNotificationSound('payment_completed');
               // Set ringing state to show stop button
               setIsPhoneRinging(true);
             }
@@ -254,10 +250,10 @@ const OrderDashboard = () => {
     }
   }, [notifications]);
 
-  // Monitor phone ringing status
+  // Monitor audio notification status
   useEffect(() => {
     const interval = setInterval(() => {
-      setIsPhoneRinging(phoneNotificationService.isCurrentlyRinging());
+      setIsPhoneRinging(audioNotificationService.isCurrentlyPlaying());
     }, 500);
 
     return () => clearInterval(interval);
@@ -332,16 +328,17 @@ const OrderDashboard = () => {
     );
   };
 
-  const toggleSound = () => {
-    setSoundEnabled(!soundEnabled);
-    phoneNotificationService.updateSettings({
-      ...phoneNotificationService.getSettings(),
-      enabled: !soundEnabled
+  const toggleSound = async () => {
+    const newSoundEnabled = !soundEnabled;
+    setSoundEnabled(newSoundEnabled);
+
+    await notificationSystem.getNotificationService().updateSettings({
+      soundEnabled: newSoundEnabled
     });
 
     toast({
-      title: soundEnabled ? `🔇 ${t('soundDisabled')}` : `🔊 ${t('soundEnabled')}`,
-      description: soundEnabled ? t('orderNotificationsSilent') : t('orderNotificationsSound'),
+      title: newSoundEnabled ? `🔊 ${t('soundEnabled')}` : `🔇 ${t('soundDisabled')}`,
+      description: newSoundEnabled ? t('orderNotificationsSound') : t('orderNotificationsSilent'),
     });
   };
 
@@ -349,8 +346,8 @@ const OrderDashboard = () => {
     console.log('🧪 Testing notification sound manually...');
     console.log('📍 Current page:', window.location.pathname);
 
-    // Test the notification service directly
-    phoneNotificationService.notifyNewOrder('TEST-001', 'Test Customer');
+    // Test the new notification system
+    audioNotificationService.testNotificationSound('order_created');
 
     toast({
       title: `🔊 ${t('testingNotificationSound')}`,
@@ -543,19 +540,8 @@ const OrderDashboard = () => {
 
 
             {/* Notifications */}
-            <div className="flex-shrink-0 flex items-center gap-2">
-              {/* New Notification Center */}
+            <div className="flex-shrink-0">
               <NotificationCenter />
-
-              {/* Legacy Notification Component (for comparison) */}
-              <OrderNotifications
-                notifications={notifications || []}
-                count={notificationCount}
-                onRefresh={() => {
-                  refetch();
-                  refetchNotifications();
-                }}
-              />
             </div>
 
             {/* Refresh Button */}

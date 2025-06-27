@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { Music, Upload, Play, Square, Trash2, Volume2 } from 'lucide-react';
-import phoneNotificationService from '@/services/phoneNotificationService';
+import audioNotificationService from '@/services/audioNotificationService';
 import ImageUploader from './ImageUploader';
 import NotificationMusicTest from './NotificationMusicTest';
 

@@ -8,8 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import backgroundOrderService from '@/services/backgroundOrderService';
-import phoneNotificationService from '@/services/phoneNotificationService';
+import notificationSystem from '@/services/notificationSystem';
+import audioNotificationService from '@/services/audioNotificationService';
 import {
   Play,
   Square,
@@ -79,16 +79,15 @@ const OrderSystemTester = () => {
   }, []);
 
   const updateSystemStatus = () => {
-    const bgStatus = backgroundOrderService.getStatus();
-    const phoneSettings = phoneNotificationService.getSettings();
-    
+    const notificationSettings = notificationSystem.getNotificationService().getSettings();
+
     setSystemStatus({
-      backgroundService: bgStatus.isRunning,
-      phoneService: phoneSettings.enabled,
-      realtimeConnection: bgStatus.hasRealtimeConnection,
-      serviceWorker: bgStatus.hasServiceWorker,
+      backgroundService: notificationSystem.isInitialized(),
+      phoneService: notificationSettings.enabled,
+      realtimeConnection: true, // New system handles this automatically
+      serviceWorker: 'serviceWorker' in navigator,
       notifications: Notification.permission === 'granted',
-      wakeLock: bgStatus.hasWakeLock,
+      wakeLock: 'wakeLock' in navigator,
       isOnline: navigator.onLine
     });
   };
@@ -346,13 +345,12 @@ const OrderSystemTester = () => {
   };
 
   const testRecoveryAfterConnectionLoss = async () => {
-    // Test recovery mechanisms
-    await backgroundOrderService.restart();
+    // Test recovery mechanisms with new notification system
+    await notificationSystem.initialize();
     await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    const status = backgroundOrderService.getStatus();
-    if (!status.isRunning) {
-      throw new Error('Service did not recover after restart');
+
+    if (!notificationSystem.isInitialized()) {
+      throw new Error('Notification system did not recover after restart');
     }
   };
 

@@ -8,7 +8,8 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Phone, Bell, Settings, TestTube, Volume2, VolumeX } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import phoneNotificationService from '@/services/phoneNotificationService';
+import notificationSystem from '@/services/notificationSystem';
+import audioNotificationService from '@/services/audioNotificationService';
 
 const PhoneNotificationSettings = () => {
   const [settings, setSettings] = useState({
@@ -26,37 +27,54 @@ const PhoneNotificationSettings = () => {
 
   useEffect(() => {
     // Load current settings
-    const currentSettings = phoneNotificationService.getSettings();
-    setSettings(currentSettings);
+    const currentSettings = notificationSystem.getNotificationService().getSettings();
+    setSettings({
+      enabled: currentSettings.enabled,
+      phoneNumber: '',
+      ringDuration: currentSettings.ringDuration,
+      ringInterval: currentSettings.ringInterval,
+      maxRings: currentSettings.maxRings,
+      vibrationEnabled: currentSettings.vibrationEnabled,
+      browserNotificationEnabled: currentSettings.browserNotificationsEnabled,
+    });
 
     // Update ring status periodically
     const interval = setInterval(() => {
-      setIsRinging(phoneNotificationService.isCurrentlyRinging());
-      setRingCount(phoneNotificationService.getRingCount());
+      setIsRinging(audioNotificationService.isCurrentlyPlaying());
+      setRingCount(audioNotificationService.getRingCount());
     }, 500);
 
     return () => clearInterval(interval);
   }, []);
 
-  const handleSettingsChange = (key: string, value: any) => {
+  const handleSettingsChange = async (key: string, value: any) => {
     const newSettings = { ...settings, [key]: value };
     setSettings(newSettings);
-    phoneNotificationService.updateSettings(newSettings);
+
+    // Update the new notification system
+    await notificationSystem.getNotificationService().updateSettings({
+      enabled: newSettings.enabled,
+      ringDuration: newSettings.ringDuration,
+      ringInterval: newSettings.ringInterval,
+      maxRings: newSettings.maxRings,
+      vibrationEnabled: newSettings.vibrationEnabled,
+      browserNotificationsEnabled: newSettings.browserNotificationEnabled,
+    });
   };
 
   const testNotification = () => {
-    phoneNotificationService.notifyNewOrder('TEST-001', 'Test Customer');
+    audioNotificationService.testNotificationSound('order_created');
     toast({
       title: 'Test Notification Sent',
-      description: 'Phone notification test has been triggered',
+      description: 'Audio notification test has been triggered',
     });
   };
 
   const stopRinging = () => {
-    phoneNotificationService.stopRinging();
+    audioNotificationService.stopNotificationSound();
     toast({
-      title: 'Ringing Stopped',
-      description: 'Phone notification ringing has been stopped',
+      title: 'Audio Stopped',
+      description: 'Notification audio has been stopped',
     });
   };
 

@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Bell, Package, Truck, CheckCircle, Clock, DollarSign, Phone, PhoneCall } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import OrderDetails from './OrderDetails';
-import OrderNotifications from './OrderNotifications';
-import phoneNotificationService from '@/services/phoneNotificationService';
+import NotificationCenter from './NotificationCenter';
+import audioNotificationService from '@/services/audioNotificationService';
 
 interface Order {
   id: string;
@@ -107,10 +107,10 @@ const OrderManagement = () => {
     }
   }, [notifications]);
 
-  // Monitor phone ringing status
+  // Monitor audio notification status
   useEffect(() => {
     const interval = setInterval(() => {
-      setIsPhoneRinging(phoneNotificationService.isCurrentlyRinging());
+      setIsPhoneRinging(audioNotificationService.isCurrentlyPlaying());
     }, 500);
 
     return () => clearInterval(interval);
@@ -181,20 +181,16 @@ const OrderManagement = () => {
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:space-x-4">
           {isPhoneRinging && (
             <Button
-              onClick={() => phoneNotificationService.stopRinging()}
+              onClick={() => audioNotificationService.stopNotificationSound()}
               variant="destructive"
               size="sm"
               className="animate-pulse w-full md:w-auto"
             >
               <Phone className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
-              Stop Ringing
+              Stop Audio
             </Button>
           )}
-          <OrderNotifications
-            notifications={notifications || []}
-            count={notificationCount}
-            onRefresh={refetch}
-          />
+          <NotificationCenter />
           <div className="flex items-center justify-center md:justify-start space-x-2 text-xs md:text-sm text-gray-600">
             <DollarSign className="w-3 h-3 md:w-4 md:h-4" />
             <span>

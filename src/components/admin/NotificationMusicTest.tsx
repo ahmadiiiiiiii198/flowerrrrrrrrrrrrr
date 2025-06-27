@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Play, Volume2, Bell } from 'lucide-react';
-import phoneNotificationService from '@/services/phoneNotificationService';
+import audioNotificationService from '@/services/audioNotificationService';
 
 const NotificationMusicTest = () => {
   const { toast } = useToast();
