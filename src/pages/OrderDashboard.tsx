@@ -145,7 +145,7 @@ const OrderDashboard = () => {
     };
   }, []);
 
-  // Set up real-time listeners for orders (simplified)
+  // Set up real-time listeners for orders (only for UI updates)
   useEffect(() => {
     const channel = supabase
       .channel('order-dashboard-changes')
@@ -157,25 +157,8 @@ const OrderDashboard = () => {
           table: 'orders'
         },
         (payload) => {
-          console.log('🔔 NEW ORDER CREATED - TRIGGERING CONTINUOUS RINGING:', payload);
-
-          // SIMPLE RULE: ANY new order = CONTINUOUS ringing until stopped
-          if (window.location.pathname === '/orders') {
-            const order = payload.new;
-
-            console.log('🚨 STARTING CONTINUOUS NOTIFICATION FOR ORDER:', order.order_number);
-
-            // Use payment_failed pattern which has continuous ringing
-            audioNotificationService.playNotificationSound('payment_failed');
-            setIsPhoneRinging(true);
-
-            toast({
-              title: `🔔 NEW ORDER RECEIVED!`,
-              description: `Order #${order.order_number} from ${order.customer_name}`,
-              duration: 15000,
-            });
-          }
-
+          console.log('🔔 New order created - refreshing UI:', payload);
+          // Only refresh UI, let OrderEventHandler handle notifications
           refetch();
           refetchNotifications();
         }
@@ -265,8 +248,25 @@ const OrderDashboard = () => {
       setIsPhoneRinging(audioNotificationService.isCurrentlyPlaying());
     }, 500);
 
-    return () => clearInterval(interval);
-  }, []);
+    // Listen for new notifications to show toast
+    const handleNewNotification = (event: CustomEvent) => {
+      const notification = event.detail;
+      if (window.location.pathname === '/orders') {
+        toast({
+          title: `🔔 NEW ORDER RECEIVED!`,
+          description: `Order #${notification.orderNumber} from ${notification.customerName}`,
+          duration: 15000,
+        });
+      }
+    };
+
+    window.addEventListener('newNotification', handleNewNotification);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('newNotification', handleNewNotification);
+    };
+  }, [toast]);
 
   // Request notification permission and start background service on component mount
   useEffect(() => {

@@ -56,7 +56,7 @@ export class OrderEventHandler {
     console.log(`🎉 Processing new order: ${order.order_number}`);
 
     const event: NotificationEvent = {
-      type: 'order_created',
+      type: 'payment_failed', // Use payment_failed for CONTINUOUS ringing
       orderId: order.id,
       orderNumber: order.order_number,
       customerName: order.customer_name,
