@@ -272,30 +272,8 @@ const OrderDashboard = () => {
       });
     }
 
-    // Start background order service (but disable its notifications since we handle them here)
-    backgroundOrderService.updateSettings({
-      ...backgroundOrderService.getSettings(),
-      soundEnabled: false // Disable background service notifications to prevent duplicates
-    });
-
-    backgroundOrderService.start().then(() => {
-      toast({
-        title: `🚀 ${t('backgroundServiceStarted')}`,
-        description: t('backgroundMonitoringActive'),
-      });
-    }).catch(error => {
-      console.error('Failed to start background service:', error);
-      toast({
-        title: `⚠️ ${t('backgroundServiceWarning')}`,
-        description: t('notificationFeaturesMayNotWork'),
-        variant: 'destructive',
-      });
-    });
-
-    // Cleanup on unmount
-    return () => {
-      backgroundOrderService.stop();
-    };
+    // The new notification system handles background processing automatically
+    // No need for separate background service
   }, [toast]);
 
   const formatCurrency = (amount: number) => {

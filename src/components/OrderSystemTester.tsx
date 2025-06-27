@@ -120,8 +120,8 @@ const OrderSystemTester = () => {
       { name: 'Real-time Subscription', test: testRealtimeSubscription },
       { name: 'Notification Permissions', test: testNotificationPermissions },
       { name: 'Service Worker Registration', test: testServiceWorkerRegistration },
-      { name: 'Phone Notification Service', test: testPhoneNotificationService },
-      { name: 'Background Order Service', test: testBackgroundOrderService },
+      { name: 'Audio Notification Service', test: testAudioNotificationService },
+      { name: 'Notification System', test: testNotificationSystem },
       { name: 'Order Creation', test: testOrderCreation },
       { name: 'Order Notification Flow', test: testOrderNotificationFlow },
       { name: 'Screen Off Notifications', test: testScreenOffNotifications },
@@ -195,16 +195,15 @@ const OrderSystemTester = () => {
     }
   };
 
-  const testPhoneNotificationService = async () => {
-    phoneNotificationService.testNotificationSound();
+  const testAudioNotificationService = async () => {
+    audioNotificationService.testNotificationSound('order_created');
     // Wait a bit for the sound to play
     await new Promise(resolve => setTimeout(resolve, 2000));
   };
 
-  const testBackgroundOrderService = async () => {
-    const status = backgroundOrderService.getStatus();
-    if (!status.isRunning) {
-      throw new Error('Background order service not running');
+  const testNotificationSystem = async () => {
+    if (!notificationSystem.isInitialized()) {
+      throw new Error('Notification system not initialized');
     }
   };
 
@@ -294,7 +293,7 @@ const OrderSystemTester = () => {
     await new Promise(resolve => setTimeout(resolve, 5000));
     
     // Send test notification
-    phoneNotificationService.notifyNewOrder('SCREEN-OFF-TEST', 'Screen Off Test Customer');
+    audioNotificationService.testNotificationSound('order_created');
     
     // Wait for user to verify
     await new Promise(resolve => setTimeout(resolve, 10000));
@@ -507,7 +506,7 @@ const OrderSystemTester = () => {
               Create Test Order
             </Button>
             <Button
-              onClick={() => phoneNotificationService.testNotificationSound()}
+              onClick={() => audioNotificationService.testNotificationSound('order_created')}
               variant="outline"
               className="flex items-center gap-2"
             >

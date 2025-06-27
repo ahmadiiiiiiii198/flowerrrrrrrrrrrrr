@@ -30,8 +30,8 @@ const MobileNotificationTest = () => {
 
     // Update ring status periodically
     const interval = setInterval(() => {
-      setIsRinging(phoneNotificationService.isCurrentlyRinging());
-      setRingCount(phoneNotificationService.getRingCount());
+      setIsRinging(audioNotificationService.isCurrentlyPlaying());
+      setRingCount(audioNotificationService.getRingCount());
     }, 500);
 
     return () => clearInterval(interval);
@@ -110,7 +110,7 @@ const MobileNotificationTest = () => {
   };
 
   const testFullNotification = () => {
-    phoneNotificationService.notifyNewOrder('TEST-MOBILE-001', 'Mobile Test Customer');
+    audioNotificationService.testNotificationSound('order_created');
     toast({
       title: 'Mobile Notification Test',
       description: 'Full notification test triggered (audio + vibration + browser notification)',
@@ -118,9 +118,9 @@ const MobileNotificationTest = () => {
   };
 
   const stopRinging = () => {
-    phoneNotificationService.stopRinging();
+    audioNotificationService.stopNotificationSound();
     toast({
-      title: 'Ringing Stopped',
+      title: 'Audio Stopped',
       description: 'All notifications have been stopped',
     });
   };
