@@ -188,7 +188,7 @@ class ContinuousAudioNotifier {
         this.customAudio.currentTime = 0;
       }
 
-      // Create new audio instance
+      // Create new audio instance with base64 data
       this.customAudio = new Audio(this.activeSound.file_url);
       this.customAudio.volume = 0.7;
 

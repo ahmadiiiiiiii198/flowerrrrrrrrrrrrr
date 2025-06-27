@@ -104,26 +104,16 @@ export default function SoundManager() {
 
     setUploading(true);
     try {
-      // Upload to Supabase storage
-      const fileName = `${Date.now()}-${selectedFile.name}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('uploads')
-        .upload(`sounds/${fileName}`, selectedFile);
+      // Convert file to base64 for storage in database
+      const base64Data = await fileToBase64(selectedFile);
 
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from('uploads')
-        .getPublicUrl(`sounds/${fileName}`);
-
-      // Save to database
+      // Save to database with base64 data
       const { error: dbError } = await supabase
         .from('notification_sounds')
         .insert({
           name: soundName.trim(),
-          file_path: uploadData.path,
-          file_url: urlData.publicUrl,
+          file_path: `base64:${selectedFile.name}`,
+          file_url: base64Data,
           sound_type: 'custom',
           is_active: false
         });
@@ -147,12 +137,21 @@ export default function SoundManager() {
       console.error('Error uploading sound:', error);
       toast({
         title: 'Errore Caricamento',
-        description: 'Impossibile caricare il suono',
+        description: `Impossibile caricare il suono: ${error.message || 'Errore sconosciuto'}`,
         variant: 'destructive'
       });
     } finally {
       setUploading(false);
     }
+  };
+
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
   };
 
   const playSound = async (sound: NotificationSound) => {
@@ -176,10 +175,10 @@ export default function SoundManager() {
         // Play built-in sound (use the existing audio system)
         playBuiltInSound(sound.name);
       } else if (sound.file_url) {
-        // Play custom uploaded sound
+        // Play custom uploaded sound (base64 data)
         const audio = new Audio(sound.file_url);
         audioRef.current = audio;
-        
+
         audio.onended = () => setPlayingSound(null);
         audio.onerror = () => {
           setPlayingSound(null);
@@ -255,14 +254,7 @@ export default function SoundManager() {
     }
 
     try {
-      // Delete from storage if it's a custom sound
-      if (sound.file_path) {
-        await supabase.storage
-          .from('uploads')
-          .remove([sound.file_path]);
-      }
-
-      // Delete from database
+      // Delete from database (no need to delete from storage since we use base64)
       await supabase
         .from('notification_sounds')
         .delete()
