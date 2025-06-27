@@ -8,7 +8,7 @@ import { Loader2, Save, Database } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import CategoryGalleryManager from './CategoryGalleryManager';
 import CategoryLabelsManager from './CategoryLabelsManager';
-import { initializeDatabase } from '@/utils/initializeDatabase';
+// initializeDatabase import removed to prevent accidental initialization
 
 interface CategoryContent {
   explanation: string;
@@ -18,7 +18,7 @@ interface CategoryContent {
 const CategoriesGalleryAdmin = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setSaving] = useState<string | null>(null);
-  const [isInitializing, setIsInitializing] = useState(false);
+  // isInitializing state removed since initialization button was removed
   const [categoryContent, setCategoryContent] = useState<Record<string, CategoryContent>>({
     matrimoni: { explanation: '', features: [] },
     fiori_piante: { explanation: '', features: [] },
@@ -212,35 +212,7 @@ const CategoriesGalleryAdmin = () => {
     }
   };
 
-  const handleInitializeDatabase = async () => {
-    setIsInitializing(true);
-    try {
-      const success = await initializeDatabase();
-      if (success) {
-        toast({
-          title: 'Success',
-          description: 'Database initialized successfully'
-        });
-        // Reload content after initialization
-        await loadCategoryContent();
-      } else {
-        toast({
-          title: 'Error',
-          description: 'Failed to initialize database',
-          variant: 'destructive'
-        });
-      }
-    } catch (error) {
-      console.error('Error initializing database:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to initialize database',
-        variant: 'destructive'
-      });
-    } finally {
-      setIsInitializing(false);
-    }
-  };
+  // Removed handleInitializeDatabase function to prevent accidental recreation of default content
 
   if (isLoading) {
     return (
@@ -258,23 +230,7 @@ const CategoriesGalleryAdmin = () => {
             <h2 className="text-2xl font-bold tracking-tight">Categories Gallery Management</h2>
             <p className="text-gray-600">Manage gallery images, descriptions, and features for each category</p>
           </div>
-          <Button
-            onClick={handleInitializeDatabase}
-            disabled={isInitializing}
-            variant="outline"
-          >
-            {isInitializing ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Initializing...
-              </>
-            ) : (
-              <>
-                <Database className="mr-2 h-4 w-4" />
-                Initialize Database
-              </>
-            )}
-          </Button>
+          {/* Initialize Database button removed to prevent accidental recreation of default content */}
         </div>
       </div>
 

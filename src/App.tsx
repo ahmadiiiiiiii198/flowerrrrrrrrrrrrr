@@ -17,7 +17,7 @@ import MenuPage from "./pages/MenuPage";
 import NotFound from "./pages/NotFound";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCancel from "./pages/PaymentCancel";
-import DatabaseSetup from "./components/DatabaseSetup";
+// DatabaseSetup component removed to prevent accidental initialization
 import SimpleStripeTest from "./components/SimpleStripeTest";
 
 const queryClient = new QueryClient();
@@ -67,13 +67,7 @@ const App = () => (
                   <PaymentCancel />
                 </ErrorBoundary>
               } />
-              <Route path="/database-setup" element={
-                <div className="min-h-screen bg-gray-50 py-12">
-                  <ErrorBoundary componentName="DatabaseSetup">
-                    <DatabaseSetup />
-                  </ErrorBoundary>
-                </div>
-              } />
+              {/* Database setup route removed to prevent accidental initialization */}
               <Route path="/stripe-test" element={
                 <div className="min-h-screen bg-gray-50 py-12">
                   <ErrorBoundary componentName="SimpleStripeTest">

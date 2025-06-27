@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/hooks/use-language';
 import { Loader2, Database, RefreshCw } from 'lucide-react';
-import { initializeDatabase } from '@/utils/initializeDatabase';
+// initializeDatabase import removed to prevent accidental initialization
 import ContentEditor from '@/components/admin/ContentEditor';
 // OrderManagement moved to dedicated OrderDashboard page
 import CategoriesGalleryAdmin from '@/components/admin/CategoriesGalleryAdmin';
@@ -39,7 +39,7 @@ const Admin = () => {
   const { toast } = useToast();
   const { t } = useLanguage();
   const [saving, setSaving] = useState<string | null>(null);
-  const [isInitializing, setIsInitializing] = useState(false);
+  // isInitializing state removed since initialization buttons were removed
   const [isTestingConnection, setIsTestingConnection] = useState(false);
 
   const { data: contentSections, isLoading, refetch, error: queryError } = useQuery({
@@ -124,34 +124,7 @@ const Admin = () => {
     }
   };
 
-  const handleInitializeDatabase = async () => {
-    setIsInitializing(true);
-    try {
-      const success = await initializeDatabase();
-      if (success) {
-        toast({
-          title: 'Success! 🎉',
-          description: 'Database initialized with default content, categories, and products',
-        });
-        refetch(); // Refresh the content sections
-      } else {
-        toast({
-          title: 'Error',
-          description: 'Failed to initialize database. Check console for details.',
-          variant: 'destructive',
-        });
-      }
-    } catch (error) {
-      console.error('[Admin] Initialization error:', error);
-      toast({
-        title: 'Error',
-        description: `Failed to initialize: ${error.message}`,
-        variant: 'destructive',
-      });
-    } finally {
-      setIsInitializing(false);
-    }
-  };
+  // Removed handleInitializeDatabase function to prevent accidental recreation of default content
 
   const initializeCategoryPictures = async () => {
     try {
@@ -236,34 +209,8 @@ const Admin = () => {
                     </>
                   )}
                 </Button>
-                <Button
-                  onClick={handleInitializeDatabase}
-                  disabled={isInitializing}
-                  variant="outline"
-                  className="flex flex-col md:flex-row items-center gap-1 md:gap-2 hover-lift text-xs p-2 md:p-3"
-                  size="sm"
-                >
-                  {isInitializing ? (
-                    <>
-                      <Loader2 className="h-3 w-3 md:h-4 md:w-4 animate-spin" />
-                      <span className="text-xs">Init...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Database className="h-3 w-3 md:h-4 md:w-4" />
-                      <span className="text-xs md:text-sm">Init DB</span>
-                    </>
-                  )}
-                </Button>
-                <Button
-                  onClick={initializeCategoryPictures}
-                  variant="outline"
-                  className="flex flex-col md:flex-row items-center gap-1 md:gap-2 hover-lift text-xs p-2 md:p-3"
-                  size="sm"
-                >
-                  <RefreshCw className="h-3 w-3 md:h-4 md:w-4" />
-                  <span className="text-xs md:text-sm">{t('gallery')}</span>
-                </Button>
+                {/* Initialize Database button removed to prevent accidental recreation of default content */}
+                {/* Initialize Category Pictures button removed to prevent accidental recreation of default images */}
               </div>
             </div>
           </div>
@@ -278,25 +225,7 @@ const Admin = () => {
                 : 'Nessuna sezione di contenuto trovata. Potrebbe essere necessario inizializzare il database.'
               }
             </p>
-            <Button
-              onClick={handleInitializeDatabase}
-              disabled={isInitializing}
-              size="sm"
-              variant="outline"
-              className="hover-lift"
-            >
-              {isInitializing ? (
-                <>
-                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                  <span className="text-xs">Inizializzazione...</span>
-                </>
-              ) : (
-                <>
-                  <Database className="h-3 w-3 mr-1" />
-                  <span className="text-xs">Inizializza Database</span>
-                </>
-              )}
-            </Button>
+            {/* Initialize Database button removed to prevent accidental recreation of default content */}
           </div>
         )}
 

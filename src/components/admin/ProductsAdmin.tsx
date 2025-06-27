@@ -29,8 +29,7 @@ import {
 } from 'lucide-react';
 import { Product } from '@/types/category';
 import { Tables } from '@/integrations/supabase/types';
-import { initializeProducts } from '@/utils/initializeProducts';
-import { initializeCategories } from '@/utils/initializeCategories';
+// initializeProducts and initializeCategories imports removed to prevent accidental initialization
 import ImageUpload from '@/components/ImageUpload';
 import LabelsManager from './LabelsManager';
 
@@ -57,7 +56,7 @@ interface ProductFormData {
 const ProductsAdmin = () => {
   const [editingProduct, setEditingProduct] = useState<DatabaseProduct | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [isInitializing, setIsInitializing] = useState(false);
+  // isInitializing state removed since initialization button was removed
   const [formData, setFormData] = useState<ProductFormData>({
     name: '',
     description: '',
@@ -346,50 +345,7 @@ const ProductsAdmin = () => {
     });
   };
 
-  const handleInitializeDatabase = async () => {
-    // This function is only used when no categories exist at all
-    // It initializes categories only (no default products to prevent recreation)
-    const confirmed = window.confirm(
-      '⚠️ WARNING: This will initialize the database with default categories ONLY.\n\n' +
-      'This action will:\n' +
-      '• Add default categories if none exist\n' +
-      '• NO default products will be added (to prevent recreation after deletion)\n' +
-      '• Only run during initial setup\n\n' +
-      'Continue?'
-    );
-
-    if (!confirmed) return;
-
-    setIsInitializing(true);
-    try {
-      // Only initialize categories (no products)
-      console.log('[ProductsAdmin] Initializing categories only...');
-      const categoriesSuccess = await initializeCategories();
-      if (!categoriesSuccess) {
-        throw new Error('Failed to initialize categories');
-      }
-
-      // Do NOT initialize products to prevent recreation after deletion
-      console.log('[ProductsAdmin] Skipping product initialization to prevent recreation after deletion');
-
-      // Invalidate queries to refresh data
-      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
-      toast({
-        title: 'Success! 🎉',
-        description: 'Database initialized with default categories only (no default products)',
-      });
-    } catch (error) {
-      console.error('[ProductsAdmin] Initialization error:', error);
-      toast({
-        title: 'Error',
-        description: `Failed to initialize: ${error.message}`,
-        variant: 'destructive',
-      });
-    } finally {
-      setIsInitializing(false);
-    }
-  };
+  // Removed handleInitializeDatabase function to prevent accidental recreation of default content
 
   if (productsLoading || categoriesLoading) {
     return (
@@ -428,29 +384,7 @@ const ProductsAdmin = () => {
           <p className="text-sm md:text-base text-gray-600">Manage your product catalog</p>
         </div>
         <div className="flex flex-col gap-2 md:flex-row">
-          {(!categories || categories.length === 0) && (
-            <Button
-              onClick={handleInitializeDatabase}
-              disabled={isInitializing}
-              variant="outline"
-              className="w-full md:w-auto text-xs md:text-sm"
-              size="sm"
-            >
-              {isInitializing ? (
-                <>
-                  <Loader2 className="mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4 animate-spin" />
-                  <span className="hidden sm:inline">Initializing...</span>
-                  <span className="sm:hidden">Init...</span>
-                </>
-              ) : (
-                <>
-                  <Package className="mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4" />
-                  <span className="hidden sm:inline">Add Default Categories & Products</span>
-                  <span className="sm:hidden">Add Defaults</span>
-                </>
-              )}
-            </Button>
-          )}
+          {/* Initialize Database button removed to prevent accidental recreation of default content */}
           <Button
             onClick={startCreate}
             disabled={isCreating || editingProduct || !categories || categories.length === 0}
