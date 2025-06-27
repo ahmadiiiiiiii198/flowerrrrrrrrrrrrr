@@ -24,7 +24,6 @@ import notificationService from '@/services/notificationService';
 import audioNotificationService from '@/services/audioNotificationService';
 import { NotificationData, NotificationType } from '@/types/notifications';
 import { formatDistanceToNow } from 'date-fns';
-import audioNotificationService from '@/services/audioNotificationService';
 
 interface NotificationCenterProps {
   className?: string;
