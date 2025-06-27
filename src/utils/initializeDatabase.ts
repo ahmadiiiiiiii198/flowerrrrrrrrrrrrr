@@ -119,14 +119,9 @@ export async function initializeDatabase(): Promise<boolean> {
     }
     console.log('[InitDB] Categories initialized successfully');
 
-    // Step 2: Initialize products (depends on categories)
-    console.log('[InitDB] Step 2: Initializing products...');
-    const productsSuccess = await initializeProducts();
-    if (!productsSuccess) {
-      console.error('[InitDB] Failed to initialize products');
-      return false;
-    }
-    console.log('[InitDB] Products initialized successfully');
+    // Step 2: Skip product initialization to prevent recreation after deletion
+    console.log('[InitDB] Step 2: Skipping product initialization to prevent recreation after deletion');
+    console.log('[InitDB] Products initialization skipped successfully');
 
     // Step 3: Initialize content sections
     console.log('[InitDB] Step 3: Initializing content sections...');
@@ -151,12 +146,7 @@ export async function initializeDatabase(): Promise<boolean> {
         section_key: 'category_matrimoni_images',
         section_name: 'Category Images: Matrimoni',
         content_type: 'json',
-        content_value: JSON.stringify([
-          "https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-          "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-          "https://images.unsplash.com/photo-1606800052052-a08af7148866?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-          "https://images.unsplash.com/photo-1521543298264-785fba19d562?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
-        ]),
+        content_value: JSON.stringify([]), // Empty array to prevent default images
         metadata: { section: 'categories' },
         is_active: true
       },
@@ -187,12 +177,7 @@ export async function initializeDatabase(): Promise<boolean> {
         section_key: 'category_fiori_piante_images',
         section_name: 'Category Images: Fiori & Piante',
         content_type: 'json',
-        content_value: JSON.stringify([
-          "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-          "https://images.unsplash.com/photo-1440342359743-84fcb8c21f21?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-          "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-          "https://images.unsplash.com/photo-1518335935020-cfd6580c1ab4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
-        ]),
+        content_value: JSON.stringify([]), // Empty array to prevent default images
         metadata: { section: 'categories' },
         is_active: true
       },
@@ -200,12 +185,7 @@ export async function initializeDatabase(): Promise<boolean> {
         section_key: 'category_fiori_finti_images',
         section_name: 'Category Images: Fiori Finti',
         content_type: 'json',
-        content_value: JSON.stringify([
-          "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-          "https://images.unsplash.com/photo-1502780402662-acc01917738e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-          "https://images.unsplash.com/photo-1454391304352-2bf4678b1a7a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-          "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
-        ]),
+        content_value: JSON.stringify([]), // Empty array to prevent default images
         metadata: { section: 'categories' },
         is_active: true
       },
@@ -213,12 +193,7 @@ export async function initializeDatabase(): Promise<boolean> {
         section_key: 'category_funerali_images',
         section_name: 'Category Images: Funerali',
         content_type: 'json',
-        content_value: JSON.stringify([
-          "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-          "https://images.unsplash.com/photo-1595207759571-3a4df3c49230?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-          "https://images.unsplash.com/photo-1490750967868-88aa4486c946?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-          "https://images.unsplash.com/photo-1583160247711-2191776b4b91?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
-        ]),
+        content_value: JSON.stringify([]), // Empty array to prevent default images
         metadata: { section: 'categories' },
         is_active: true
       }

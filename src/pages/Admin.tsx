@@ -155,26 +155,8 @@ const Admin = () => {
 
   const initializeCategoryPictures = async () => {
     try {
-      const defaultPictures = [
-        {
-          image_url: "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-          alt_text: "Beautiful fresh flowers",
-          position: 1,
-          is_active: true
-        },
-        {
-          image_url: "https://images.unsplash.com/photo-1440342359743-84fcb8c21f21?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-          alt_text: "Elegant floral arrangement",
-          position: 2,
-          is_active: true
-        },
-        {
-          image_url: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-          alt_text: "Colorful flower bouquet",
-          position: 3,
-          is_active: true
-        }
-      ];
+      // No default pictures to prevent automatic recreation after deletion
+      const defaultPictures = [];
 
       const { error } = await supabase
         .from('category_pictures')

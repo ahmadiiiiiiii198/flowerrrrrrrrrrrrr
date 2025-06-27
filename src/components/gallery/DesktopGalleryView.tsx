@@ -31,16 +31,12 @@ const DesktopGalleryView: React.FC<DesktopGalleryViewProps> = ({
   // Generate a unique key for forcing re-renders when needed
   const gridKey = useMemo(() => `desktop-gallery-${lastUpdated}-${Date.now()}`, [lastUpdated]);
   
-  // Ensure we always have valid images to display
+  // Ensure we always have valid images to display (no default images to prevent recreation)
   const safeImages = useMemo(() => {
     if (!Array.isArray(images) || images.length === 0) {
-      return [
-        { id: "default1", src: "/placeholder.svg", alt: "Gallery Image 1", featured: false },
-        { id: "default2", src: "/placeholder.svg", alt: "Gallery Image 2", featured: false },
-        { id: "default3", src: "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07", alt: "Gallery Image 3", featured: false }
-      ];
+      return []; // Return empty array instead of default images
     }
-    
+
     return images.filter(img => img && typeof img.src === 'string');
   }, [images]);
   

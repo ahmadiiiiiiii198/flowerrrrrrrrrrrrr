@@ -348,12 +348,12 @@ const ProductsAdmin = () => {
 
   const handleInitializeDatabase = async () => {
     // This function is only used when no categories exist at all
-    // It initializes both categories and products for first-time setup
+    // It initializes categories only (no default products to prevent recreation)
     const confirmed = window.confirm(
-      '⚠️ WARNING: This will initialize the database with default categories and products.\n\n' +
+      '⚠️ WARNING: This will initialize the database with default categories ONLY.\n\n' +
       'This action will:\n' +
       '• Add default categories if none exist\n' +
-      '• Add default products if none exist\n' +
+      '• NO default products will be added (to prevent recreation after deletion)\n' +
       '• Only run during initial setup\n\n' +
       'Continue?'
     );
@@ -362,30 +362,23 @@ const ProductsAdmin = () => {
 
     setIsInitializing(true);
     try {
-      // First ensure categories exist
-      console.log('[ProductsAdmin] Initializing categories...');
+      // Only initialize categories (no products)
+      console.log('[ProductsAdmin] Initializing categories only...');
       const categoriesSuccess = await initializeCategories();
       if (!categoriesSuccess) {
         throw new Error('Failed to initialize categories');
       }
 
-      // Then initialize products (only if none exist)
-      const productsSuccess = await initializeProducts(false);
-      if (productsSuccess) {
-        // Invalidate both queries to refresh data
-        queryClient.invalidateQueries({ queryKey: ['admin-products'] });
-        queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
-        toast({
-          title: 'Success! 🎉',
-          description: 'Database initialized with default categories and products',
-        });
-      } else {
-        toast({
-          title: 'Error',
-          description: 'Failed to initialize products. Check console for details.',
-          variant: 'destructive',
-        });
-      }
+      // Do NOT initialize products to prevent recreation after deletion
+      console.log('[ProductsAdmin] Skipping product initialization to prevent recreation after deletion');
+
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
+      toast({
+        title: 'Success! 🎉',
+        description: 'Database initialized with default categories only (no default products)',
+      });
     } catch (error) {
       console.error('[ProductsAdmin] Initialization error:', error);
       toast({

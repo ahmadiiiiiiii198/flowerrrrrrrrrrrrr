@@ -1,26 +1,32 @@
 import { supabase } from '@/integrations/supabase/client';
 
-// Initialize products in the database (only if no products exist)
+// Initialize products in the database (DISABLED - no automatic initialization)
 export const initializeProducts = async (force: boolean = false): Promise<boolean> => {
   try {
-    console.log('[InitializeProducts] Starting product initialization...');
+    console.log('[InitializeProducts] Product initialization is disabled to prevent automatic recreation of deleted products');
 
-    // Check if products already exist (unless forced)
+    // Always return true without doing anything unless explicitly forced
     if (!force) {
-      const { data: existingProducts, error: checkError } = await supabase
-        .from('products')
-        .select('id')
-        .limit(1);
+      console.log('[InitializeProducts] Automatic product initialization is disabled. Use force=true to override.');
+      return true;
+    }
 
-      if (checkError) {
-        console.error('[InitializeProducts] Error checking existing products:', checkError);
-        return false;
-      }
+    console.log('[InitializeProducts] Force initialization requested...');
 
-      if (existingProducts && existingProducts.length > 0) {
-        console.log('[InitializeProducts] Products already exist, skipping initialization');
-        return true;
-      }
+    // Check if products already exist
+    const { data: existingProducts, error: checkError } = await supabase
+      .from('products')
+      .select('id')
+      .limit(1);
+
+    if (checkError) {
+      console.error('[InitializeProducts] Error checking existing products:', checkError);
+      return false;
+    }
+
+    if (existingProducts && existingProducts.length > 0) {
+      console.log('[InitializeProducts] Products already exist, skipping initialization');
+      return true;
     }
 
     // First, get the categories to map them correctly
