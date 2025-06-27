@@ -133,36 +133,78 @@ class ContinuousAudioNotifier {
     if (!this.isRinging || !this.audioContext) return;
 
     try {
-      // Create oscillator for ring tone
-      const oscillator = this.audioContext.createOscillator();
-      const gainNode = this.audioContext.createGain();
+      // Create a pleasant phone-like ringing sound with dual tones
+      this.playDualToneRing();
 
-      oscillator.connect(gainNode);
-      gainNode.connect(this.audioContext.destination);
-
-      // Professional ring tone frequency
-      oscillator.frequency.setValueAtTime(800, this.audioContext.currentTime);
-      oscillator.type = 'sine';
-
-      // Ring pattern: 0.5s on, 0.3s off
-      gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.3, this.audioContext.currentTime + 0.05);
-      gainNode.gain.linearRampToValueAtTime(0.3, this.audioContext.currentTime + 0.5);
-      gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.55);
-
-      oscillator.start(this.audioContext.currentTime);
-      oscillator.stop(this.audioContext.currentTime + 0.6);
-
-      // Schedule next ring
+      // Schedule next ring cycle (ring-ring pattern)
       this.timeoutId = setTimeout(() => {
         if (this.isRinging) {
           this.playRingTone();
         }
-      }, 800); // Ring every 800ms
+      }, 4000); // 4 second intervals between ring cycles
 
     } catch (error) {
       console.error('❌ Audio playback error:', error);
     }
+  }
+
+  private playDualToneRing() {
+    if (!this.audioContext) return;
+
+    // Create two oscillators for a richer ringing sound
+    const oscillator1 = this.audioContext.createOscillator();
+    const oscillator2 = this.audioContext.createOscillator();
+    const gainNode1 = this.audioContext.createGain();
+    const gainNode2 = this.audioContext.createGain();
+    const masterGain = this.audioContext.createGain();
+
+    // Connect audio nodes
+    oscillator1.connect(gainNode1);
+    oscillator2.connect(gainNode2);
+    gainNode1.connect(masterGain);
+    gainNode2.connect(masterGain);
+    masterGain.connect(this.audioContext.destination);
+
+    // Set frequencies for pleasant ringing (like a phone)
+    oscillator1.frequency.setValueAtTime(880, this.audioContext.currentTime); // A5 note
+    oscillator2.frequency.setValueAtTime(1108, this.audioContext.currentTime); // C#6 note
+    oscillator1.type = 'sine';
+    oscillator2.type = 'sine';
+
+    const currentTime = this.audioContext.currentTime;
+
+    // Master volume
+    masterGain.gain.setValueAtTime(0.15, currentTime);
+
+    // Ring pattern: ring-ring-pause-ring-ring-pause
+    // First ring
+    this.createRingBurst(gainNode1, gainNode2, currentTime, 0);
+    // Second ring
+    this.createRingBurst(gainNode1, gainNode2, currentTime, 0.8);
+
+    oscillator1.start(currentTime);
+    oscillator2.start(currentTime);
+    oscillator1.stop(currentTime + 2.0);
+    oscillator2.stop(currentTime + 2.0);
+  }
+
+  private createRingBurst(gainNode1: GainNode, gainNode2: GainNode, startTime: number, offset: number) {
+    const ringStart = startTime + offset;
+    const ringDuration = 0.6;
+
+    // Fade in
+    gainNode1.gain.setValueAtTime(0, ringStart);
+    gainNode2.gain.setValueAtTime(0, ringStart);
+    gainNode1.gain.linearRampToValueAtTime(1, ringStart + 0.05);
+    gainNode2.gain.linearRampToValueAtTime(0.8, ringStart + 0.05);
+
+    // Hold
+    gainNode1.gain.setValueAtTime(1, ringStart + ringDuration - 0.05);
+    gainNode2.gain.setValueAtTime(0.8, ringStart + ringDuration - 0.05);
+
+    // Fade out
+    gainNode1.gain.linearRampToValueAtTime(0, ringStart + ringDuration);
+    gainNode2.gain.linearRampToValueAtTime(0, ringStart + ringDuration);
   }
 
   stopRinging() {
