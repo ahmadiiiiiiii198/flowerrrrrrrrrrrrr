@@ -1,5 +1,5 @@
-// Notification System Types
-// Complete type definitions for the new notification system
+// Simplified Notification Types
+// Basic types for the new order dashboard
 
 export interface NotificationData {
   id: string;

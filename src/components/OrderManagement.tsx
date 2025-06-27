@@ -8,8 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Bell, Package, Truck, CheckCircle, Clock, DollarSign, Phone, PhoneCall } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import OrderDetails from './OrderDetails';
-import NotificationCenter from './NotificationCenter';
-import audioNotificationService from '@/services/audioNotificationService';
 
 interface Order {
   id: string;
@@ -29,7 +27,6 @@ interface Order {
 const OrderManagement = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [notificationCount, setNotificationCount] = useState(0);
-  const [isPhoneRinging, setIsPhoneRinging] = useState(false);
   const { toast } = useToast();
 
   const { data: orders, isLoading, refetch } = useQuery({
@@ -107,14 +104,7 @@ const OrderManagement = () => {
     }
   }, [notifications]);
 
-  // Monitor audio notification status
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsPhoneRinging(audioNotificationService.isCurrentlyPlaying());
-    }, 500);
-
-    return () => clearInterval(interval);
-  }, []);
+  // Audio monitoring removed - handled by new order dashboard
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -171,26 +161,13 @@ const OrderManagement = () => {
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
           <h2 className="text-lg md:text-2xl font-semibold text-center md:text-left">Order Management</h2>
-          {isPhoneRinging && (
-            <Badge variant="destructive" className="animate-pulse self-center md:self-auto">
-              <PhoneCall className="w-3 h-3 mr-1" />
-              Phone Ringing
-            </Badge>
-          )}
         </div>
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:space-x-4">
-          {isPhoneRinging && (
-            <Button
-              onClick={() => audioNotificationService.stopNotificationSound()}
-              variant="destructive"
-              size="sm"
-              className="animate-pulse w-full md:w-auto"
-            >
-              <Phone className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
-              Stop Audio
-            </Button>
-          )}
-          <NotificationCenter />
+          <div className="text-center p-4 bg-blue-50 rounded-lg">
+            <p className="text-sm text-blue-700">
+              📱 Order notifications now handled by dedicated <a href="/orders" className="font-semibold underline">Order Dashboard</a>
+            </p>
+          </div>
           <div className="flex items-center justify-center md:justify-start space-x-2 text-xs md:text-sm text-gray-600">
             <DollarSign className="w-3 h-3 md:w-4 md:h-4" />
             <span>
