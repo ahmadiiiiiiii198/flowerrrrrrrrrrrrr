@@ -158,6 +158,21 @@ const OrderDashboard = () => {
         },
         (payload) => {
           console.log('🔔 New order inserted in dashboard:', payload);
+
+          // Trigger audio notification for new orders
+          if (window.location.pathname === '/orders') {
+            console.log('🎵 Triggering audio for new order:', payload.new.order_number);
+            audioNotificationService.playNotificationSound('order_created');
+            setIsPhoneRinging(true);
+
+            // Show toast notification
+            toast({
+              title: `🔔 ${t('newOrderReceived')}`,
+              description: `Order #${payload.new.order_number} from ${payload.new.customer_name}`,
+              duration: 15000,
+            });
+          }
+
           refetch();
           refetchNotifications();
         }
