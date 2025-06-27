@@ -24,6 +24,7 @@ import {
   XCircle
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import OrderDashboardDebugger from '@/components/OrderDashboardDebugger';
 
 // Types
 interface Order {
@@ -323,6 +324,11 @@ const OrderDashboard: React.FC = () => {
         </motion.div>
       </div>
     );
+  }
+
+  // Show debugger if no orders are loading properly
+  if (loading && orders.length === 0) {
+    return <OrderDashboardDebugger />;
   }
 
   return (
