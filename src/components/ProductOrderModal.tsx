@@ -694,7 +694,7 @@ const ProductOrderModal: React.FC<ProductOrderModalProps> = ({ product, isOpen, 
                               .from('order_notifications')
                               .insert({
                                 order_id: order.id,
-                                notification_type: 'new_order',
+                                message: `New order received from ${orderData.customerName}`,
                                 is_read: false
                               });
 

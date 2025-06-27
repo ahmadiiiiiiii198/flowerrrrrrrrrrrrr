@@ -12,7 +12,7 @@ import phoneNotificationService from '@/services/phoneNotificationService';
 interface Notification {
   id: string;
   order_id: string;
-  notification_type: string;
+  message: string;
   is_read: boolean;
   created_at: string;
 }
@@ -441,7 +441,7 @@ const OrderNotifications = ({ notifications, count, onRefresh }: OrderNotificati
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="text-sm font-medium">
-                            {notification.notification_type === 'new_order' && 'New Order Received'}
+                            {notification.message || 'New Order Received'}
                           </div>
                           {order && (
                             <div className="text-xs text-gray-600 mt-1">
