@@ -5,17 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { 
-  Bell, 
-  VolumeOff, 
-  Volume2, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Euro,
+import {
+  Bell,
+  VolumeX,
+  Volume2,
+  Phone,
+  Mail,
+  MapPin,
+  DollarSign,
   Clock,
   Package,
-  Refresh,
+  RotateCcw,
   User,
   Calendar,
   CreditCard,
@@ -338,7 +338,7 @@ const OrderDashboard: React.FC = () => {
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Order Management
+                🚀 NEW Order Management System
               </h1>
               <p className="text-gray-600 mt-2">Monitor and manage incoming orders in real-time</p>
             </div>
@@ -356,7 +356,7 @@ const OrderDashboard: React.FC = () => {
                       variant="destructive"
                       className="animate-pulse shadow-lg"
                     >
-                      <VolumeOff className="w-4 h-4 mr-2" />
+                      <VolumeX className="w-4 h-4 mr-2" />
                       Stop Alert
                     </Button>
                   </motion.div>
@@ -368,7 +368,7 @@ const OrderDashboard: React.FC = () => {
                 variant="outline"
                 className={`shadow-md ${soundEnabled ? 'text-green-600 border-green-200' : 'text-gray-400'}`}
               >
-                {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeOff className="w-4 h-4" />}
+                {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
               </Button>
 
               <Button
@@ -389,7 +389,7 @@ const OrderDashboard: React.FC = () => {
               </Button>
 
               <Button onClick={loadOrders} variant="outline" className="shadow-md">
-                <Refresh className="w-4 h-4" />
+                <RotateCcw className="w-4 h-4" />
               </Button>
             </div>
           </div>
@@ -460,7 +460,7 @@ const OrderDashboard: React.FC = () => {
                                   </div>
                                 )}
                                 <div className="flex items-center gap-2">
-                                  <Euro className="w-4 h-4 text-gray-400" />
+                                  <DollarSign className="w-4 h-4 text-gray-400" />
                                   <span className="font-semibold text-green-600">€{order.total_amount}</span>
                                 </div>
                               </div>
