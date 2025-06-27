@@ -160,18 +160,46 @@ class PhoneNotificationService {
   private playDefaultRingTone() {
     console.log('🎶 playDefaultRingTone() called');
     try {
-      // Create a simple beep sound using HTML5 audio
-      const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEaAzKH0fPTgjAHJXfH8N2QQAoUXrTp66hVFApGn+DyvmEaAw==');
-      audio.volume = 0.8;
-      audio.play().then(() => {
-        console.log('✅ Default ring tone played successfully');
-      }).catch(error => {
-        console.warn('❌ Failed to play default ring tone:', error);
-        // Try alternative approach
-        this.playAlternativeSound();
-      });
+      // Create a simple notification sound using Web Audio API
+      this.createWebAudioNotification();
     } catch (error) {
       console.error('❌ Failed to create default ring tone:', error);
+      this.playAlternativeSound();
+    }
+  }
+
+  private createWebAudioNotification() {
+    console.log('🎵 Creating Web Audio notification...');
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+      // Create a simple beep sound
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      // Set frequency for a pleasant notification sound
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+      oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.2);
+
+      // Set volume envelope
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.5);
+
+      console.log('✅ Web Audio notification created successfully');
+
+      // Play multiple beeps for continuous notification
+      setTimeout(() => this.createWebAudioNotification(), 1000);
+
+    } catch (error) {
+      console.warn('❌ Web Audio failed, trying alternative:', error);
       this.playAlternativeSound();
     }
   }
