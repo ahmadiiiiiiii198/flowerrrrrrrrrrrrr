@@ -168,13 +168,13 @@ const MainGalleryManager = () => {
       const filePath = `gallery/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('images')
+        .from('uploads')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage
-        .from('images')
+        .from('uploads')
         .getPublicUrl(filePath);
 
       const newImages = [...images];
@@ -337,6 +337,8 @@ const MainGalleryManager = () => {
             <h3 className="text-lg font-semibold mb-4">Caricamento Multiplo</h3>
             <MultipleImageUploader
               onImagesWithLabelsSelected={handleMultipleUpload}
+              bucketName="uploads"
+              folderPath="gallery"
             />
           </div>
 
