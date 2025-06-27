@@ -482,24 +482,25 @@ const OrderDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-2 sm:p-4">
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+      <div className="mb-4 sm:mb-6">
+        <div className="flex flex-col gap-3 sm:gap-4">
+          <div className="text-center sm:text-left">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
               🌸 {t('orderDashboard')}
             </h1>
-            <p className="text-gray-600 text-sm md:text-base">
+            <p className="text-gray-600 text-xs sm:text-sm md:text-base">
               {t('realTimeOrderManagement')}
             </p>
           </div>
-          
-          <div className="flex items-center gap-2">
+
+          {/* Mobile-optimized control buttons */}
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1 sm:gap-2">
             {/* Connection Status */}
-            <Badge variant={isOnline ? "default" : "destructive"} className="flex items-center gap-1">
+            <Badge variant={isOnline ? "default" : "destructive"} className="flex items-center gap-1 text-xs">
               <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
-              {isOnline ? t('online') : t('offline')}
+              <span className="hidden sm:inline">{isOnline ? t('online') : t('offline')}</span>
             </Badge>
 
             {/* Sound Toggle */}
@@ -507,10 +508,10 @@ const OrderDashboard = () => {
               variant="outline"
               size="sm"
               onClick={toggleSound}
-              className="flex items-center gap-2"
+              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3"
             >
               {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-              {soundEnabled ? t('soundOn') : t('soundOff')}
+              <span className="hidden sm:inline">{soundEnabled ? t('soundOn') : t('soundOff')}</span>
             </Button>
 
             {/* Test Notification Button */}
@@ -518,10 +519,10 @@ const OrderDashboard = () => {
               onClick={testNotificationSound}
               variant="outline"
               size="sm"
-              className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 border-blue-200"
+              className="flex items-center gap-1 sm:gap-2 bg-blue-50 hover:bg-blue-100 border-blue-200 px-2 sm:px-3"
             >
               <Bell className="w-4 h-4" />
-              {t('testSound')}
+              <span className="hidden sm:inline">{t('testSound')}</span>
             </Button>
 
             {/* Phone Ringing Indicator */}
@@ -530,22 +531,24 @@ const OrderDashboard = () => {
                 onClick={() => phoneNotificationService.stopRinging()}
                 variant="destructive"
                 size="sm"
-                className="animate-pulse flex items-center gap-2"
+                className="animate-pulse flex items-center gap-1 sm:gap-2 px-2 sm:px-3"
               >
                 <Phone className="w-4 h-4" />
-                {t('stopRinging')}
+                <span className="hidden sm:inline">{t('stopRinging')}</span>
               </Button>
             )}
 
             {/* Notifications */}
-            <OrderNotifications
-              notifications={notifications || []}
-              count={notificationCount}
-              onRefresh={() => {
-                refetch();
-                refetchNotifications();
-              }}
-            />
+            <div className="flex-shrink-0">
+              <OrderNotifications
+                notifications={notifications || []}
+                count={notificationCount}
+                onRefresh={() => {
+                  refetch();
+                  refetchNotifications();
+                }}
+              />
+            </div>
 
             {/* Refresh Button */}
             <Button
@@ -555,10 +558,10 @@ const OrderDashboard = () => {
                 refetch();
                 refetchNotifications();
               }}
-              className="flex items-center gap-2"
+              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3"
             >
               <RefreshCw className="w-4 h-4" />
-              {t('refresh')}
+              <span className="hidden sm:inline">{t('refresh')}</span>
             </Button>
           </div>
         </div>
@@ -570,114 +573,115 @@ const OrderDashboard = () => {
       </div>
 
       {/* Dashboard Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 mb-4 sm:mb-6">
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-gray-600">{t('totalOrders')}</p>
-                <p className="text-lg font-bold">{stats.totalOrders}</p>
+                <p className="text-lg sm:text-xl font-bold">{stats.totalOrders}</p>
               </div>
-              <Package className="w-6 h-6 text-blue-600" />
+              <Package className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-gray-600">{t('pending')}</p>
-                <p className="text-lg font-bold text-yellow-600">{stats.pendingOrders}</p>
+                <p className="text-lg sm:text-xl font-bold text-yellow-600">{stats.pendingOrders}</p>
               </div>
-              <Clock className="w-6 h-6 text-yellow-600" />
+              <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-gray-600">{t('accepted')}</p>
-                <p className="text-lg font-bold text-blue-600">{stats.acceptedOrders}</p>
+                <p className="text-lg sm:text-xl font-bold text-blue-600">{stats.acceptedOrders}</p>
               </div>
-              <CheckCircle className="w-6 h-6 text-blue-600" />
+              <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-gray-600">{t('completed')}</p>
-                <p className="text-lg font-bold text-green-600">{stats.completedOrders}</p>
+                <p className="text-lg sm:text-xl font-bold text-green-600">{stats.completedOrders}</p>
               </div>
-              <CheckCircle className="w-6 h-6 text-green-600" />
+              <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-gray-600">{t('today')}</p>
-                <p className="text-lg font-bold text-purple-600">{stats.todayOrders}</p>
+                <p className="text-lg sm:text-xl font-bold text-purple-600">{stats.todayOrders}</p>
               </div>
-              <Smartphone className="w-6 h-6 text-purple-600" />
+              <Smartphone className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-gray-600">{t('revenue')}</p>
-                <p className="text-lg font-bold text-green-600">{formatCurrency(stats.totalRevenue)}</p>
+                <p className="text-lg sm:text-xl font-bold text-green-600">{formatCurrency(stats.totalRevenue)}</p>
               </div>
-              <DollarSign className="w-6 h-6 text-green-600" />
+              <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Main Content */}
-      <Tabs defaultValue="dashboard" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="dashboard">{t('dashboard')}</TabsTrigger>
-          <TabsTrigger value="orders">{t('orders')}</TabsTrigger>
-          <TabsTrigger value="testing">{t('systemTesting')}</TabsTrigger>
+      <Tabs defaultValue="dashboard" className="space-y-4 sm:space-y-6">
+        <TabsList className="grid w-full grid-cols-3 h-auto p-1">
+          <TabsTrigger value="dashboard" className="text-xs sm:text-sm py-2">{t('dashboard')}</TabsTrigger>
+          <TabsTrigger value="orders" className="text-xs sm:text-sm py-2">{t('orders')}</TabsTrigger>
+          <TabsTrigger value="testing" className="text-xs sm:text-sm py-2">{t('systemTesting')}</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="dashboard" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <TabsContent value="dashboard" className="space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Orders List */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-base sm:text-lg">
               <span>{t('recentOrders')}</span>
               <div className="flex items-center gap-2">
-                <Badge variant="secondary">{orders?.length || 0} totale</Badge>
+                <Badge variant="secondary" className="text-xs">{orders?.length || 0} totale</Badge>
                 {orders && orders.length > 0 && (
                   <Button
                     onClick={deleteAllOrders}
                     variant="outline"
                     size="sm"
-                    className="flex items-center gap-1 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                    className="flex items-center gap-1 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 text-xs px-2 py-1"
                   >
                     <Trash2 className="w-3 h-3" />
-                    Elimina Tutti
+                    <span className="hidden sm:inline">Elimina Tutti</span>
+                    <span className="sm:hidden">Elimina</span>
                   </Button>
                 )}
               </div>
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             {orders && orders.length > 0 ? (
-              <div className="space-y-3 max-h-96 overflow-y-auto">
+              <div className="space-y-2 sm:space-y-3 max-h-80 sm:max-h-96 overflow-y-auto">
                 {orders.map((order) => (
                   <Card
                     key={order.id}
@@ -686,12 +690,14 @@ const OrderDashboard = () => {
                     }`}
                     onClick={() => setSelectedOrder(order)}
                   >
-                    <CardContent className="p-4">
+                    <CardContent className="p-3 sm:p-4">
                       <div className="flex items-center justify-between mb-2">
-                        <div className="font-medium">#{order.order_number}</div>
-                        {getStatusBadge(order.status)}
+                        <div className="font-medium text-sm sm:text-base">#{order.order_number}</div>
+                        <div className="flex-shrink-0">
+                          {getStatusBadge(order.status)}
+                        </div>
                       </div>
-                      <div className="text-sm text-gray-600 mb-1">
+                      <div className="text-xs sm:text-sm text-gray-600 mb-1 truncate">
                         {order.customer_name}
                       </div>
                       <div className="flex items-center justify-between text-xs text-gray-500">
@@ -703,10 +709,10 @@ const OrderDashboard = () => {
                 ))}
               </div>
             ) : (
-              <div className="text-center text-gray-500 py-8">
-                <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                <p>{t('noOrdersFound')}</p>
-                <p className="text-xs mt-2">{t('createFirstOrder')}</p>
+              <div className="text-center text-gray-500 py-6 sm:py-8">
+                <Package className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-gray-300" />
+                <p className="text-sm sm:text-base">{t('noOrdersFound')}</p>
+                <p className="text-xs mt-1 sm:mt-2">{t('createFirstOrder')}</p>
               </div>
             )}
           </CardContent>
@@ -714,10 +720,10 @@ const OrderDashboard = () => {
 
         {/* Order Details */}
         <Card>
-          <CardHeader>
-            <CardTitle>{t('orderDetails')}</CardTitle>
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="text-base sm:text-lg">{t('orderDetails')}</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             {selectedOrder ? (
               <OrderDetails
                 order={selectedOrder}
@@ -731,9 +737,9 @@ const OrderDashboard = () => {
                 }}
               />
             ) : (
-              <div className="text-center text-gray-500 py-8">
-                <CheckCircle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                <p>{t('selectOrderToView')}</p>
+              <div className="text-center text-gray-500 py-6 sm:py-8">
+                <CheckCircle className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-gray-300" />
+                <p className="text-sm sm:text-base">{t('selectOrderToView')}</p>
               </div>
             )}
           </CardContent>
@@ -741,24 +747,25 @@ const OrderDashboard = () => {
           </div>
         </TabsContent>
 
-        <TabsContent value="orders" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <TabsContent value="orders" className="space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Orders List */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
+              <CardHeader className="pb-3 sm:pb-6">
+                <CardTitle className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-base sm:text-lg">
                   <span>{t('allOrders')}</span>
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary">{orders?.length || 0} totale</Badge>
+                    <Badge variant="secondary" className="text-xs">{orders?.length || 0} totale</Badge>
                     {orders && orders.length > 0 && (
                       <Button
                         onClick={deleteAllOrders}
                         variant="outline"
                         size="sm"
-                        className="flex items-center gap-1 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                        className="flex items-center gap-1 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 text-xs px-2 py-1"
                       >
                         <Trash2 className="w-3 h-3" />
-                        Elimina Tutti
+                        <span className="hidden sm:inline">Elimina Tutti</span>
+                        <span className="sm:hidden">Elimina</span>
                       </Button>
                     )}
                   </div>

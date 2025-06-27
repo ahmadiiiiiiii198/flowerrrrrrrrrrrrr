@@ -245,33 +245,33 @@ const OrderDetails = ({ order, onUpdate, onDelete }: OrderDetailsProps) => {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          Order #{order.order_number}
-          <div className="ml-auto flex items-center gap-2">
-            <Badge variant="outline">
+      <CardHeader className="pb-3 sm:pb-6">
+        <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+          <span className="text-base sm:text-lg">Order #{order.order_number}</span>
+          <div className="flex items-center gap-2 sm:ml-auto">
+            <Badge variant="outline" className="text-xs">
               {getStatusIcon(order.status)}
-              {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+              <span className="ml-1">{order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span>
             </Badge>
             <Button
               onClick={handleDeleteOrder}
               disabled={updating}
               variant="destructive"
               size="sm"
-              className="h-8 w-8 p-0"
+              className="h-7 w-7 sm:h-8 sm:w-8 p-0"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
           </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4 sm:space-y-6 pt-0">
         {/* Customer Information */}
         <div>
-          <h4 className="font-semibold mb-2">{t('customerInformation')}</h4>
-          <div className="space-y-1 text-sm">
-            <div><strong>{t('name')}:</strong> {order.customer_name}</div>
-            <div><strong>{t('email')}:</strong> {order.customer_email}</div>
+          <h4 className="font-semibold mb-2 text-sm sm:text-base">{t('customerInformation')}</h4>
+          <div className="space-y-1 text-xs sm:text-sm">
+            <div className="break-words"><strong>{t('name')}:</strong> {order.customer_name}</div>
+            <div className="break-all"><strong>{t('email')}:</strong> {order.customer_email}</div>
             {order.customer_phone && (
               <div><strong>{t('phone')}:</strong> {order.customer_phone}</div>
             )}
@@ -282,13 +282,13 @@ const OrderDetails = ({ order, onUpdate, onDelete }: OrderDetailsProps) => {
 
         {/* Order Information */}
         <div>
-          <h4 className="font-semibold mb-2">{t('orderInformation')}</h4>
-          <div className="space-y-1 text-sm">
+          <h4 className="font-semibold mb-2 text-sm sm:text-base">{t('orderInformation')}</h4>
+          <div className="space-y-1 text-xs sm:text-sm">
             <div><strong>{t('totalAmount')}:</strong> {formatCurrency(Number(order.total_amount))}</div>
             <div><strong>{t('created')}:</strong> {formatDate(order.created_at)}</div>
             <div><strong>{t('lastUpdated')}:</strong> {formatDate(order.updated_at)}</div>
             {order.tracking_number && (
-              <div><strong>{t('trackingNumber')}:</strong> {order.tracking_number}</div>
+              <div className="break-all"><strong>{t('trackingNumber')}:</strong> {order.tracking_number}</div>
             )}
             {order.shipped_at && (
               <div><strong>{t('shipped')}:</strong> {formatDate(order.shipped_at)}</div>
@@ -304,32 +304,34 @@ const OrderDetails = ({ order, onUpdate, onDelete }: OrderDetailsProps) => {
         {/* Quick Actions for Pending Orders */}
         {order.status === 'pending' && (
           <div>
-            <h4 className="font-semibold mb-3">Azioni Rapide</h4>
-            <div className="flex gap-3">
+            <h4 className="font-semibold mb-3 text-sm sm:text-base">Azioni Rapide</h4>
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <Button
                 onClick={() => handleQuickStatusUpdate('accepted')}
                 disabled={updating}
-                className="flex-1 bg-green-600 hover:bg-green-700"
+                className="flex-1 bg-green-600 hover:bg-green-700 text-sm py-2"
               >
                 {updating ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                   <CheckCircle className="mr-2 h-4 w-4" />
                 )}
-                Accetta Ordine
+                <span className="hidden sm:inline">Accetta Ordine</span>
+                <span className="sm:hidden">Accetta</span>
               </Button>
               <Button
                 onClick={() => handleQuickStatusUpdate('rejected')}
                 disabled={updating}
                 variant="destructive"
-                className="flex-1"
+                className="flex-1 text-sm py-2"
               >
                 {updating ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                   <X className="mr-2 h-4 w-4" />
                 )}
-                Rifiuta Ordine
+                <span className="hidden sm:inline">Rifiuta Ordine</span>
+                <span className="sm:hidden">Rifiuta</span>
               </Button>
             </div>
           </div>
@@ -339,12 +341,12 @@ const OrderDetails = ({ order, onUpdate, onDelete }: OrderDetailsProps) => {
 
         {/* Status Update Section */}
         <div>
-          <h4 className="font-semibold mb-3">{t('updateOrderStatus')}</h4>
-          <div className="space-y-4">
+          <h4 className="font-semibold mb-3 text-sm sm:text-base">{t('updateOrderStatus')}</h4>
+          <div className="space-y-3 sm:space-y-4">
             <div>
-              <label className="text-sm font-medium mb-2 block">{t('status')}</label>
+              <label className="text-xs sm:text-sm font-medium mb-2 block">{t('status')}</label>
               <Select value={newStatus} onValueChange={setNewStatus}>
-                <SelectTrigger>
+                <SelectTrigger className="text-sm">
                   <SelectValue placeholder={t('selectStatus')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -363,29 +365,31 @@ const OrderDetails = ({ order, onUpdate, onDelete }: OrderDetailsProps) => {
 
             {(newStatus === 'out_for_delivery' || newStatus === 'delivered') && (
               <div>
-                <label className="text-sm font-medium mb-2 block">{t('trackingNumber')}</label>
+                <label className="text-xs sm:text-sm font-medium mb-2 block">{t('trackingNumber')}</label>
                 <Input
                   value={trackingNumber}
                   onChange={(e) => setTrackingNumber(e.target.value)}
                   placeholder={t('trackingNumberOptional')}
+                  className="text-sm"
                 />
               </div>
             )}
 
             <div>
-              <label className="text-sm font-medium mb-2 block">{t('addNotes')}</label>
+              <label className="text-xs sm:text-sm font-medium mb-2 block">{t('addNotes')}</label>
               <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder={t('notesOptional')}
                 rows={3}
+                className="text-sm resize-none"
               />
             </div>
 
             <Button
               onClick={handleStatusUpdate}
               disabled={updating || newStatus === order.status}
-              className="w-full"
+              className="w-full text-sm py-2"
             >
               {updating ? (
                 <>
