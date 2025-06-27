@@ -192,6 +192,6 @@ export const AUDIO_PATTERNS: Record<NotificationType, AudioNotificationConfig> =
     frequency: 1200,
     duration: 0.4,
     volume: 0.8,
-    pattern: 'triple',
+    pattern: 'single', // Single notification for completed Stripe payments
   },
 };

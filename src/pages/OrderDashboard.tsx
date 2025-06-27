@@ -159,18 +159,33 @@ const OrderDashboard = () => {
         (payload) => {
           console.log('🔔 New order inserted in dashboard:', payload);
 
-          // Trigger audio notification for new orders
+          // Trigger different notifications based on order status
           if (window.location.pathname === '/orders') {
-            console.log('🎵 Triggering audio for new order:', payload.new.order_number);
-            audioNotificationService.playNotificationSound('order_created');
-            setIsPhoneRinging(true);
+            const order = payload.new;
 
-            // Show toast notification
-            toast({
-              title: `🔔 ${t('newOrderReceived')}`,
-              description: `Order #${payload.new.order_number} from ${payload.new.customer_name}`,
-              duration: 15000,
-            });
+            if (order.status === 'pending') {
+              // Pay Later orders - CONTINUOUS notification until manually stopped
+              console.log('🔄 Pay Later order - triggering CONTINUOUS notification:', order.order_number);
+              audioNotificationService.playNotificationSound('payment_failed'); // Uses continuous pattern
+              setIsPhoneRinging(true);
+
+              toast({
+                title: `🔔 Pay Later Order Received`,
+                description: `Order #${order.order_number} from ${order.customer_name} - Payment Pending`,
+                duration: 15000,
+              });
+            } else if (order.status === 'payment_pending') {
+              // Stripe orders - Single notification
+              console.log('💳 Stripe order created - single notification:', order.order_number);
+              audioNotificationService.playNotificationSound('order_created'); // Uses triple pattern
+              setIsPhoneRinging(true);
+
+              toast({
+                title: `🔔 New Order Created`,
+                description: `Order #${order.order_number} from ${order.customer_name} - Payment Processing`,
+                duration: 15000,
+              });
+            }
           }
 
           refetch();
@@ -190,13 +205,12 @@ const OrderDashboard = () => {
           // Only trigger notifications when order status changes to 'paid'
           // This means a customer has successfully completed payment
           if (payload.new.status === 'paid' && payload.old.status !== 'paid') {
-            console.log('🎉 Order payment completed - triggering notification');
+            console.log('🎉 Order payment completed - triggering SINGLE notification');
 
             // Only trigger notifications if we're on the order dashboard page
             if (window.location.pathname === '/orders') {
-              // Trigger enhanced notifications (SINGLE SOURCE)
-              audioNotificationService.playNotificationSound('payment_completed');
-              // Set ringing state to show stop button
+              // Stripe payment completed - SINGLE notification (not continuous)
+              audioNotificationService.playNotificationSound('payment_completed'); // Uses single pattern
               setIsPhoneRinging(true);
             }
 
