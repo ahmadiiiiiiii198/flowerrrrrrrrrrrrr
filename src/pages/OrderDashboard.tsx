@@ -24,7 +24,6 @@ import {
   XCircle
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import OrderDashboardDebugger from '@/components/OrderDashboardDebugger';
 
 // Types
 interface Order {
@@ -204,8 +203,26 @@ const OrderDashboard: React.FC = () => {
 
   // Initial data load
   useEffect(() => {
-    loadOrders();
-    loadNotifications();
+    console.log('OrderDashboard: Starting initial data load...');
+    const initializeData = async () => {
+      try {
+        await Promise.all([loadOrders(), loadNotifications()]);
+        console.log('OrderDashboard: Data loaded successfully');
+      } catch (error) {
+        console.error('OrderDashboard: Error during initialization:', error);
+        setLoading(false); // Ensure loading is cleared even on error
+      }
+    };
+
+    initializeData();
+
+    // Failsafe: Clear loading after 10 seconds no matter what
+    const timeout = setTimeout(() => {
+      console.log('OrderDashboard: Timeout reached, clearing loading state');
+      setLoading(false);
+    }, 10000);
+
+    return () => clearTimeout(timeout);
   }, [loadOrders, loadNotifications]);
 
   // Real-time subscriptions
@@ -326,8 +343,7 @@ const OrderDashboard: React.FC = () => {
     );
   }
 
-  // TEMPORARY: Always show debugger to diagnose the issue
-  return <OrderDashboardDebugger />;
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
