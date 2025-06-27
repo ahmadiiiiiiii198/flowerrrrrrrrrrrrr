@@ -28,6 +28,7 @@ import OrderNotifications from '@/components/OrderNotifications';
 import OrderSystemTester from '@/components/OrderSystemTester';
 import phoneNotificationService from '@/services/phoneNotificationService';
 import backgroundOrderService from '@/services/backgroundOrderService';
+import { QuickNotificationTest } from '@/components/QuickNotificationTest';
 
 interface Order {
   id: string;
@@ -672,6 +673,9 @@ const OrderDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Notification Test Component */}
+      <QuickNotificationTest />
 
       {/* Main Content */}
       <Tabs defaultValue="dashboard" className="space-y-4 sm:space-y-6">

@@ -308,11 +308,19 @@ class PhoneNotificationService {
     // Request wake lock to keep screen active on mobile
     await this.requestWakeLock();
 
-    // Send SMS notification
-    await this.sendSMSNotification(orderNumber, customerName);
+    // Send SMS notification (don't block audio if this fails)
+    try {
+      await this.sendSMSNotification(orderNumber, customerName);
+    } catch (error) {
+      console.warn('SMS notification failed, continuing with audio:', error);
+    }
 
-    // Show browser notification
-    this.showBrowserNotification(orderNumber, customerName);
+    // Show browser notification (don't block audio if this fails)
+    try {
+      this.showBrowserNotification(orderNumber, customerName);
+    } catch (error) {
+      console.warn('Browser notification failed, continuing with audio:', error);
+    }
 
     // Trigger mobile vibration (enhanced for continuous notification)
     this.triggerContinuousVibration();
