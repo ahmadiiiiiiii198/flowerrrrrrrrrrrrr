@@ -146,215 +146,108 @@ const itemVariants = {
 };
 
 const OrderDashboard: React.FC = () => {
+  console.log('OrderDashboard component is rendering...');
+
   // State management
   const [orders, setOrders] = useState<Order[]>([]);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [isAudioActive, setIsAudioActive] = useState(false);
-  const [soundEnabled, setSoundEnabled] = useState(true);
   const [loading, setLoading] = useState(true);
-  const [showNotifications, setShowNotifications] = useState(false);
   const { toast } = useToast();
 
-  // Audio status monitoring
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsAudioActive(audioManager.isActive);
-    }, 500);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Data loading
+  // Simple data loading
   const loadOrders = useCallback(async () => {
+    console.log('Loading orders...');
     try {
       const { data, error } = await supabase
         .from('orders')
         .select('*')
-        .order('created_at', { ascending: false })
-        .limit(50);
+        .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+
+      console.log('Orders loaded:', data?.length || 0);
       setOrders(data || []);
     } catch (error) {
       console.error('Failed to load orders:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load orders',
-        variant: 'destructive'
-      });
     } finally {
       setLoading(false);
-    }
-  }, [toast]);
-
-  const loadNotifications = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from('order_notifications')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(20);
-
-      if (error) throw error;
-      setNotifications(data || []);
-    } catch (error) {
-      console.error('Failed to load notifications:', error);
     }
   }, []);
 
   // Initial data load
   useEffect(() => {
-    console.log('OrderDashboard: Starting initial data load...');
-    const initializeData = async () => {
-      try {
-        await Promise.all([loadOrders(), loadNotifications()]);
-        console.log('OrderDashboard: Data loaded successfully');
-      } catch (error) {
-        console.error('OrderDashboard: Error during initialization:', error);
-        setLoading(false); // Ensure loading is cleared even on error
-      }
-    };
+    console.log('OrderDashboard: useEffect triggered');
+    loadOrders();
+  }, [loadOrders]);
 
-    initializeData();
-
-    // Failsafe: Clear loading after 10 seconds no matter what
-    const timeout = setTimeout(() => {
-      console.log('OrderDashboard: Timeout reached, clearing loading state');
-      setLoading(false);
-    }, 10000);
-
-    return () => clearTimeout(timeout);
-  }, [loadOrders, loadNotifications]);
-
-  // Real-time subscriptions
-  useEffect(() => {
-    const orderChannel = supabase
-      .channel('orders-realtime')
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'orders'
-      }, (payload) => {
-        const newOrder = payload.new as Order;
-        setOrders(prev => [newOrder, ...prev]);
-        
-        if (soundEnabled) {
-          audioManager.startContinuousAlert();
-          toast({
-            title: '🔔 New Order Received!',
-            description: `Order #${newOrder.order_number} from ${newOrder.customer_name}`,
-            duration: 8000,
-          });
-        }
-      })
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'orders'
-      }, (payload) => {
-        const updatedOrder = payload.new as Order;
-        setOrders(prev => prev.map(order => 
-          order.id === updatedOrder.id ? updatedOrder : order
-        ));
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(orderChannel);
-    };
-  }, [soundEnabled, toast]);
-
-  // Event handlers
-  const handleStopAudio = () => {
-    audioManager.stopAlert();
-    toast({
-      title: '🔇 Audio Stopped',
-      description: 'Notification audio has been stopped',
-    });
-  };
-
-  const toggleSound = () => {
-    setSoundEnabled(!soundEnabled);
-    if (!soundEnabled) {
-      audioManager.stopAlert();
-    }
-    toast({
-      title: soundEnabled ? '🔇 Sound Disabled' : '🔊 Sound Enabled',
-      description: `Notification sounds ${soundEnabled ? 'disabled' : 'enabled'}`,
-    });
-  };
-
-  const markNotificationAsRead = async (notificationId: string) => {
-    try {
-      const { error } = await supabase
-        .from('order_notifications')
-        .update({ 
-          is_read: true, 
-          read_at: new Date().toISOString() 
-        })
-        .eq('id', notificationId);
-
-      if (error) throw error;
-      
-      setNotifications(prev => 
-        prev.map(n => 
-          n.id === notificationId 
-            ? { ...n, is_read: true, read_at: new Date().toISOString() }
-            : n
-        )
-      );
-    } catch (error) {
-      console.error('Failed to mark notification as read:', error);
-    }
-  };
-
-  // Utility functions
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'pending': return <Clock className="w-4 h-4 text-yellow-500" />;
-      case 'paid': return <CheckCircle2 className="w-4 h-4 text-green-500" />;
-      case 'cancelled': return <XCircle className="w-4 h-4 text-red-500" />;
-      default: return <AlertCircle className="w-4 h-4 text-gray-500" />;
-    }
-  };
-
+  // Simple status color function
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'paid': return 'bg-green-100 text-green-800 border-green-200';
-      case 'cancelled': return 'bg-red-100 text-red-800 border-red-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'paid': return 'bg-green-100 text-green-800';
+      case 'cancelled': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const unreadNotifications = notifications.filter(n => !n.is_read);
+  console.log('About to render, loading:', loading, 'orders:', orders.length);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center"
-        >
+        <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600 font-medium">Loading orders...</p>
-        </motion.div>
+        </div>
       </div>
     );
   }
 
 
 
+  // Simple test render first
+  return (
+    <div className="min-h-screen bg-gray-100 p-8">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-3xl font-bold mb-6">Order Management Dashboard</h1>
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4">Orders ({orders.length})</h2>
+          {orders.length === 0 ? (
+            <p className="text-gray-500">No orders found</p>
+          ) : (
+            <div className="space-y-4">
+              {orders.map((order) => (
+                <div key={order.id} className="border p-4 rounded">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-semibold">#{order.order_number}</h3>
+                      <p className="text-gray-600">{order.customer_name}</p>
+                      <p className="text-sm text-gray-500">{order.customer_email}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold">€{order.total_amount}</p>
+                      <span className={`px-2 py-1 rounded text-xs ${getStatusColor(order.status)}`}>
+                        {order.status}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  // Original complex render (commented out for testing)
+  /*
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <motion.div 
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="container mx-auto px-4 py-8 max-w-7xl"
-      >
-        {/* Header */}
-        <motion.div variants={itemVariants} className="mb-8">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
