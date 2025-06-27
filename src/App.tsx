@@ -13,7 +13,6 @@ import Admin from "./pages/Admin";
 import AdminMinimal from "./pages/AdminMinimal";
 import Order from "./pages/Order";
 import NewOrderDashboard from "./pages/NewOrderDashboard";
-import TestPage from "./pages/TestPage";
 import MenuPage from "./pages/MenuPage";
 import NotFound from "./pages/NotFound";
 import PaymentSuccess from "./pages/PaymentSuccess";
@@ -58,11 +57,7 @@ const App = () => (
                   <NewOrderDashboard />
                 </ErrorBoundary>
               } />
-              <Route path="/test" element={
-                <ErrorBoundary componentName="TestPage">
-                  <TestPage />
-                </ErrorBoundary>
-              } />
+
               <Route path="/menu" element={
                 <ErrorBoundary componentName="MenuPage">
                   <MenuPage />

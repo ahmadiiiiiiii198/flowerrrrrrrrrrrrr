@@ -22,7 +22,7 @@ import {
   Refresh
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import OrderDashboardTest from '@/components/OrderDashboardTest';
+
 
 interface Order {
   id: string;
@@ -130,7 +130,6 @@ class SimpleAudioNotifier {
 const audioNotifier = new SimpleAudioNotifier();
 
 const NewOrderDashboard: React.FC = () => {
-  console.log('🚀 NewOrderDashboard component loading...');
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -330,19 +329,15 @@ const NewOrderDashboard: React.FC = () => {
   const unreadNotifications = notifications.filter(n => !n.is_read);
 
   if (loading) {
-    console.log('📊 NewOrderDashboard is loading...');
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-2 text-gray-600">Loading orders...</p>
-          <p className="mt-1 text-xs text-gray-400">New Order Dashboard v2.0</p>
         </div>
       </div>
     );
   }
-
-  console.log('✅ NewOrderDashboard loaded successfully with', orders.length, 'orders');
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -397,15 +392,9 @@ const NewOrderDashboard: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Test Panel */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="lg:col-span-1">
-            <OrderDashboardTest />
-          </div>
-        )}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Orders List */}
-        <div className={`${process.env.NODE_ENV === 'development' ? 'lg:col-span-2' : 'lg:col-span-2'}`}>
+        <div className="lg:col-span-2">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
