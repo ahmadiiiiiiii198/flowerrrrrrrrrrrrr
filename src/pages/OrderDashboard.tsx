@@ -326,10 +326,8 @@ const OrderDashboard: React.FC = () => {
     );
   }
 
-  // Show debugger if no orders are loading properly
-  if (loading && orders.length === 0) {
-    return <OrderDashboardDebugger />;
-  }
+  // TEMPORARY: Always show debugger to diagnose the issue
+  return <OrderDashboardDebugger />;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
