@@ -19,7 +19,7 @@ import SoundManager from '@/components/SoundManager';
 
 import HeroDebugger from '@/components/admin/HeroDebugger';
 import HeroContentEditor from '@/components/admin/HeroContentEditor';
-import PhoneNumberUpdater from '@/components/admin/PhoneNumberUpdater';
+import ContactInfoEditor from '@/components/admin/ContactInfoEditor';
 import HeroImageFixer from '@/components/admin/HeroImageFixer';
 
 // import TestOrderButton from '@/components/TestOrderButton';
@@ -329,11 +329,8 @@ const Admin = () => {
           </div>
 
           <TabsContent value="phone" className="space-y-2 md:space-y-4 animate-fade-in-up">
-            <div className="bg-white/95 backdrop-blur-sm rounded-xl p-3 md:p-6 shadow-lg border border-blue-100">
-              <h2 className="text-base md:text-2xl font-semibold mb-2 md:mb-4 text-blue-800 animate-fade-in-left">{t('phoneNumberUpdate')}</h2>
-              <div className="animate-fade-in-right animate-stagger-1">
-                <PhoneNumberUpdater />
-              </div>
+            <div className="animate-fade-in-right animate-stagger-1">
+              <ContactInfoEditor />
             </div>
           </TabsContent>
 

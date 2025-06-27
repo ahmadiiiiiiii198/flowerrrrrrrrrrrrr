@@ -140,14 +140,25 @@ class ContinuousAudioNotifier {
       return;
     }
 
+    console.log('🚨 STARTING CONTINUOUS RINGING');
+    console.log('🎵 Audio initialized:', this.isInitialized);
+    console.log('🎵 Audio context:', !!this.audioContext);
+    console.log('🎵 Active sound:', this.activeSound?.name || 'Built-in phone ring');
+
+    // Force audio initialization if needed
     if (!this.isInitialized || !this.audioContext) {
-      console.log('⚠️ Audio not initialized yet, will start ringing on next user interaction');
-      // Try to initialize again
+      console.log('⚠️ Audio not initialized, forcing initialization...');
       this.initializeAudio();
+
+      // Try again after a short delay
+      setTimeout(() => {
+        if (!this.isRinging) {
+          this.startContinuousRinging();
+        }
+      }, 100);
       return;
     }
 
-    console.log('🚨 STARTING CONTINUOUS RINGING');
     this.isRinging = true;
     this.playRingTone();
   }
@@ -951,31 +962,31 @@ const OrderDashboardPro: React.FC = () => {
         </div>
 
         {/* Francesco Fiori Statistics Cards - Mobile Optimized */}
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-8 md:mb-12">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-6 md:mb-8">
           <Card className="bg-white/90 backdrop-blur-sm border border-emerald-200 shadow-lg hover:shadow-emerald-200/50 transition-all duration-300 hover:scale-105 rounded-xl">
-            <CardContent className="p-3 sm:p-4 md:p-6">
+            <CardContent className="p-2 sm:p-3 md:p-4">
               <div className="flex items-center justify-between">
                 <div className="min-w-0 flex-1">
-                  <p className="text-gray-700 font-semibold text-xs sm:text-sm uppercase tracking-wider mb-1 sm:mb-2 truncate">Ordini Totali</p>
-                  <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-1 sm:mb-2">{orders.length}</p>
+                  <p className="text-gray-700 font-medium text-xs uppercase tracking-wide mb-1 truncate">Ordini Totali</p>
+                  <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-1">{orders.length}</p>
                   <div className="flex items-center gap-1 sm:gap-2">
                     <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-600" />
                     <span className="text-emerald-700 text-xs sm:text-sm font-medium truncate">Tutti i tempi</span>
                   </div>
                 </div>
-                <div className="p-2 sm:p-3 bg-emerald-100 rounded-xl border border-emerald-200 ml-2">
-                  <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-emerald-700" />
+                <div className="p-1.5 sm:p-2 bg-emerald-100 rounded-lg border border-emerald-200 ml-2">
+                  <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-emerald-700" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-white/90 backdrop-blur-sm border border-amber-200 shadow-lg hover:shadow-amber-200/50 transition-all duration-300 hover:scale-105 rounded-xl">
-            <CardContent className="p-3 sm:p-4 md:p-6">
+            <CardContent className="p-2 sm:p-3 md:p-4">
               <div className="flex items-center justify-between">
                 <div className="min-w-0 flex-1">
-                  <p className="text-gray-700 font-semibold text-xs sm:text-sm uppercase tracking-wider mb-1 sm:mb-2 truncate">Ordini Oggi</p>
-                  <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-1 sm:mb-2">{todayOrders.length}</p>
+                  <p className="text-gray-700 font-medium text-xs uppercase tracking-wide mb-1 truncate">Ordini Oggi</p>
+                  <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-1">{todayOrders.length}</p>
                   <div className="flex items-center gap-1 sm:gap-2">
                     <Zap className="w-3 h-3 sm:w-4 sm:h-4 text-amber-600" />
                     <span className="text-amber-700 text-xs sm:text-sm font-medium truncate">Freschi oggi</span>
@@ -1026,20 +1037,20 @@ const OrderDashboardPro: React.FC = () => {
         </div>
 
         {/* Main Content Grid - Mobile Optimized */}
-        <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
           {/* Orders List */}
           <div className="xl:col-span-3">
             <Card className="bg-white/95 backdrop-blur-sm border border-gray-200 shadow-lg">
-              <CardHeader className="border-b border-gray-200 bg-gray-50/50">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <CardTitle className="flex items-center gap-3">
-                    <div className="p-2 bg-emerald-100 rounded-xl border border-emerald-200">
-                      <Package className="w-6 h-6 text-emerald-700" />
+              <CardHeader className="border-b border-gray-200 bg-gray-50/50 p-3 sm:p-4 md:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <CardTitle className="flex items-center gap-2 sm:gap-3">
+                    <div className="p-1.5 sm:p-2 bg-emerald-100 rounded-lg border border-emerald-200">
+                      <Package className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-emerald-700" />
                     </div>
-                    <span className="text-gray-800 font-bold text-xl">Ordini ({filteredOrders.length})</span>
+                    <span className="text-gray-800 font-bold text-lg sm:text-xl">Ordini ({filteredOrders.length})</span>
                   </CardTitle>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3">
                     <div className="relative">
                       <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
                       <input
@@ -1047,14 +1058,14 @@ const OrderDashboardPro: React.FC = () => {
                         placeholder="Cerca ordini..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-800 placeholder-gray-500 focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-colors"
+                        className="pl-8 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3 bg-white border border-gray-300 rounded-lg text-sm sm:text-base text-gray-800 placeholder-gray-500 focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-colors"
                       />
                     </div>
 
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
-                      className="px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-800 focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-colors"
+                      className="px-3 sm:px-4 py-2 sm:py-3 bg-white border border-gray-300 rounded-lg text-sm sm:text-base text-gray-800 focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-colors"
                     >
                       <option value="all">Tutti gli Stati</option>
                       <option value="pending">In Attesa</option>
