@@ -27,6 +27,8 @@ import OrderDetails from '@/components/OrderDetails';
 import OrderNotifications from '@/components/OrderNotifications';
 import OrderSystemTester from '@/components/OrderSystemTester';
 import phoneNotificationService from '@/services/phoneNotificationService';
+import NotificationCenter from '@/components/NotificationCenter';
+import notificationSystem from '@/services/notificationSystem';
 import backgroundOrderService from '@/services/backgroundOrderService';
 
 interface Order {
@@ -135,7 +137,16 @@ const OrderDashboard = () => {
     }
   }, [orders]);
 
-  // Set up real-time listeners for orders and notifications
+  // Initialize notification system
+  useEffect(() => {
+    notificationSystem.initialize();
+
+    return () => {
+      // Cleanup is handled by the notification system
+    };
+  }, []);
+
+  // Set up real-time listeners for orders (simplified)
   useEffect(() => {
     const channel = supabase
       .channel('order-dashboard-changes')
@@ -149,50 +160,6 @@ const OrderDashboard = () => {
         (payload) => {
           console.log('🔔 New order inserted in dashboard:', payload);
           refetch();
-          refetchNotifications();
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'order_notifications'
-        },
-        (payload) => {
-          console.log('🔔 New notification inserted:', payload);
-
-          // Trigger audio notification when new notification is created
-          console.log('🎉 New notification created - triggering audio');
-
-          // Only trigger notifications if we're on the order dashboard page
-          if (window.location.pathname === '/orders') {
-            // Trigger enhanced notifications (SINGLE SOURCE)
-            phoneNotificationService.notifyNewOrder(
-              'NEW-ORDER',
-              'Customer'
-            );
-            // Set ringing state to show stop button
-            setIsPhoneRinging(true);
-
-            // Show persistent toast notification
-            toast({
-              title: `🔔 ${t('newOrderReceived')}`,
-              description: payload.new.message || 'New order notification received',
-              duration: 15000, // Show for 15 seconds
-            });
-
-            // Trigger browser notification if permission granted
-            if ('Notification' in window && Notification.permission === 'granted') {
-              new Notification('Nuovo Ordine Ricevuto!', {
-                body: payload.new.message || 'New order notification received',
-                icon: '/favicon.ico',
-                tag: 'new-order',
-                requireInteraction: true, // Keep notification until user interacts
-              });
-            }
-          }
-
           refetchNotifications();
         }
       )
@@ -576,7 +543,11 @@ const OrderDashboard = () => {
 
 
             {/* Notifications */}
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 flex items-center gap-2">
+              {/* New Notification Center */}
+              <NotificationCenter />
+
+              {/* Legacy Notification Component (for comparison) */}
               <OrderNotifications
                 notifications={notifications || []}
                 count={notificationCount}
