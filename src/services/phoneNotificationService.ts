@@ -97,12 +97,10 @@ class PhoneNotificationService {
   private createPhoneRingTone() {
     console.log('🎵 createPhoneRingTone() called, audioContext:', !!this.audioContext);
 
-    if (!this.audioContext) {
-      console.log('📱 No audioContext, using fallback...');
-      // Fallback to HTML5 audio for mobile compatibility
-      this.createFallbackRingTone();
-      return;
-    }
+    // Always use fallback for better compatibility
+    console.log('📱 Using HTML5 audio fallback for better compatibility...');
+    this.createFallbackRingTone();
+    return;
 
     try {
       const oscillator1 = this.audioContext.createOscillator();
@@ -135,34 +133,92 @@ class PhoneNotificationService {
   }
 
   private createFallbackRingTone() {
+    console.log('🔊 createFallbackRingTone() called');
     try {
       // Use custom notification sound if available
       if (this.settings.customNotificationSound && this.settings.notificationSoundUrl) {
+        console.log('🎵 Playing custom notification sound:', this.settings.notificationSoundUrl);
         const audio = new Audio(this.settings.notificationSoundUrl);
-        audio.volume = 0.7;
-        audio.play().catch(error => {
-          console.warn('Failed to play custom notification sound:', error);
+        audio.volume = 0.8;
+        audio.play().then(() => {
+          console.log('✅ Custom audio played successfully');
+        }).catch(error => {
+          console.warn('❌ Failed to play custom notification sound:', error);
           this.playDefaultRingTone();
         });
       } else {
+        console.log('🔔 Playing default ring tone');
         this.playDefaultRingTone();
       }
     } catch (error) {
-      console.error('Failed to create fallback ring tone:', error);
+      console.error('❌ Failed to create fallback ring tone:', error);
       this.playDefaultRingTone();
     }
   }
 
   private playDefaultRingTone() {
+    console.log('🎶 playDefaultRingTone() called');
     try {
       // Create a simple beep sound using HTML5 audio
       const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEaAzKH0fPTgjAHJXfH8N2QQAoUXrTp66hVFApGn+DyvmEaAw==');
-      audio.volume = 0.5;
-      audio.play().catch(error => {
-        console.warn('Failed to play default ring tone:', error);
+      audio.volume = 0.8;
+      audio.play().then(() => {
+        console.log('✅ Default ring tone played successfully');
+      }).catch(error => {
+        console.warn('❌ Failed to play default ring tone:', error);
+        // Try alternative approach
+        this.playAlternativeSound();
       });
     } catch (error) {
-      console.error('Failed to create default ring tone:', error);
+      console.error('❌ Failed to create default ring tone:', error);
+      this.playAlternativeSound();
+    }
+  }
+
+  private playAlternativeSound() {
+    console.log('🔔 Trying alternative sound approach...');
+    try {
+      // Try a different audio approach
+      const audio = new Audio();
+      audio.src = 'data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAATM=';
+      audio.volume = 0.9;
+      audio.loop = false;
+
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          console.log('✅ Alternative sound played successfully');
+        }).catch(error => {
+          console.warn('❌ Alternative sound also failed:', error);
+          // Last resort: try to create audio context manually
+          this.tryManualAudioContext();
+        });
+      }
+    } catch (error) {
+      console.error('❌ Alternative sound failed:', error);
+      this.tryManualAudioContext();
+    }
+  }
+
+  private tryManualAudioContext() {
+    console.log('🎵 Trying manual audio context creation...');
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.5);
+
+      console.log('✅ Manual audio context sound created');
+    } catch (error) {
+      console.error('❌ Manual audio context also failed:', error);
     }
   }
 

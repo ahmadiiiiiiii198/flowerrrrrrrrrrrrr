@@ -28,7 +28,6 @@ import OrderNotifications from '@/components/OrderNotifications';
 import OrderSystemTester from '@/components/OrderSystemTester';
 import phoneNotificationService from '@/services/phoneNotificationService';
 import backgroundOrderService from '@/services/backgroundOrderService';
-import { QuickNotificationTest } from '@/components/QuickNotificationTest';
 
 interface Order {
   id: string;
@@ -543,6 +542,20 @@ const OrderDashboard = () => {
               </Button>
             )}
 
+            {/* Test Sound Button */}
+            <Button
+              size="sm"
+              onClick={() => {
+                console.log('🧪 Testing notification sound directly...');
+                phoneNotificationService.notifyNewOrder('TEST-AUDIO', 'Audio Test');
+              }}
+              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 bg-blue-600 hover:bg-blue-700 text-white font-bold"
+            >
+              <Volume2 className="w-4 h-4" />
+              <span className="hidden sm:inline">🎵 TEST SOUND</span>
+              <span className="sm:hidden">🎵 TEST</span>
+            </Button>
+
             {/* Notification Status Indicator */}
             {isPhoneRinging && (
               <div className="flex items-center gap-1 px-2 py-1 bg-red-100 border border-red-300 rounded text-red-700 text-xs animate-pulse">
@@ -673,9 +686,6 @@ const OrderDashboard = () => {
           </CardContent>
         </Card>
       </div>
-
-      {/* Notification Test Component */}
-      <QuickNotificationTest />
 
       {/* Main Content */}
       <Tabs defaultValue="dashboard" className="space-y-4 sm:space-y-6">
