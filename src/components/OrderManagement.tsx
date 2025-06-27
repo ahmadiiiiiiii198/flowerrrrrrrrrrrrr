@@ -156,51 +156,67 @@ const OrderManagement = () => {
   }
 
   return (
-    <div className="space-y-4 md:space-y-6">
-      {/* Mobile-optimized header */}
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-          <h2 className="text-lg md:text-2xl font-semibold text-center md:text-left">Order Management</h2>
+    <div className="space-y-6 md:space-y-8">
+      {/* Francesco Fiori Header */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6">
+          <div className="flex items-center justify-center md:justify-start gap-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-white to-emerald-50 rounded-full flex items-center justify-center shadow-lg overflow-hidden border-2 border-emerald-200">
+              <img
+                src="https://despodpgvkszyexvcbft.supabase.co/storage/v1/object/public/uploads/logos/1749735172947-oi6nr6gnk7.png"
+                alt="Francesco Fiori & Piante Logo"
+                className="w-8 h-8 object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  const fallback = document.createElement('span');
+                  fallback.className = 'text-2xl';
+                  fallback.textContent = '🌿';
+                  e.currentTarget.parentElement!.appendChild(fallback);
+                }}
+              />
+            </div>
+            <h2 className="text-xl md:text-3xl font-bold text-gray-800 text-center md:text-left font-serif">Gestione Ordini</h2>
+          </div>
         </div>
-        <div className="flex flex-col gap-2 md:flex-row md:items-center md:space-x-4">
-          <div className="text-center p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm text-blue-700">
-              📱 Order notifications now handled by dedicated <a href="/orders" className="font-semibold underline">Order Dashboard</a>
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:space-x-6">
+          <div className="text-center p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+            <p className="text-sm text-emerald-700 font-medium">
+              📱 Notifiche ordini gestite dalla <a href="/orders" className="font-bold underline hover:text-emerald-800">Dashboard Dedicata</a>
             </p>
           </div>
-          <div className="flex items-center justify-center md:justify-start space-x-2 text-xs md:text-sm text-gray-600">
-            <DollarSign className="w-3 h-3 md:w-4 md:h-4" />
-            <span>
-              Total: {formatCurrency(orders?.reduce((sum, order) => sum + Number(order.total_amount), 0) || 0)}
+          <div className="flex items-center justify-center md:justify-start space-x-2 text-sm md:text-base text-gray-700 bg-white p-3 rounded-lg border border-gray-200">
+            <DollarSign className="w-4 h-4 md:w-5 md:h-5 text-emerald-600" />
+            <span className="font-semibold">
+              Totale: {formatCurrency(orders?.reduce((sum, order) => sum + Number(order.total_amount), 0) || 0)}
             </span>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-        <div className="space-y-3 md:space-y-4">
-          <h3 className="text-base md:text-lg font-medium">Recent Orders</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+        <div className="space-y-4 md:space-y-6">
+          <h3 className="text-lg md:text-xl font-semibold text-gray-800 border-b border-gray-200 pb-2">Ordini Recenti</h3>
           {orders && orders.length > 0 ? (
-            <div className="space-y-2 md:space-y-3 max-h-80 md:max-h-96 overflow-y-auto">
+            <div className="space-y-3 md:space-y-4 max-h-80 md:max-h-96 overflow-y-auto">
               {orders.map((order) => (
                 <Card
                   key={order.id}
-                  className={`cursor-pointer transition-all hover:shadow-md ${
-                    selectedOrder?.id === order.id ? 'ring-2 ring-blue-500' : ''
+                  className={`cursor-pointer transition-all hover:shadow-lg border ${
+                    selectedOrder?.id === order.id ? 'ring-2 ring-emerald-500 border-emerald-300' : 'border-gray-200 hover:border-emerald-300'
                   }`}
                   onClick={() => setSelectedOrder(order)}
                 >
-                  <CardContent className="p-3 md:p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="font-medium text-sm md:text-base">#{order.order_number}</div>
+                  <CardContent className="p-3 sm:p-4 md:p-5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 sm:mb-3 gap-2">
+                      <div className="font-bold text-sm md:text-base text-gray-800">#{order.order_number}</div>
                       {getStatusBadge(order.status)}
                     </div>
-                    <div className="text-xs md:text-sm text-gray-600 space-y-1">
-                      <div className="truncate">{order.customer_name}</div>
-                      <div className="truncate">{order.customer_email}</div>
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">{formatCurrency(Number(order.total_amount))}</span>
-                        <span className="text-xs">{formatDate(order.created_at)}</span>
+                    <div className="text-xs sm:text-sm md:text-base text-gray-700 space-y-1 sm:space-y-2">
+                      <div className="truncate font-medium">{order.customer_name}</div>
+                      <div className="truncate text-gray-600 text-xs sm:text-sm">{order.customer_email}</div>
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center pt-2 border-t border-gray-100 gap-1 sm:gap-0">
+                        <span className="font-bold text-emerald-700 text-sm sm:text-base">{formatCurrency(Number(order.total_amount))}</span>
+                        <span className="text-xs text-gray-500">{formatDate(order.created_at)}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -208,9 +224,13 @@ const OrderManagement = () => {
               ))}
             </div>
           ) : (
-            <Card>
-              <CardContent className="p-6 md:p-8 text-center text-gray-500">
-                <p className="text-sm md:text-base">No orders found</p>
+            <Card className="border-gray-200">
+              <CardContent className="p-6 sm:p-8 md:p-12 text-center text-gray-500">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <Package className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
+                </div>
+                <p className="text-sm sm:text-base md:text-lg font-medium">Nessun ordine trovato</p>
+                <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">Gli ordini appariranno qui quando verranno effettuati</p>
               </CardContent>
             </Card>
           )}

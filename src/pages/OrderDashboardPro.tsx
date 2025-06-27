@@ -214,6 +214,7 @@ const OrderDashboardPro: React.FC = () => {
   // Data loading with ALL columns
   const loadOrders = useCallback(async () => {
     console.log('📊 Loading orders from database...');
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from('orders')
@@ -241,8 +242,14 @@ const OrderDashboardPro: React.FC = () => {
 
       if (error) throw error;
 
-      console.log(`✅ Loaded ${data?.length || 0} orders from database`);
+      console.log(`✅ Loaded ${data?.length || 0} orders from database:`, data);
       setOrders(data || []);
+
+      // Show success toast for debugging
+      toast({
+        title: '✅ Orders Loaded',
+        description: `Successfully loaded ${data?.length || 0} orders`,
+      });
     } catch (error) {
       console.error('❌ Failed to load orders:', error);
       toast({
@@ -294,7 +301,7 @@ const OrderDashboardPro: React.FC = () => {
     console.log('🔄 Setting up real-time subscriptions...');
 
     const orderChannel = supabase
-      .channel('orders-realtime-channel')
+      .channel('orders-realtime-channel-' + Date.now()) // Unique channel name
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
@@ -304,17 +311,26 @@ const OrderDashboardPro: React.FC = () => {
         const newOrder = payload.new as Order;
 
         // Add to orders list
-        setOrders(prev => [newOrder, ...prev]);
+        setOrders(prev => {
+          console.log('📝 Adding new order to list. Previous count:', prev.length);
+          const updated = [newOrder, ...prev];
+          console.log('📝 New order list count:', updated.length);
+          return updated;
+        });
+
+        // Always show toast notification
+        toast({
+          title: '🚨 NEW ORDER RECEIVED!',
+          description: `Order #${newOrder.order_number} from ${newOrder.customer_name} - €${newOrder.total_amount}`,
+          duration: 10000,
+        });
 
         if (soundEnabled) {
           console.log('🔊 Starting continuous ringing for new order...');
+          console.log('🎵 Audio initialized:', audioNotifier.isActive);
           audioNotifier.startContinuousRinging();
-
-          toast({
-            title: '🚨 NEW ORDER RECEIVED!',
-            description: `Order #${newOrder.order_number} from ${newOrder.customer_name} - €${newOrder.total_amount}`,
-            duration: 10000,
-          });
+        } else {
+          console.log('🔇 Sound disabled, skipping audio notification');
         }
       })
       .on('postgres_changes', {
@@ -339,10 +355,24 @@ const OrderDashboardPro: React.FC = () => {
       })
       .subscribe((status) => {
         console.log('📡 Orders subscription status:', status);
+        if (status === 'SUBSCRIBED') {
+          console.log('✅ Orders real-time subscription ACTIVE');
+          toast({
+            title: '📡 Real-time Connected',
+            description: 'Orders will now appear instantly',
+          });
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error('❌ Orders subscription ERROR');
+          toast({
+            title: '❌ Real-time Error',
+            description: 'Orders may not appear instantly',
+            variant: 'destructive'
+          });
+        }
       });
 
     const notificationChannel = supabase
-      .channel('notifications-realtime-channel')
+      .channel('notifications-realtime-channel-' + Date.now()) // Unique channel name
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
@@ -350,7 +380,10 @@ const OrderDashboardPro: React.FC = () => {
       }, (payload) => {
         console.log('🔔 New notification:', payload);
         const newNotification = payload.new as Notification;
-        setNotifications(prev => [newNotification, ...prev]);
+        setNotifications(prev => {
+          console.log('📝 Adding new notification. Previous count:', prev.length);
+          return [newNotification, ...prev];
+        });
       })
       .on('postgres_changes', {
         event: 'UPDATE',
@@ -365,6 +398,11 @@ const OrderDashboardPro: React.FC = () => {
       })
       .subscribe((status) => {
         console.log('📡 Notifications subscription status:', status);
+        if (status === 'SUBSCRIBED') {
+          console.log('✅ Notifications real-time subscription ACTIVE');
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error('❌ Notifications subscription ERROR');
+        }
       });
 
     return () => {
@@ -404,8 +442,19 @@ const OrderDashboardPro: React.FC = () => {
     console.log('🧪 Testing notification sound...');
     audioNotifier.testRing();
     toast({
-      title: '🧪 Testing Audio',
-      description: 'Playing test notification sound for 3 seconds',
+      title: '🧪 Test Audio',
+      description: 'Riproduzione suono di notifica per 3 secondi',
+    });
+  };
+
+  // Manual refresh function
+  const handleRefresh = async () => {
+    console.log('🔄 Manual refresh triggered');
+    setLoading(true);
+    await Promise.all([loadOrders(), loadNotifications()]);
+    toast({
+      title: '🔄 Aggiornato',
+      description: 'Ordini e notifiche sono stati aggiornati',
     });
   };
 
@@ -413,6 +462,9 @@ const OrderDashboardPro: React.FC = () => {
   const createTestOrder = async () => {
     try {
       console.log('🧪 Creating test order...');
+      console.log('🔊 Sound enabled:', soundEnabled);
+      console.log('🎵 Audio system ready:', audioNotifier.isActive);
+
       const testOrder = {
         order_number: `TEST-${Date.now()}`,
         customer_name: 'Test Customer',
@@ -423,7 +475,7 @@ const OrderDashboardPro: React.FC = () => {
         status: 'pending',
         payment_status: 'pending',
         payment_method: 'pay_later',
-        notes: 'Test order for notification system verification',
+        notes: 'Ordine di test per verifica sistema notifiche',
         metadata: { test: true, created_by: 'dashboard_test' }
       };
 
@@ -436,17 +488,21 @@ const OrderDashboardPro: React.FC = () => {
       if (error) throw error;
 
       console.log('✅ Test order created successfully:', data);
+
+      // Force refresh orders list to ensure it shows up
+      await loadOrders();
+
       toast({
-        title: '🧪 Test Order Created',
-        description: `Test order ${data.order_number} created - should trigger continuous ringing!`,
+        title: '🧪 Ordine di Test Creato',
+        description: `Ordine di test ${data.order_number} creato - dovrebbe attivare la suoneria continua!`,
         duration: 5000,
       });
 
     } catch (error) {
       console.error('❌ Failed to create test order:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to create test order',
+        title: 'Errore',
+        description: 'Impossibile creare ordine di test',
         variant: 'destructive'
       });
     }
@@ -497,14 +553,14 @@ const OrderDashboardPro: React.FC = () => {
       setSelectedOrder(null);
 
       toast({
-        title: '✅ Order Deleted',
-        description: 'Order has been successfully deleted',
+        title: '✅ Ordine Eliminato',
+        description: 'Ordine eliminato con successo',
       });
     } catch (error) {
       console.error('Failed to delete order:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to delete order',
+        title: 'Errore',
+        description: 'Impossibile eliminare ordine',
         variant: 'destructive'
       });
     }
@@ -535,14 +591,14 @@ const OrderDashboardPro: React.FC = () => {
       setSelectedOrder(null);
 
       toast({
-        title: '✅ All Orders Deleted',
-        description: `Successfully deleted all ${orders.length} orders`,
+        title: '✅ Tutti gli Ordini Eliminati',
+        description: `Eliminati con successo tutti i ${orders.length} ordini`,
       });
     } catch (error) {
       console.error('Failed to delete all orders:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to delete all orders',
+        title: 'Errore',
+        description: 'Impossibile eliminare tutti gli ordini',
         variant: 'destructive'
       });
     }
@@ -602,6 +658,18 @@ const OrderDashboardPro: React.FC = () => {
     }
   };
 
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'pending': return 'In Attesa';
+      case 'paid': return 'Pagato';
+      case 'cancelled': return 'Annullato';
+      case 'processing': return 'In Lavorazione';
+      case 'shipped': return 'Spedito';
+      case 'delivered': return 'Consegnato';
+      default: return 'Sconosciuto';
+    }
+  };
+
   // Filtered orders
   const filteredOrders = orders.filter(order => {
     const matchesSearch = order.order_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -620,223 +688,253 @@ const OrderDashboardPro: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 font-medium">Loading order dashboard...</p>
+          <div className="w-16 h-16 border-4 border-rose-200 border-t-rose-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-rose-600 font-medium">🌸 Loading flower shop dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800">
-      {/* Animated Background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -inset-10 opacity-50">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
-          <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
-          <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000"></div>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-amber-50 relative">
+      {/* Elegant Francesco Fiori Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Subtle botanical elements */}
+        <div className="absolute top-20 left-10 w-6 h-6 bg-emerald-200/20 rounded-full blur-sm animate-pulse" style={{animationDelay: '0s', animationDuration: '4s'}}></div>
+        <div className="absolute top-40 right-20 w-4 h-4 bg-amber-200/30 rounded-full blur-sm animate-pulse" style={{animationDelay: '2s', animationDuration: '5s'}}></div>
+        <div className="absolute bottom-20 left-1/4 w-8 h-8 bg-emerald-100/30 rounded-full blur-sm animate-pulse" style={{animationDelay: '1s', animationDuration: '4.5s'}}></div>
+        <div className="absolute bottom-40 right-1/3 w-5 h-5 bg-amber-100/40 rounded-full blur-sm animate-pulse" style={{animationDelay: '3s', animationDuration: '4s'}}></div>
+        <div className="absolute top-1/2 left-1/2 w-3 h-3 bg-emerald-200/25 rounded-full blur-sm animate-pulse" style={{animationDelay: '1.5s', animationDuration: '5s'}}></div>
+
+        {/* Elegant gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/30 via-transparent to-amber-50/30"></div>
       </div>
 
       <div className="relative z-10 container mx-auto px-4 py-8 max-w-7xl">
-        {/* Header */}
-        <div className="mb-12">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        {/* Floral Header - Mobile Optimized */}
+        <div className="mb-8 md:mb-12">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 md:gap-6">
             <div className="text-center lg:text-left">
-              <h1 className="text-6xl font-black bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent mb-4">
-                Order Command Center
-              </h1>
-              <p className="text-xl text-blue-100 font-medium">Real-time order management & analytics</p>
-              <div className="flex items-center gap-2 mt-3 justify-center lg:justify-start">
-                <Activity className="w-5 h-5 text-green-400 animate-pulse" />
-                <span className="text-green-300 font-medium">Live System Active</span>
+              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start mb-4 md:mb-6 gap-3 sm:gap-6">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-white to-emerald-50 rounded-full flex items-center justify-center shadow-xl overflow-hidden border-2 sm:border-3 border-emerald-200/50">
+                  <img
+                    src="https://despodpgvkszyexvcbft.supabase.co/storage/v1/object/public/uploads/logos/1749735172947-oi6nr6gnk7.png"
+                    alt="Francesco Fiori & Piante Logo"
+                    className="w-10 h-10 sm:w-16 sm:h-16 object-contain"
+                    onError={(e) => {
+                      // Fallback to botanical emoji if logo fails to load
+                      e.currentTarget.style.display = 'none';
+                      const fallback = document.createElement('span');
+                      fallback.className = 'text-2xl sm:text-4xl';
+                      fallback.textContent = '🌿';
+                      e.currentTarget.parentElement!.appendChild(fallback);
+                    }}
+                  />
+                </div>
+                <div className="text-center sm:text-left">
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold text-gray-800 mb-2 md:mb-3 font-serif leading-tight">
+                    Francesco Fiori & Piante
+                  </h1>
+                  <p className="text-base sm:text-lg md:text-xl text-emerald-700 font-medium tracking-wide">Gestione Ordini in Tempo Reale</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 md:gap-3 mt-3 md:mt-4 justify-center lg:justify-start">
+                <div className="w-2 h-2 md:w-3 md:h-3 bg-emerald-500 rounded-full animate-pulse shadow-sm"></div>
+                <span className="text-emerald-700 font-semibold text-base md:text-lg">Sistema Attivo</span>
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-4 justify-center lg:justify-end">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4 justify-center lg:justify-end">
               {isAudioActive && (
                 <Button
                   onClick={handleStopAudio}
-                  className="bg-red-500 hover:bg-red-600 text-white shadow-2xl animate-pulse border-2 border-red-300"
-                  size="lg"
+                  className="bg-red-500 hover:bg-red-600 text-white shadow-2xl animate-pulse border-2 border-red-300 text-xs sm:text-sm"
+                  size="sm"
                 >
-                  <VolumeX className="w-5 h-5 mr-2" />
-                  Stop Alert
+                  <VolumeX className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Stop Alert</span>
+                  <span className="sm:hidden">Stop</span>
                 </Button>
               )}
 
               <Button
                 onClick={toggleSound}
                 variant="outline"
-                size="lg"
-                className={`shadow-xl border-2 backdrop-blur-sm ${
+                size="sm"
+                className={`shadow-lg border-2 backdrop-blur-sm rounded-full text-xs sm:text-sm ${
                   soundEnabled
-                    ? 'bg-green-500/20 border-green-300 text-green-100 hover:bg-green-500/30'
-                    : 'bg-gray-500/20 border-gray-400 text-gray-300 hover:bg-gray-500/30'
+                    ? 'bg-green-100 border-green-300 text-green-700 hover:bg-green-200'
+                    : 'bg-red-100 border-red-300 text-red-700 hover:bg-red-200'
                 }`}
               >
-                {soundEnabled ? <Volume2 className="w-5 h-5 mr-2" /> : <VolumeX className="w-5 h-5 mr-2" />}
-                {soundEnabled ? 'Sound On' : 'Sound Off'}
+                {soundEnabled ? <Volume2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> : <VolumeX className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />}
+                <span className="hidden sm:inline">🔊 {soundEnabled ? 'Audio Attivo' : 'Audio Spento'}</span>
+                <span className="sm:hidden">🔊</span>
               </Button>
 
               <Button
                 onClick={testNotificationSound}
                 variant="outline"
-                size="lg"
-                className="bg-purple-500/20 border-purple-300 text-purple-100 hover:bg-purple-500/30 shadow-xl border-2 backdrop-blur-sm"
+                size="sm"
+                className="bg-purple-100 border-purple-300 text-purple-700 hover:bg-purple-200 shadow-lg border-2 rounded-full text-xs sm:text-sm"
               >
-                <Bell className="w-5 h-5 mr-2" />
-                Test Audio
+                <Bell className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">🔔 Test Audio</span>
+                <span className="sm:hidden">🔔</span>
               </Button>
 
               <Button
                 onClick={createTestOrder}
                 variant="outline"
-                size="lg"
-                className="bg-yellow-500/20 border-yellow-300 text-yellow-100 hover:bg-yellow-500/30 shadow-xl border-2 backdrop-blur-sm"
+                size="sm"
+                className="bg-yellow-100 border-yellow-300 text-yellow-700 hover:bg-yellow-200 shadow-lg border-2 rounded-full text-xs sm:text-sm"
               >
-                <Package className="w-5 h-5 mr-2" />
-                Test Order
+                <Package className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">🌻 Test Ordine</span>
+                <span className="sm:hidden">🌻</span>
               </Button>
 
               <Button
-                onClick={loadOrders}
+                onClick={handleRefresh}
                 variant="outline"
-                size="lg"
-                className="bg-blue-500/20 border-blue-300 text-blue-100 hover:bg-blue-500/30 shadow-xl border-2 backdrop-blur-sm"
+                size="sm"
+                className="bg-blue-100 border-blue-300 text-blue-700 hover:bg-blue-200 shadow-lg border-2 rounded-full text-xs sm:text-sm"
               >
-                <RotateCcw className="w-5 h-5 mr-2" />
-                Refresh
+                <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">🔄 Aggiorna</span>
+                <span className="sm:hidden">🔄</span>
               </Button>
 
               <Button
                 onClick={deleteAllOrders}
                 variant="outline"
-                size="lg"
-                className="bg-red-500/20 border-red-300 text-red-100 hover:bg-red-500/30 shadow-xl border-2 backdrop-blur-sm"
+                size="sm"
+                className="bg-red-100 border-red-300 text-red-700 hover:bg-red-200 shadow-lg border-2 rounded-full text-xs sm:text-sm"
                 disabled={orders.length === 0}
               >
-                <Trash2 className="w-5 h-5 mr-2" />
-                Clear All
+                <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">🗑️ Cancella Tutto</span>
+                <span className="sm:hidden">🗑️</span>
               </Button>
             </div>
           </div>
         </div>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-          <Card className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 backdrop-blur-xl border border-blue-300/30 shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 hover:scale-105">
-            <CardContent className="p-8">
+        {/* Francesco Fiori Statistics Cards - Mobile Optimized */}
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-8 md:mb-12">
+          <Card className="bg-white/90 backdrop-blur-sm border border-emerald-200 shadow-lg hover:shadow-emerald-200/50 transition-all duration-300 hover:scale-105 rounded-xl">
+            <CardContent className="p-3 sm:p-4 md:p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-blue-100 font-semibold text-sm uppercase tracking-wider">Total Orders</p>
-                  <p className="text-5xl font-black text-white mt-2">{orders.length}</p>
-                  <div className="flex items-center gap-2 mt-3">
-                    <ArrowUpRight className="w-4 h-4 text-green-400" />
-                    <span className="text-green-300 text-sm font-medium">All time</span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-gray-700 font-semibold text-xs sm:text-sm uppercase tracking-wider mb-1 sm:mb-2 truncate">Ordini Totali</p>
+                  <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-1 sm:mb-2">{orders.length}</p>
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-600" />
+                    <span className="text-emerald-700 text-xs sm:text-sm font-medium truncate">Tutti i tempi</span>
                   </div>
                 </div>
-                <div className="p-4 bg-blue-500/30 rounded-2xl border border-blue-300/50">
-                  <ShoppingBag className="w-8 h-8 text-blue-100" />
+                <div className="p-2 sm:p-3 bg-emerald-100 rounded-xl border border-emerald-200 ml-2">
+                  <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-emerald-700" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-xl border border-emerald-300/30 shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300 hover:scale-105">
-            <CardContent className="p-8">
+          <Card className="bg-white/90 backdrop-blur-sm border border-amber-200 shadow-lg hover:shadow-amber-200/50 transition-all duration-300 hover:scale-105 rounded-xl">
+            <CardContent className="p-3 sm:p-4 md:p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-emerald-100 font-semibold text-sm uppercase tracking-wider">Today's Orders</p>
-                  <p className="text-5xl font-black text-white mt-2">{todayOrders.length}</p>
-                  <div className="flex items-center gap-2 mt-3">
-                    <Zap className="w-4 h-4 text-yellow-400" />
-                    <span className="text-yellow-300 text-sm font-medium">Live today</span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-gray-700 font-semibold text-xs sm:text-sm uppercase tracking-wider mb-1 sm:mb-2 truncate">Ordini Oggi</p>
+                  <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-1 sm:mb-2">{todayOrders.length}</p>
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <Zap className="w-3 h-3 sm:w-4 sm:h-4 text-amber-600" />
+                    <span className="text-amber-700 text-xs sm:text-sm font-medium truncate">Freschi oggi</span>
                   </div>
                 </div>
-                <div className="p-4 bg-emerald-500/30 rounded-2xl border border-emerald-300/50">
-                  <Calendar className="w-8 h-8 text-emerald-100" />
+                <div className="p-2 sm:p-3 bg-amber-100 rounded-xl border border-amber-200 ml-2">
+                  <Calendar className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-amber-700" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-amber-500/20 to-orange-500/20 backdrop-blur-xl border border-amber-300/30 shadow-2xl hover:shadow-amber-500/25 transition-all duration-300 hover:scale-105">
-            <CardContent className="p-8">
+          <Card className="bg-white/90 backdrop-blur-sm border border-orange-200 shadow-lg hover:shadow-orange-200/50 transition-all duration-300 hover:scale-105 rounded-xl">
+            <CardContent className="p-3 sm:p-4 md:p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-amber-100 font-semibold text-sm uppercase tracking-wider">Pending Orders</p>
-                  <p className="text-5xl font-black text-white mt-2">{pendingOrders.length}</p>
-                  <div className="flex items-center gap-2 mt-3">
-                    <Clock className="w-4 h-4 text-amber-400 animate-pulse" />
-                    <span className="text-amber-300 text-sm font-medium">Awaiting</span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-gray-700 font-semibold text-xs sm:text-sm uppercase tracking-wider mb-1 sm:mb-2 truncate">In Attesa</p>
+                  <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-1 sm:mb-2">{pendingOrders.length}</p>
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <Clock className="w-3 h-3 sm:w-4 sm:h-4 text-orange-600 animate-pulse" />
+                    <span className="text-orange-700 text-xs sm:text-sm font-medium truncate">In lavorazione</span>
                   </div>
                 </div>
-                <div className="p-4 bg-amber-500/30 rounded-2xl border border-amber-300/50">
-                  <Clock className="w-8 h-8 text-amber-100" />
+                <div className="p-2 sm:p-3 bg-orange-100 rounded-xl border border-orange-200 ml-2">
+                  <Clock className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-orange-700" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 backdrop-blur-xl border border-green-300/30 shadow-2xl hover:shadow-green-500/25 transition-all duration-300 hover:scale-105">
-            <CardContent className="p-8">
+          <Card className="bg-white/90 backdrop-blur-sm border border-green-200 shadow-lg hover:shadow-green-200/50 transition-all duration-300 hover:scale-105 rounded-xl">
+            <CardContent className="p-3 sm:p-4 md:p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-green-100 font-semibold text-sm uppercase tracking-wider">Total Revenue</p>
-                  <p className="text-5xl font-black text-white mt-2">€{totalRevenue.toFixed(2)}</p>
-                  <div className="flex items-center gap-2 mt-3">
-                    <TrendingUp className="w-4 h-4 text-green-400" />
-                    <span className="text-green-300 text-sm font-medium">Earnings</span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-gray-700 font-semibold text-xs sm:text-sm uppercase tracking-wider mb-1 sm:mb-2 truncate">Ricavi Totali</p>
+                  <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 mb-1 sm:mb-2">€{totalRevenue.toFixed(2)}</p>
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
+                    <span className="text-green-700 text-xs sm:text-sm font-medium truncate">Crescita continua</span>
                   </div>
                 </div>
-                <div className="p-4 bg-green-500/30 rounded-2xl border border-green-300/50">
-                  <DollarSign className="w-8 h-8 text-green-100" />
+                <div className="p-2 sm:p-3 bg-green-100 rounded-xl border border-green-200 ml-2">
+                  <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-green-700" />
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
+        {/* Main Content Grid - Mobile Optimized */}
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
           {/* Orders List */}
           <div className="xl:col-span-3">
-            <Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl">
-              <CardHeader className="border-b border-white/10 bg-white/5">
+            <Card className="bg-white/95 backdrop-blur-sm border border-gray-200 shadow-lg">
+              <CardHeader className="border-b border-gray-200 bg-gray-50/50">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <CardTitle className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-500/30 rounded-xl">
-                      <Package className="w-6 h-6 text-blue-100" />
+                    <div className="p-2 bg-emerald-100 rounded-xl border border-emerald-200">
+                      <Package className="w-6 h-6 text-emerald-700" />
                     </div>
-                    <span className="text-white font-bold text-xl">Orders ({filteredOrders.length})</span>
+                    <span className="text-gray-800 font-bold text-xl">Ordini ({filteredOrders.length})</span>
                   </CardTitle>
 
                   <div className="flex items-center gap-3">
                     <div className="relative">
-                      <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60" />
+                      <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
                       <input
                         type="text"
-                        placeholder="Search orders..."
+                        placeholder="Cerca ordini..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/60 focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm"
+                        className="pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-800 placeholder-gray-500 focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-colors"
                       />
                     </div>
 
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
-                      className="px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm"
+                      className="px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-800 focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-colors"
                     >
-                      <option value="all" className="bg-gray-800">All Status</option>
-                      <option value="pending" className="bg-gray-800">Pending</option>
-                      <option value="paid" className="bg-gray-800">Paid</option>
-                      <option value="processing" className="bg-gray-800">Processing</option>
-                      <option value="shipped" className="bg-gray-800">Shipped</option>
-                      <option value="delivered" className="bg-gray-800">Delivered</option>
-                      <option value="cancelled" className="bg-gray-800">Cancelled</option>
+                      <option value="all">Tutti gli Stati</option>
+                      <option value="pending">In Attesa</option>
+                      <option value="paid">Pagato</option>
+                      <option value="processing">In Lavorazione</option>
+                      <option value="shipped">Spedito</option>
+                      <option value="delivered">Consegnato</option>
+                      <option value="cancelled">Annullato</option>
                     </select>
                   </div>
                 </div>
@@ -844,31 +942,31 @@ const OrderDashboardPro: React.FC = () => {
               <CardContent className="p-0">
                 {filteredOrders.length === 0 ? (
                   <div className="text-center py-20">
-                    <div className="p-6 bg-white/10 rounded-3xl inline-block mb-6">
-                      <Package className="w-20 h-20 mx-auto text-white/40" />
+                    <div className="p-6 bg-gray-100 rounded-3xl inline-block mb-6">
+                      <Package className="w-20 h-20 mx-auto text-gray-400" />
                     </div>
-                    <p className="text-white/80 text-xl font-semibold">No orders found</p>
-                    <p className="text-white/60 text-sm mt-2">Orders will appear here when customers place them</p>
+                    <p className="text-gray-700 text-xl font-semibold">Nessun ordine trovato</p>
+                    <p className="text-gray-500 text-sm mt-2">Gli ordini appariranno qui quando i clienti li effettueranno</p>
                   </div>
                 ) : (
                   <div className="max-h-[600px] overflow-y-auto">
                     {filteredOrders.map((order, index) => (
                       <div
                         key={order.id}
-                        className={`p-6 border-b border-white/10 hover:bg-white/5 transition-all duration-300 ${
-                          selectedOrder?.id === order.id ? 'bg-blue-500/20 border-l-4 border-blue-400' : ''
+                        className={`p-6 border-b border-gray-200 hover:bg-gray-50 transition-all duration-300 ${
+                          selectedOrder?.id === order.id ? 'bg-emerald-50 border-l-4 border-emerald-500' : ''
                         }`}
                       >
                         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                           <div className="flex-1">
                             <div className="flex items-center gap-4 mb-4">
-                              <h3 className="font-black text-xl text-white">
+                              <h3 className="font-bold text-xl text-gray-800">
                                 #{order.order_number}
                               </h3>
                               <Badge className={`${getStatusColor(order.status)} border-0 px-3 py-1 text-sm font-semibold`}>
                                 <span className="flex items-center gap-2">
                                   {getStatusIcon(order.status)}
-                                  {order.status.toUpperCase()}
+                                  {getStatusText(order.status)}
                                 </span>
                               </Badge>
 
@@ -876,38 +974,38 @@ const OrderDashboardPro: React.FC = () => {
                               <select
                                 value={order.status}
                                 onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                                className="px-3 py-1 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-400 backdrop-blur-sm"
+                                className="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-800 text-sm focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400"
                                 onClick={(e) => e.stopPropagation()}
                               >
-                                <option value="pending" className="bg-gray-800">Pending</option>
-                                <option value="paid" className="bg-gray-800">Paid</option>
-                                <option value="processing" className="bg-gray-800">Processing</option>
-                                <option value="shipped" className="bg-gray-800">Shipped</option>
-                                <option value="delivered" className="bg-gray-800">Delivered</option>
-                                <option value="cancelled" className="bg-gray-800">Cancelled</option>
+                                <option value="pending">In Attesa</option>
+                                <option value="paid">Pagato</option>
+                                <option value="processing">In Lavorazione</option>
+                                <option value="shipped">Spedito</option>
+                                <option value="delivered">Consegnato</option>
+                                <option value="cancelled">Annullato</option>
                               </select>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                               <div className="space-y-3">
                                 <div className="flex items-center gap-3">
-                                  <div className="p-2 bg-blue-500/20 rounded-lg">
-                                    <User className="w-4 h-4 text-blue-300" />
+                                  <div className="p-2 bg-emerald-100 rounded-lg">
+                                    <User className="w-4 h-4 text-emerald-700" />
                                   </div>
-                                  <span className="font-semibold text-white">{order.customer_name}</span>
+                                  <span className="font-semibold text-gray-800">{order.customer_name}</span>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                  <div className="p-2 bg-purple-500/20 rounded-lg">
-                                    <Mail className="w-4 h-4 text-purple-300" />
+                                  <div className="p-2 bg-blue-100 rounded-lg">
+                                    <Mail className="w-4 h-4 text-blue-700" />
                                   </div>
-                                  <span className="text-white/80">{order.customer_email}</span>
+                                  <span className="text-gray-700">{order.customer_email}</span>
                                 </div>
                                 {order.customer_phone && (
                                   <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-green-500/20 rounded-lg">
-                                      <Phone className="w-4 h-4 text-green-300" />
+                                    <div className="p-2 bg-green-100 rounded-lg">
+                                      <Phone className="w-4 h-4 text-green-700" />
                                     </div>
-                                    <span className="text-white/80">{order.customer_phone}</span>
+                                    <span className="text-gray-700">{order.customer_phone}</span>
                                   </div>
                                 )}
                               </div>
@@ -915,42 +1013,42 @@ const OrderDashboardPro: React.FC = () => {
                               <div className="space-y-3">
                                 {order.customer_address && (
                                   <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-red-500/20 rounded-lg">
-                                      <MapPin className="w-4 h-4 text-red-300" />
+                                    <div className="p-2 bg-amber-100 rounded-lg">
+                                      <MapPin className="w-4 h-4 text-amber-700" />
                                     </div>
-                                    <span className="text-white/80 text-sm">{order.customer_address}</span>
+                                    <span className="text-gray-700 text-sm">{order.customer_address}</span>
                                   </div>
                                 )}
                                 <div className="flex items-center gap-3">
-                                  <div className="p-2 bg-yellow-500/20 rounded-lg">
-                                    <Calendar className="w-4 h-4 text-yellow-300" />
+                                  <div className="p-2 bg-purple-100 rounded-lg">
+                                    <Calendar className="w-4 h-4 text-purple-700" />
                                   </div>
-                                  <span className="text-white/80 text-sm">
+                                  <span className="text-gray-700 text-sm">
                                     {formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                  <div className="p-2 bg-indigo-500/20 rounded-lg">
-                                    <CreditCard className="w-4 h-4 text-indigo-300" />
+                                  <div className="p-2 bg-indigo-100 rounded-lg">
+                                    <CreditCard className="w-4 h-4 text-indigo-700" />
                                   </div>
-                                  <span className="text-white/80 text-sm">
-                                    Payment: {order.payment_status}
+                                  <span className="text-gray-700 text-sm">
+                                    Pagamento: {order.payment_status}
                                   </span>
                                 </div>
                               </div>
                             </div>
 
                             {order.notes && (
-                              <div className="mt-4 p-4 bg-white/10 rounded-xl border border-white/20">
-                                <p className="text-white/90 text-sm">{order.notes}</p>
+                              <div className="mt-4 p-4 bg-gray-100 rounded-xl border border-gray-200">
+                                <p className="text-gray-800 text-sm">{order.notes}</p>
                               </div>
                             )}
                           </div>
 
                           <div className="text-right space-y-4">
                             <div className="flex items-center gap-2 justify-end">
-                              <DollarSign className="w-6 h-6 text-green-400" />
-                              <span className="font-black text-3xl text-green-400">€{order.total_amount}</span>
+                              <DollarSign className="w-6 h-6 text-emerald-600" />
+                              <span className="font-bold text-3xl text-emerald-700">€{order.total_amount}</span>
                             </div>
 
                             <div className="flex flex-col gap-2">
@@ -961,10 +1059,10 @@ const OrderDashboardPro: React.FC = () => {
                                   e.stopPropagation();
                                   setSelectedOrder(order);
                                 }}
-                                className="bg-blue-500/20 border-blue-300 text-blue-100 hover:bg-blue-500/30"
+                                className="bg-emerald-50 border-emerald-300 text-emerald-700 hover:bg-emerald-100"
                               >
                                 <Eye className="w-4 h-4 mr-2" />
-                                View Details
+                                Visualizza
                               </Button>
 
                               <Button
@@ -974,10 +1072,10 @@ const OrderDashboardPro: React.FC = () => {
                                   e.stopPropagation();
                                   deleteOrder(order.id);
                                 }}
-                                className="bg-red-500/20 border-red-300 text-red-100 hover:bg-red-500/30"
+                                className="bg-red-50 border-red-300 text-red-700 hover:bg-red-100"
                               >
                                 <Trash2 className="w-4 h-4 mr-2" />
-                                Delete
+                                Elimina
                               </Button>
                             </div>
                           </div>
@@ -992,11 +1090,11 @@ const OrderDashboardPro: React.FC = () => {
 
           {/* Notifications Panel */}
           <div className="xl:col-span-1">
-            <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-              <CardHeader className="border-b border-gray-100">
+            <Card className="shadow-lg border border-gray-200 bg-white/95 backdrop-blur-sm">
+              <CardHeader className="border-b border-gray-200 bg-gray-50/50">
                 <CardTitle className="flex items-center gap-3">
-                  <Bell className="w-5 h-5 text-purple-600" />
-                  <span>Notifications</span>
+                  <Bell className="w-5 h-5 text-emerald-600" />
+                  <span className="text-gray-800">Notifiche</span>
                   {unreadNotifications.length > 0 && (
                     <Badge variant="destructive" className="ml-auto">
                       {unreadNotifications.length}
@@ -1008,7 +1106,7 @@ const OrderDashboardPro: React.FC = () => {
                 {notifications.length === 0 ? (
                   <div className="text-center py-8">
                     <Bell className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                    <p className="text-gray-500">No notifications</p>
+                    <p className="text-gray-500">Nessuna notifica</p>
                   </div>
                 ) : (
                   <div className="divide-y divide-gray-100 max-h-96 overflow-y-auto">
@@ -1018,7 +1116,7 @@ const OrderDashboardPro: React.FC = () => {
                         className={`p-4 hover:bg-gray-50 transition-colors cursor-pointer ${
                           notification.is_read
                             ? 'opacity-60'
-                            : 'bg-blue-50/50'
+                            : 'bg-emerald-50/50'
                         }`}
                         onClick={() => !notification.is_read && markNotificationAsRead(notification.id)}
                       >
@@ -1026,7 +1124,7 @@ const OrderDashboardPro: React.FC = () => {
                           {notification.is_read ? (
                             <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5" />
                           ) : (
-                            <AlertCircle className="w-4 h-4 text-blue-500 mt-0.5" />
+                            <AlertCircle className="w-4 h-4 text-emerald-500 mt-0.5" />
                           )}
                           <div className="flex-1 min-w-0">
                             <p className={`text-sm ${notification.is_read ? 'text-gray-600' : 'text-gray-900 font-medium'}`}>

@@ -227,150 +227,172 @@ const OrderForm = () => {
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <ShoppingCart className="h-6 w-6" />
-          Place Your Order
+    <Card className="w-full max-w-4xl mx-auto shadow-lg border border-emerald-200 bg-white/95 backdrop-blur-sm">
+      <CardHeader className="bg-gradient-to-r from-emerald-50 to-amber-50 border-b border-emerald-200 p-4 sm:p-6">
+        <CardTitle className="flex flex-col sm:flex-row items-center gap-3 text-gray-800 text-center sm:text-left">
+          <div className="p-2 bg-emerald-100 rounded-lg">
+            <ShoppingCart className="h-5 h-5 sm:h-6 sm:w-6 text-emerald-700" />
+          </div>
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold">Effettua il Tuo Ordine</h2>
+            <p className="text-xs sm:text-sm text-gray-600 font-normal">Francesco Fiori & Piante - Creazioni su misura</p>
+          </div>
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+      <CardContent className="p-4 sm:p-6 md:p-8">
+        <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
           {/* Customer Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="customerName" className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                Full Name *
-              </Label>
-              <Input
-                id="customerName"
-                value={formData.customerName}
-                onChange={(e) => handleInputChange('customerName', e.target.value)}
-                placeholder="Enter your full name"
-                required
-              />
+          <div className="space-y-4 sm:space-y-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">Informazioni Cliente</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              <div className="space-y-2 sm:space-y-3">
+                <Label htmlFor="customerName" className="flex items-center gap-2 text-gray-700 font-medium text-sm sm:text-base">
+                  <User className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-600" />
+                  Nome Completo *
+                </Label>
+                <Input
+                  id="customerName"
+                  value={formData.customerName}
+                  onChange={(e) => handleInputChange('customerName', e.target.value)}
+                  placeholder="Inserisci il tuo nome completo"
+                  className="border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 text-sm sm:text-base h-10 sm:h-11"
+                  required
+                />
+              </div>
+              <div className="space-y-2 sm:space-y-3">
+                <Label htmlFor="customerEmail" className="flex items-center gap-2 text-gray-700 font-medium text-sm sm:text-base">
+                  <Mail className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-600" />
+                  Indirizzo Email *
+                </Label>
+                <Input
+                  id="customerEmail"
+                  type="email"
+                  value={formData.customerEmail}
+                  onChange={(e) => handleInputChange('customerEmail', e.target.value)}
+                  placeholder="Inserisci la tua email"
+                  className="border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 text-sm sm:text-base h-10 sm:h-11"
+                  required
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="customerEmail" className="flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                Email Address *
-              </Label>
-              <Input
-                id="customerEmail"
-                type="email"
-                value={formData.customerEmail}
-                onChange={(e) => handleInputChange('customerEmail', e.target.value)}
-                placeholder="Enter your email"
-                required
-              />
-            </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="customerPhone" className="flex items-center gap-2">
-              <Phone className="h-4 w-4" />
-              Phone Number
-            </Label>
-            <Input
-              id="customerPhone"
-              type="tel"
-              value={formData.customerPhone}
-              onChange={(e) => handleInputChange('customerPhone', e.target.value)}
-              placeholder="Enter your phone number"
-            />
+            <div className="space-y-2 sm:space-y-3">
+              <Label htmlFor="customerPhone" className="flex items-center gap-2 text-gray-700 font-medium text-sm sm:text-base">
+                <Phone className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-600" />
+                Numero di Telefono
+              </Label>
+              <Input
+                id="customerPhone"
+                type="tel"
+                value={formData.customerPhone}
+                onChange={(e) => handleInputChange('customerPhone', e.target.value)}
+                placeholder="Inserisci il tuo numero di telefono"
+                className="border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 text-sm sm:text-base h-10 sm:h-11"
+              />
+            </div>
           </div>
 
           {/* Product Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="category">Category *</Label>
-              <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category.value} value={category.value}>
-                      {category.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="quantity">Quantity</Label>
-              <Input
-                id="quantity"
-                type="number"
-                min="1"
-                value={formData.quantity}
-                onChange={(e) => handleInputChange('quantity', parseInt(e.target.value) || 1)}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="productDescription">Product Description *</Label>
-            <Textarea
-              id="productDescription"
-              value={formData.productDescription}
-              onChange={(e) => handleInputChange('productDescription', e.target.value)}
-              placeholder="Describe what you're looking for..."
-              rows={3}
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="deliveryDate">Preferred Delivery Date</Label>
-              <Input
-                id="deliveryDate"
-                type="date"
-                value={formData.deliveryDate}
-                onChange={(e) => handleInputChange('deliveryDate', e.target.value)}
-                min={new Date().toISOString().split('T')[0]}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Estimated Price</Label>
-              <div className="text-2xl font-bold text-green-600">
-                €{calculateEstimatedPrice().toFixed(2)}
+          <div className="space-y-4 sm:space-y-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">Dettagli Prodotto</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              <div className="space-y-3">
+                <Label htmlFor="category" className="text-gray-700 font-medium">Categoria *</Label>
+                <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
+                  <SelectTrigger className="border-gray-300 focus:border-emerald-500 focus:ring-emerald-500">
+                    <SelectValue placeholder="Seleziona una categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category.value} value={category.value}>
+                        {category.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <p className="text-sm text-gray-500">Final price will be confirmed</p>
+              <div className="space-y-3">
+                <Label htmlFor="quantity" className="text-gray-700 font-medium">Quantità</Label>
+                <Input
+                  id="quantity"
+                  type="number"
+                  min="1"
+                  value={formData.quantity}
+                  onChange={(e) => handleInputChange('quantity', parseInt(e.target.value) || 1)}
+                  className="border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Label htmlFor="productDescription" className="text-gray-700 font-medium">Descrizione Prodotto *</Label>
+              <Textarea
+                id="productDescription"
+                value={formData.productDescription}
+                onChange={(e) => handleInputChange('productDescription', e.target.value)}
+                placeholder="Descrivi cosa stai cercando..."
+                rows={4}
+                className="border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <Label htmlFor="deliveryDate" className="text-gray-700 font-medium">Data di Consegna Preferita</Label>
+                <Input
+                  id="deliveryDate"
+                  type="date"
+                  className="border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
+                  value={formData.deliveryDate}
+                  onChange={(e) => handleInputChange('deliveryDate', e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+              <div className="space-y-3">
+                <Label className="text-gray-700 font-medium">Prezzo Stimato</Label>
+                <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+                  <div className="text-3xl font-bold text-emerald-700">
+                    €{calculateEstimatedPrice().toFixed(2)}
+                  </div>
+                  <p className="text-sm text-emerald-600 mt-1">Il prezzo finale sarà confermato</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Label htmlFor="specialRequests" className="text-gray-700 font-medium">Richieste Speciali</Label>
+              <Textarea
+                id="specialRequests"
+                value={formData.specialRequests}
+                onChange={(e) => handleInputChange('specialRequests', e.target.value)}
+                placeholder="Eventuali richieste speciali o note..."
+                rows={3}
+                className="border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
+              />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="specialRequests">Special Requests</Label>
-            <Textarea
-              id="specialRequests"
-              value={formData.specialRequests}
-              onChange={(e) => handleInputChange('specialRequests', e.target.value)}
-              placeholder="Any special requirements or notes..."
-              rows={2}
-            />
+          <div className="pt-6 border-t border-gray-200">
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 sm:py-4 text-base sm:text-lg h-12 sm:h-auto"
+              size="lg"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                  <span className="text-sm sm:text-base">Invio Ordine in Corso...</span>
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="text-sm sm:text-base">Invia Ordine</span>
+                </>
+              )}
+            </Button>
           </div>
-
-          <Button 
-            type="submit" 
-            disabled={isSubmitting}
-            className="w-full"
-            size="lg"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Submitting Order...
-              </>
-            ) : (
-              <>
-                <ShoppingCart className="mr-2 h-4 w-4" />
-                Submit Order
-              </>
-            )}
-          </Button>
         </form>
       </CardContent>
     </Card>

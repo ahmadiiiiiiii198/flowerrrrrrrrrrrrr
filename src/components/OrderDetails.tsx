@@ -244,77 +244,95 @@ const OrderDetails = ({ order, onUpdate, onDelete }: OrderDetailsProps) => {
   };
 
   return (
-    <Card>
-      <CardHeader className="pb-3 sm:pb-6">
-        <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-          <span className="text-base sm:text-lg">Order #{order.order_number}</span>
-          <div className="flex items-center gap-2 sm:ml-auto">
-            <Badge variant="outline" className="text-xs">
-              {getStatusIcon(order.status)}
-              <span className="ml-1">{order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span>
-            </Badge>
+    <Card className="border-emerald-200 shadow-lg">
+      <CardHeader className="pb-3 sm:pb-4 md:pb-6 bg-gradient-to-r from-emerald-50 to-amber-50 border-b border-emerald-200 p-3 sm:p-4 md:p-6">
+        <CardTitle className="flex flex-col gap-3 sm:gap-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-emerald-100 rounded-full flex items-center justify-center">
+                <img
+                  src="https://despodpgvkszyexvcbft.supabase.co/storage/v1/object/public/uploads/logos/1749735172947-oi6nr6gnk7.png"
+                  alt="Francesco Fiori & Piante Logo"
+                  className="w-4 h-4 sm:w-5 sm:h-5 object-contain"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    const fallback = document.createElement('span');
+                    fallback.className = 'text-sm sm:text-lg';
+                    fallback.textContent = '🌿';
+                    e.currentTarget.parentElement!.appendChild(fallback);
+                  }}
+                />
+              </div>
+              <span className="text-base sm:text-lg md:text-xl font-bold text-gray-800">Ordine #{order.order_number}</span>
+            </div>
             <Button
               onClick={handleDeleteOrder}
               disabled={updating}
               variant="destructive"
               size="sm"
-              className="h-7 w-7 sm:h-8 sm:w-8 p-0"
+              className="h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9 p-0 bg-red-500 hover:bg-red-600"
             >
               <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
           </div>
+          <div className="flex items-center justify-center sm:justify-start">
+            <Badge variant="outline" className="text-xs sm:text-sm border-emerald-300 text-emerald-700 bg-emerald-50 px-2 py-1">
+              {getStatusIcon(order.status)}
+              <span className="ml-1 sm:ml-2">{order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span>
+            </Badge>
+          </div>
+          </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4 sm:space-y-6 pt-0">
+      <CardContent className="space-y-4 sm:space-y-6 md:space-y-8 pt-4 sm:pt-6 p-3 sm:p-4 md:p-6">
         {/* Customer Information */}
-        <div>
-          <h4 className="font-semibold mb-2 text-sm sm:text-base">{t('customerInformation')}</h4>
-          <div className="space-y-1 text-xs sm:text-sm">
-            <div className="break-words"><strong>{t('name')}:</strong> {order.customer_name}</div>
-            <div className="break-all"><strong>{t('email')}:</strong> {order.customer_email}</div>
+        <div className="bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-200">
+          <h4 className="font-bold mb-3 sm:mb-4 text-sm sm:text-base md:text-lg text-gray-800 border-b border-gray-300 pb-2">Informazioni Cliente</h4>
+          <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm md:text-base">
+            <div className="break-words"><strong className="text-gray-700">Nome:</strong> <span className="text-gray-800">{order.customer_name}</span></div>
+            <div className="break-all"><strong className="text-gray-700">Email:</strong> <span className="text-gray-800">{order.customer_email}</span></div>
             {order.customer_phone && (
-              <div><strong>{t('phone')}:</strong> {order.customer_phone}</div>
+              <div><strong className="text-gray-700">Telefono:</strong> <span className="text-gray-800">{order.customer_phone}</span></div>
             )}
           </div>
         </div>
-
-        <Separator />
 
         {/* Order Information */}
-        <div>
-          <h4 className="font-semibold mb-2 text-sm sm:text-base">{t('orderInformation')}</h4>
-          <div className="space-y-1 text-xs sm:text-sm">
-            <div><strong>{t('totalAmount')}:</strong> {formatCurrency(Number(order.total_amount))}</div>
-            <div><strong>{t('created')}:</strong> {formatDate(order.created_at)}</div>
-            <div><strong>{t('lastUpdated')}:</strong> {formatDate(order.updated_at)}</div>
+        <div className="bg-emerald-50 p-3 sm:p-4 rounded-lg border border-emerald-200">
+          <h4 className="font-bold mb-3 sm:mb-4 text-sm sm:text-base md:text-lg text-gray-800 border-b border-emerald-300 pb-2">Informazioni Ordine</h4>
+          <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm md:text-base">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
+              <strong className="text-gray-700">Importo Totale:</strong>
+              <span className="text-lg sm:text-xl font-bold text-emerald-700">€{Number(order.total_amount).toFixed(2)}</span>
+            </div>
+            <div className="break-words"><strong className="text-gray-700">Creato:</strong> <span className="text-gray-800">{formatDate(order.created_at)}</span></div>
+            <div className="break-words"><strong className="text-gray-700">Ultimo Aggiornamento:</strong> <span className="text-gray-800">{formatDate(order.updated_at)}</span></div>
             {order.tracking_number && (
-              <div className="break-all"><strong>{t('trackingNumber')}:</strong> {order.tracking_number}</div>
+              <div className="break-all"><strong className="text-gray-700">Numero di Tracciamento:</strong> <span className="text-gray-800 font-mono text-xs sm:text-sm">{order.tracking_number}</span></div>
             )}
             {order.shipped_at && (
-              <div><strong>{t('shipped')}:</strong> {formatDate(order.shipped_at)}</div>
+              <div className="break-words"><strong className="text-gray-700">Spedito:</strong> <span className="text-gray-800">{formatDate(order.shipped_at)}</span></div>
             )}
             {order.delivered_at && (
-              <div><strong>{t('delivered')}:</strong> {formatDate(order.delivered_at)}</div>
+              <div className="break-words"><strong className="text-gray-700">Consegnato:</strong> <span className="text-gray-800">{formatDate(order.delivered_at)}</span></div>
             )}
           </div>
         </div>
-
-        <Separator />
 
         {/* Quick Actions for Pending Orders */}
         {order.status === 'pending' && (
-          <div>
-            <h4 className="font-semibold mb-3 text-sm sm:text-base">Azioni Rapide</h4>
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
+            <h4 className="font-bold mb-4 text-base sm:text-lg text-gray-800 border-b border-amber-300 pb-2">Azioni Rapide</h4>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <Button
                 onClick={() => handleQuickStatusUpdate('accepted')}
                 disabled={updating}
-                className="flex-1 bg-green-600 hover:bg-green-700 text-sm py-2"
+                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3"
               >
                 {updating ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 ) : (
-                  <CheckCircle className="mr-2 h-4 w-4" />
+                  <CheckCircle className="mr-2 h-5 w-5" />
                 )}
                 <span className="hidden sm:inline">Accetta Ordine</span>
                 <span className="sm:hidden">Accetta</span>
@@ -323,12 +341,12 @@ const OrderDetails = ({ order, onUpdate, onDelete }: OrderDetailsProps) => {
                 onClick={() => handleQuickStatusUpdate('rejected')}
                 disabled={updating}
                 variant="destructive"
-                className="flex-1 text-sm py-2"
+                className="flex-1 bg-red-600 hover:bg-red-700 font-semibold py-3"
               >
                 {updating ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 ) : (
-                  <X className="mr-2 h-4 w-4" />
+                  <X className="mr-2 h-5 w-5" />
                 )}
                 <span className="hidden sm:inline">Rifiuta Ordine</span>
                 <span className="sm:hidden">Rifiuta</span>
@@ -337,67 +355,65 @@ const OrderDetails = ({ order, onUpdate, onDelete }: OrderDetailsProps) => {
           </div>
         )}
 
-        <Separator />
-
         {/* Status Update Section */}
-        <div>
-          <h4 className="font-semibold mb-3 text-sm sm:text-base">{t('updateOrderStatus')}</h4>
-          <div className="space-y-3 sm:space-y-4">
+        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <h4 className="font-bold mb-4 text-base sm:text-lg text-gray-800 border-b border-gray-300 pb-2">Aggiorna Stato Ordine</h4>
+          <div className="space-y-4 sm:space-y-5">
             <div>
-              <label className="text-xs sm:text-sm font-medium mb-2 block">{t('status')}</label>
+              <label className="text-sm sm:text-base font-semibold mb-3 block text-gray-700">Stato</label>
               <Select value={newStatus} onValueChange={setNewStatus}>
-                <SelectTrigger className="text-sm">
-                  <SelectValue placeholder={t('selectStatus')} />
+                <SelectTrigger className="text-sm border-gray-300 focus:border-emerald-500 focus:ring-emerald-500">
+                  <SelectValue placeholder="Seleziona stato" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="pending">{t('pending')}</SelectItem>
-                  <SelectItem value="accepted">{t('accepted')}</SelectItem>
-                  <SelectItem value="rejected">{t('rejected')}</SelectItem>
+                  <SelectItem value="pending">In Attesa</SelectItem>
+                  <SelectItem value="accepted">Accettato</SelectItem>
+                  <SelectItem value="rejected">Rifiutato</SelectItem>
                   <SelectItem value="preparing">In Preparazione</SelectItem>
                   <SelectItem value="ready">Pronto per Ritiro/Consegna</SelectItem>
                   <SelectItem value="out_for_delivery">In Consegna</SelectItem>
-                  <SelectItem value="delivered">{t('delivered')}</SelectItem>
-                  <SelectItem value="completed">{t('completed')}</SelectItem>
-                  <SelectItem value="cancelled">{t('cancelled')}</SelectItem>
+                  <SelectItem value="delivered">Consegnato</SelectItem>
+                  <SelectItem value="completed">Completato</SelectItem>
+                  <SelectItem value="cancelled">Annullato</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {(newStatus === 'out_for_delivery' || newStatus === 'delivered') && (
               <div>
-                <label className="text-xs sm:text-sm font-medium mb-2 block">{t('trackingNumber')}</label>
+                <label className="text-sm sm:text-base font-semibold mb-3 block text-gray-700">Numero di Tracciamento</label>
                 <Input
                   value={trackingNumber}
                   onChange={(e) => setTrackingNumber(e.target.value)}
-                  placeholder={t('trackingNumberOptional')}
-                  className="text-sm"
+                  placeholder="Numero di tracciamento (opzionale)"
+                  className="text-sm border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
                 />
               </div>
             )}
 
             <div>
-              <label className="text-xs sm:text-sm font-medium mb-2 block">{t('addNotes')}</label>
+              <label className="text-sm sm:text-base font-semibold mb-3 block text-gray-700">Aggiungi Note</label>
               <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder={t('notesOptional')}
+                placeholder="Note aggiuntive (opzionale)"
                 rows={3}
-                className="text-sm resize-none"
+                className="text-sm resize-none border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
               />
             </div>
 
             <Button
               onClick={handleStatusUpdate}
               disabled={updating || newStatus === order.status}
-              className="w-full text-sm py-2"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 sm:py-3 text-sm sm:text-base h-10 sm:h-auto"
             >
               {updating ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t('updating')}
+                  <Loader2 className="mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                  <span className="text-xs sm:text-sm md:text-base">Aggiornamento in corso...</span>
                 </>
               ) : (
-                t('updateOrder')
+                <span className="text-xs sm:text-sm md:text-base">Aggiorna Ordine</span>
               )}
             </Button>
           </div>
