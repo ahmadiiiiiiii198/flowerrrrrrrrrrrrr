@@ -154,10 +154,15 @@ export class AudioNotificationService {
   }
 
   private playContinuousTone(config: AudioNotificationConfig): void {
-    const settings = notificationService.getSettings();
-    const totalDuration = settings.ringDuration * 1000;
-    
-    this.createTone(config.frequency, totalDuration / 1000, config.volume);
+    // Play a tone and immediately schedule the next one for TRUE continuous ringing
+    this.createTone(config.frequency, config.duration, config.volume);
+
+    // Schedule next tone immediately after this one ends
+    this.ringInterval = setTimeout(() => {
+      if (this.isPlaying) {
+        this.playContinuousTone(config); // Recursive call for continuous ringing
+      }
+    }, config.duration * 1000 + 100); // Small gap between tones
   }
 
   private createTone(frequency: number, duration: number, volume: number): void {

@@ -157,35 +157,23 @@ const OrderDashboard = () => {
           table: 'orders'
         },
         (payload) => {
-          console.log('🔔 New order inserted in dashboard:', payload);
+          console.log('🔔 NEW ORDER CREATED - TRIGGERING CONTINUOUS RINGING:', payload);
 
-          // Trigger different notifications based on order status
+          // SIMPLE RULE: ANY new order = CONTINUOUS ringing until stopped
           if (window.location.pathname === '/orders') {
             const order = payload.new;
 
-            if (order.status === 'pending') {
-              // Pay Later orders - CONTINUOUS notification until manually stopped
-              console.log('🔄 Pay Later order - triggering CONTINUOUS notification:', order.order_number);
-              audioNotificationService.playNotificationSound('payment_failed'); // Uses continuous pattern
-              setIsPhoneRinging(true);
+            console.log('🚨 STARTING CONTINUOUS NOTIFICATION FOR ORDER:', order.order_number);
 
-              toast({
-                title: `🔔 Pay Later Order Received`,
-                description: `Order #${order.order_number} from ${order.customer_name} - Payment Pending`,
-                duration: 15000,
-              });
-            } else if (order.status === 'payment_pending') {
-              // Stripe orders - Single notification
-              console.log('💳 Stripe order created - single notification:', order.order_number);
-              audioNotificationService.playNotificationSound('order_created'); // Uses triple pattern
-              setIsPhoneRinging(true);
+            // Use payment_failed pattern which has continuous ringing
+            audioNotificationService.playNotificationSound('payment_failed');
+            setIsPhoneRinging(true);
 
-              toast({
-                title: `🔔 New Order Created`,
-                description: `Order #${order.order_number} from ${order.customer_name} - Payment Processing`,
-                duration: 15000,
-              });
-            }
+            toast({
+              title: `🔔 NEW ORDER RECEIVED!`,
+              description: `Order #${order.order_number} from ${order.customer_name}`,
+              duration: 15000,
+            });
           }
 
           refetch();
@@ -202,19 +190,11 @@ const OrderDashboard = () => {
         (payload) => {
           console.log('🔄 Order updated in dashboard:', payload);
 
-          // Only trigger notifications when order status changes to 'paid'
-          // This means a customer has successfully completed payment
+          // Only show toast for payment completion, no audio
           if (payload.new.status === 'paid' && payload.old.status !== 'paid') {
-            console.log('🎉 Order payment completed - triggering SINGLE notification');
+            console.log('🎉 Order payment completed - showing toast only');
 
-            // Only trigger notifications if we're on the order dashboard page
-            if (window.location.pathname === '/orders') {
-              // Stripe payment completed - SINGLE notification (not continuous)
-              audioNotificationService.playNotificationSound('payment_completed'); // Uses single pattern
-              setIsPhoneRinging(true);
-            }
-
-            // Show persistent toast notification
+            // Show toast notification only (no audio for updates)
             toast({
               title: `🔔 ${t('orderPaymentCompleted')}`,
               description: `Ordine #${payload.new.order_number} da ${payload.new.customer_name} - Pagamento Riuscito!`,
