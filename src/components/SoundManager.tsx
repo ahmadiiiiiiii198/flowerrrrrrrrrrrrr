@@ -77,11 +77,11 @@ export default function SoundManager() {
         return;
       }
 
-      // Validate file size (5MB max)
-      if (file.size > 5 * 1024 * 1024) {
+      // Validate file size (1MB max for base64 storage)
+      if (file.size > 1 * 1024 * 1024) {
         toast({
           title: 'File Troppo Grande',
-          description: 'Dimensione massima: 5MB',
+          description: 'Dimensione massima: 1MB per compatibilità database',
           variant: 'destructive'
         });
         return;
@@ -107,6 +107,10 @@ export default function SoundManager() {
       // Convert file to base64 for storage in database
       const base64Data = await fileToBase64(selectedFile);
 
+      // Check base64 size (should be roughly 1.33x original file size)
+      const base64Size = base64Data.length;
+      console.log(`Base64 size: ${(base64Size / 1024 / 1024).toFixed(2)}MB`);
+
       // Save to database with base64 data
       const { error: dbError } = await supabase
         .from('notification_sounds')
@@ -118,7 +122,10 @@ export default function SoundManager() {
           is_active: false
         });
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        console.error('Database error:', dbError);
+        throw new Error(dbError.message || 'Database insertion failed');
+      }
 
       toast({
         title: '✅ Suono Caricato',
@@ -135,9 +142,21 @@ export default function SoundManager() {
       loadSounds();
     } catch (error) {
       console.error('Error uploading sound:', error);
+
+      let errorMessage = 'Errore sconosciuto';
+      if (error.message) {
+        if (error.message.includes('too long')) {
+          errorMessage = 'File troppo grande per il database. Prova con un file più piccolo (max 1MB).';
+        } else if (error.message.includes('character varying')) {
+          errorMessage = 'Formato file non supportato o troppo grande.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
       toast({
         title: 'Errore Caricamento',
-        description: `Impossibile caricare il suono: ${error.message || 'Errore sconosciuto'}`,
+        description: errorMessage,
         variant: 'destructive'
       });
     } finally {
@@ -303,7 +322,7 @@ export default function SoundManager() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="sound-file" className="text-gray-700 font-medium">
-                File Audio (MP3, WAV, OGG, WebM - Max 5MB)
+                File Audio (MP3, WAV, OGG, WebM - Max 1MB)
               </Label>
               <Input
                 id="sound-file"
