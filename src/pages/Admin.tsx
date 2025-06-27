@@ -8,6 +8,7 @@ import { useLanguage } from '@/hooks/use-language';
 import { Loader2, Database, RefreshCw } from 'lucide-react';
 // initializeDatabase import removed to prevent accidental initialization
 import ContentEditor from '@/components/admin/ContentEditor';
+import TextContentEditor from '@/components/admin/TextContentEditor';
 // OrderManagement moved to dedicated OrderDashboard page
 import CategoriesGalleryAdmin from '@/components/admin/CategoriesGalleryAdmin';
 import ProductsAdmin from '@/components/admin/ProductsAdmin';
@@ -401,7 +402,7 @@ const Admin = () => {
               <div className="space-y-3 md:space-y-4">
                 {groupedSections?.about?.map((section, index) => (
                   <div key={section.id} className={`animate-fade-in-right animate-stagger-${Math.min(index + 1, 5)}`}>
-                    <ContentEditor
+                    <TextContentEditor
                       section={section}
                       onSave={updateContent}
                       saving={saving === section.id}

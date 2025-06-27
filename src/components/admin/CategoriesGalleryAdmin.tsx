@@ -217,7 +217,10 @@ const CategoriesGalleryAdmin = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Caricamento gestione galleria...</p>
+        </div>
       </div>
     );
   }
@@ -227,10 +230,12 @@ const CategoriesGalleryAdmin = () => {
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Categories Gallery Management</h2>
-            <p className="text-gray-600">Manage gallery images, descriptions, and features for each category</p>
+            <h2 className="text-2xl font-bold tracking-tight text-emerald-800">🖼️ Gestione Galleria Categorie</h2>
+            <p className="text-gray-600">Gestisci immagini della galleria, descrizioni e caratteristiche per ogni categoria</p>
           </div>
-          {/* Initialize Database button removed to prevent accidental recreation of default content */}
+          <div className="text-sm text-gray-500">
+            <p>Categorie caricate: {Object.keys(categoryContent).length}</p>
+          </div>
         </div>
       </div>
 
@@ -262,14 +267,16 @@ const CategoriesGalleryAdmin = () => {
               {/* Explanation */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Description</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    📝 Descrizione Categoria
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <Textarea
                     value={categoryContent[category.key]?.explanation || ''}
                     onChange={(e) => updateCategoryContent(category.key, 'explanation', e.target.value)}
                     rows={6}
-                    placeholder="Enter category description..."
+                    placeholder="Inserisci la descrizione della categoria..."
                     className="min-h-[150px]"
                   />
                   <Button 
@@ -295,7 +302,9 @@ const CategoriesGalleryAdmin = () => {
               {/* Features */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Features</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    ⭐ Caratteristiche
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
