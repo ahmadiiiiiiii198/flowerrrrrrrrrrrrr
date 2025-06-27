@@ -41,7 +41,7 @@ import {
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
-// Types
+// Types - Complete database schema
 interface Order {
   id: string;
   order_number: string;
@@ -53,6 +53,10 @@ interface Order {
   status: string;
   payment_status: string;
   payment_method?: string;
+  stripe_session_id?: string;
+  stripe_payment_intent_id?: string;
+  paid_amount?: number;
+  paid_at?: string;
   notes?: string;
   metadata?: any;
   created_at: string;
@@ -65,13 +69,18 @@ interface Notification {
   message: string;
   is_read: boolean;
   created_at: string;
+  notification_type?: string;
+  priority?: number;
+  read_at?: string;
+  metadata?: any;
 }
 
-// Audio Notification System
-class AudioNotificationManager {
+// BULLETPROOF Continuous Audio Notification System
+class ContinuousAudioNotifier {
   private audioContext: AudioContext | null = null;
-  private isPlaying = false;
-  private intervalId: NodeJS.Timeout | null = null;
+  private isRinging = false;
+  private timeoutId: NodeJS.Timeout | null = null;
+  private isInitialized = false;
 
   constructor() {
     this.initializeAudio();
@@ -81,66 +90,106 @@ class AudioNotificationManager {
     const initAudio = () => {
       try {
         this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        this.isInitialized = true;
+        console.log('🔊 Audio system initialized successfully');
         document.removeEventListener('click', initAudio);
         document.removeEventListener('touchstart', initAudio);
       } catch (error) {
-        console.error('Audio initialization failed:', error);
+        console.error('❌ Audio initialization failed:', error);
       }
     };
 
+    // Initialize on user interaction
     document.addEventListener('click', initAudio);
     document.addEventListener('touchstart', initAudio);
+
+    // Try to initialize immediately (might fail due to autoplay policy)
+    try {
+      initAudio();
+    } catch (error) {
+      console.log('⏳ Audio will initialize on first user interaction');
+    }
   }
 
-  startContinuousAlert() {
-    if (this.isPlaying || !this.audioContext) return;
-    
-    this.isPlaying = true;
-    this.playTone();
+  startContinuousRinging() {
+    if (this.isRinging) {
+      console.log('🔊 Already ringing, ignoring duplicate start request');
+      return;
+    }
+
+    if (!this.isInitialized || !this.audioContext) {
+      console.log('⚠️ Audio not initialized yet, will start ringing on next user interaction');
+      // Try to initialize again
+      this.initializeAudio();
+      return;
+    }
+
+    console.log('🚨 STARTING CONTINUOUS RINGING');
+    this.isRinging = true;
+    this.playRingTone();
   }
 
-  private playTone() {
-    if (!this.audioContext || !this.isPlaying) return;
+  private playRingTone() {
+    if (!this.isRinging || !this.audioContext) return;
 
     try {
+      // Create oscillator for ring tone
       const oscillator = this.audioContext.createOscillator();
       const gainNode = this.audioContext.createGain();
 
       oscillator.connect(gainNode);
       gainNode.connect(this.audioContext.destination);
 
-      oscillator.frequency.setValueAtTime(880, this.audioContext.currentTime);
+      // Professional ring tone frequency
+      oscillator.frequency.setValueAtTime(800, this.audioContext.currentTime);
       oscillator.type = 'sine';
 
+      // Ring pattern: 0.5s on, 0.3s off
       gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.4, this.audioContext.currentTime + 0.1);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.6);
+      gainNode.gain.linearRampToValueAtTime(0.3, this.audioContext.currentTime + 0.05);
+      gainNode.gain.linearRampToValueAtTime(0.3, this.audioContext.currentTime + 0.5);
+      gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.55);
 
       oscillator.start(this.audioContext.currentTime);
       oscillator.stop(this.audioContext.currentTime + 0.6);
 
-      this.intervalId = setTimeout(() => {
-        if (this.isPlaying) this.playTone();
-      }, 1000);
+      // Schedule next ring
+      this.timeoutId = setTimeout(() => {
+        if (this.isRinging) {
+          this.playRingTone();
+        }
+      }, 800); // Ring every 800ms
+
     } catch (error) {
-      console.error('Audio playback error:', error);
+      console.error('❌ Audio playback error:', error);
     }
   }
 
-  stopAlert() {
-    this.isPlaying = false;
-    if (this.intervalId) {
-      clearTimeout(this.intervalId);
-      this.intervalId = null;
+  stopRinging() {
+    console.log('🔇 STOPPING CONTINUOUS RINGING');
+    this.isRinging = false;
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId);
+      this.timeoutId = null;
     }
   }
 
   get isActive() {
-    return this.isPlaying;
+    return this.isRinging;
+  }
+
+  // Test function
+  testRing() {
+    console.log('🧪 Testing ring tone...');
+    this.startContinuousRinging();
+    setTimeout(() => {
+      this.stopRinging();
+      console.log('🧪 Test ring completed');
+    }, 3000);
   }
 }
 
-const audioManager = new AudioNotificationManager();
+const audioNotifier = new ContinuousAudioNotifier();
 
 const OrderDashboardPro: React.FC = () => {
   // State management
@@ -157,24 +206,45 @@ const OrderDashboardPro: React.FC = () => {
   // Audio status monitoring
   useEffect(() => {
     const interval = setInterval(() => {
-      setIsAudioActive(audioManager.isActive);
+      setIsAudioActive(audioNotifier.isActive);
     }, 500);
     return () => clearInterval(interval);
   }, []);
 
-  // Data loading
+  // Data loading with ALL columns
   const loadOrders = useCallback(async () => {
+    console.log('📊 Loading orders from database...');
     try {
       const { data, error } = await supabase
         .from('orders')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(100);
+        .select(`
+          id,
+          order_number,
+          customer_name,
+          customer_email,
+          customer_phone,
+          customer_address,
+          total_amount,
+          status,
+          payment_status,
+          payment_method,
+          stripe_session_id,
+          stripe_payment_intent_id,
+          paid_amount,
+          paid_at,
+          notes,
+          metadata,
+          created_at,
+          updated_at
+        `)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
+
+      console.log(`✅ Loaded ${data?.length || 0} orders from database`);
       setOrders(data || []);
     } catch (error) {
-      console.error('Failed to load orders:', error);
+      console.error('❌ Failed to load orders:', error);
       toast({
         title: 'Error',
         description: 'Failed to load orders',
@@ -186,17 +256,30 @@ const OrderDashboardPro: React.FC = () => {
   }, [toast]);
 
   const loadNotifications = useCallback(async () => {
+    console.log('🔔 Loading notifications from database...');
     try {
       const { data, error } = await supabase
         .from('order_notifications')
-        .select('*')
+        .select(`
+          id,
+          order_id,
+          message,
+          is_read,
+          created_at,
+          notification_type,
+          priority,
+          read_at,
+          metadata
+        `)
         .order('created_at', { ascending: false })
-        .limit(50);
+        .limit(100);
 
       if (error) throw error;
+
+      console.log(`✅ Loaded ${data?.length || 0} notifications from database`);
       setNotifications(data || []);
     } catch (error) {
-      console.error('Failed to load notifications:', error);
+      console.error('❌ Failed to load notifications:', error);
     }
   }, []);
 
@@ -206,24 +289,31 @@ const OrderDashboardPro: React.FC = () => {
     loadNotifications();
   }, [loadOrders, loadNotifications]);
 
-  // Real-time subscriptions
+  // Real-time subscriptions with BULLETPROOF continuous ringing
   useEffect(() => {
+    console.log('🔄 Setting up real-time subscriptions...');
+
     const orderChannel = supabase
-      .channel('orders-realtime')
+      .channel('orders-realtime-channel')
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
         table: 'orders'
       }, (payload) => {
+        console.log('🚨 NEW ORDER DETECTED!', payload);
         const newOrder = payload.new as Order;
+
+        // Add to orders list
         setOrders(prev => [newOrder, ...prev]);
-        
+
         if (soundEnabled) {
-          audioManager.startContinuousAlert();
+          console.log('🔊 Starting continuous ringing for new order...');
+          audioNotifier.startContinuousRinging();
+
           toast({
-            title: '🔔 New Order Received!',
-            description: `Order #${newOrder.order_number} from ${newOrder.customer_name}`,
-            duration: 8000,
+            title: '🚨 NEW ORDER RECEIVED!',
+            description: `Order #${newOrder.order_number} from ${newOrder.customer_name} - €${newOrder.total_amount}`,
+            duration: 10000,
           });
         }
       })
@@ -232,30 +322,53 @@ const OrderDashboardPro: React.FC = () => {
         schema: 'public',
         table: 'orders'
       }, (payload) => {
+        console.log('📝 Order updated:', payload);
         const updatedOrder = payload.new as Order;
-        setOrders(prev => prev.map(order => 
+        setOrders(prev => prev.map(order =>
           order.id === updatedOrder.id ? updatedOrder : order
         ));
       })
-      .subscribe();
+      .on('postgres_changes', {
+        event: 'DELETE',
+        schema: 'public',
+        table: 'orders'
+      }, (payload) => {
+        console.log('🗑️ Order deleted:', payload);
+        const deletedOrder = payload.old as Order;
+        setOrders(prev => prev.filter(order => order.id !== deletedOrder.id));
+      })
+      .subscribe((status) => {
+        console.log('📡 Orders subscription status:', status);
+      });
 
     const notificationChannel = supabase
-      .channel('notifications-realtime')
+      .channel('notifications-realtime-channel')
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
         table: 'order_notifications'
       }, (payload) => {
+        console.log('🔔 New notification:', payload);
         const newNotification = payload.new as Notification;
         setNotifications(prev => [newNotification, ...prev]);
-        
-        if (soundEnabled) {
-          audioManager.startContinuousAlert();
-        }
       })
-      .subscribe();
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'order_notifications'
+      }, (payload) => {
+        console.log('📝 Notification updated:', payload);
+        const updatedNotification = payload.new as Notification;
+        setNotifications(prev => prev.map(notification =>
+          notification.id === updatedNotification.id ? updatedNotification : notification
+        ));
+      })
+      .subscribe((status) => {
+        console.log('📡 Notifications subscription status:', status);
+      });
 
     return () => {
+      console.log('🔌 Cleaning up real-time subscriptions...');
       supabase.removeChannel(orderChannel);
       supabase.removeChannel(notificationChannel);
     };
@@ -263,22 +376,80 @@ const OrderDashboardPro: React.FC = () => {
 
   // Event handlers
   const handleStopAudio = () => {
-    audioManager.stopAlert();
+    console.log('🔇 User clicked stop audio');
+    audioNotifier.stopRinging();
     toast({
       title: '🔇 Audio Stopped',
-      description: 'Notification audio has been stopped',
+      description: 'Continuous ringing has been stopped',
     });
   };
 
   const toggleSound = () => {
-    setSoundEnabled(!soundEnabled);
-    if (!soundEnabled) {
-      audioManager.stopAlert();
+    const newSoundState = !soundEnabled;
+    setSoundEnabled(newSoundState);
+
+    if (!newSoundState) {
+      // If disabling sound, stop any current ringing
+      audioNotifier.stopRinging();
     }
+
     toast({
-      title: soundEnabled ? '🔇 Sound Disabled' : '🔊 Sound Enabled',
-      description: `Notification sounds ${soundEnabled ? 'disabled' : 'enabled'}`,
+      title: newSoundState ? '🔊 Sound Enabled' : '🔇 Sound Disabled',
+      description: `Notification sounds ${newSoundState ? 'enabled' : 'disabled'}`,
     });
+  };
+
+  // Test function for development
+  const testNotificationSound = () => {
+    console.log('🧪 Testing notification sound...');
+    audioNotifier.testRing();
+    toast({
+      title: '🧪 Testing Audio',
+      description: 'Playing test notification sound for 3 seconds',
+    });
+  };
+
+  // Create test order to verify notification system
+  const createTestOrder = async () => {
+    try {
+      console.log('🧪 Creating test order...');
+      const testOrder = {
+        order_number: `TEST-${Date.now()}`,
+        customer_name: 'Test Customer',
+        customer_email: 'test@example.com',
+        customer_phone: '+1234567890',
+        customer_address: 'Test Address, Test City',
+        total_amount: 25.99,
+        status: 'pending',
+        payment_status: 'pending',
+        payment_method: 'pay_later',
+        notes: 'Test order for notification system verification',
+        metadata: { test: true, created_by: 'dashboard_test' }
+      };
+
+      const { data, error } = await supabase
+        .from('orders')
+        .insert([testOrder])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      console.log('✅ Test order created successfully:', data);
+      toast({
+        title: '🧪 Test Order Created',
+        description: `Test order ${data.order_number} created - should trigger continuous ringing!`,
+        duration: 5000,
+      });
+
+    } catch (error) {
+      console.error('❌ Failed to create test order:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to create test order',
+        variant: 'destructive'
+      });
+    }
   };
 
   const markNotificationAsRead = async (notificationId: string) => {
@@ -508,6 +679,26 @@ const OrderDashboardPro: React.FC = () => {
               >
                 {soundEnabled ? <Volume2 className="w-5 h-5 mr-2" /> : <VolumeX className="w-5 h-5 mr-2" />}
                 {soundEnabled ? 'Sound On' : 'Sound Off'}
+              </Button>
+
+              <Button
+                onClick={testNotificationSound}
+                variant="outline"
+                size="lg"
+                className="bg-purple-500/20 border-purple-300 text-purple-100 hover:bg-purple-500/30 shadow-xl border-2 backdrop-blur-sm"
+              >
+                <Bell className="w-5 h-5 mr-2" />
+                Test Audio
+              </Button>
+
+              <Button
+                onClick={createTestOrder}
+                variant="outline"
+                size="lg"
+                className="bg-yellow-500/20 border-yellow-300 text-yellow-100 hover:bg-yellow-500/30 shadow-xl border-2 backdrop-blur-sm"
+              >
+                <Package className="w-5 h-5 mr-2" />
+                Test Order
               </Button>
 
               <Button
