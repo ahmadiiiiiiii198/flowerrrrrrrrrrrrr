@@ -11,6 +11,7 @@ import ContentEditor from '@/components/admin/ContentEditor';
 import TextContentEditor from '@/components/admin/TextContentEditor';
 // OrderManagement moved to dedicated OrderDashboard page
 import CategoriesGalleryAdmin from '@/components/admin/CategoriesGalleryAdmin';
+import MainGalleryManager from '@/components/admin/MainGalleryManager';
 import ProductsAdmin from '@/components/admin/ProductsAdmin';
 import LogoEditor from '@/components/admin/LogoEditor';
 import ShippingZoneManager from '@/components/admin/ShippingZoneManager';
