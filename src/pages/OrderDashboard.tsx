@@ -135,7 +135,7 @@ const OrderDashboard = () => {
     }
   }, [orders]);
 
-  // Set up real-time listeners for orders
+  // Set up real-time listeners for orders and notifications
   useEffect(() => {
     const channel = supabase
       .channel('order-dashboard-changes')
@@ -148,17 +148,29 @@ const OrderDashboard = () => {
         },
         (payload) => {
           console.log('🔔 New order inserted in dashboard:', payload);
+          refetch();
+          refetchNotifications();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'order_notifications'
+        },
+        (payload) => {
+          console.log('🔔 New notification inserted:', payload);
 
-          // Trigger notifications for new orders regardless of status
-          console.log('🎉 New order created - triggering notification');
-          console.log('📊 Order status:', payload.new.status);
+          // Trigger audio notification when new notification is created
+          console.log('🎉 New notification created - triggering audio');
 
           // Only trigger notifications if we're on the order dashboard page
           if (window.location.pathname === '/orders') {
             // Trigger enhanced notifications (SINGLE SOURCE)
             phoneNotificationService.notifyNewOrder(
-              payload.new.order_number,
-              payload.new.customer_name
+              'NEW-ORDER',
+              'Customer'
             );
             // Set ringing state to show stop button
             setIsPhoneRinging(true);
@@ -166,14 +178,14 @@ const OrderDashboard = () => {
             // Show persistent toast notification
             toast({
               title: `🔔 ${t('newOrderReceived')}`,
-              description: `Ordine #${payload.new.order_number} da ${payload.new.customer_name} - Stato: ${payload.new.status}`,
+              description: payload.new.message || 'New order notification received',
               duration: 15000, // Show for 15 seconds
             });
 
             // Trigger browser notification if permission granted
             if ('Notification' in window && Notification.permission === 'granted') {
               new Notification('Nuovo Ordine Ricevuto!', {
-                body: `Ordine #${payload.new.order_number} da ${payload.new.customer_name}`,
+                body: payload.new.message || 'New order notification received',
                 icon: '/favicon.ico',
                 tag: 'new-order',
                 requireInteraction: true, // Keep notification until user interacts
@@ -181,7 +193,6 @@ const OrderDashboard = () => {
             }
           }
 
-          refetch();
           refetchNotifications();
         }
       )

@@ -162,9 +162,8 @@ const OrderNotifications = ({ notifications, count, onRefresh }: OrderNotificati
     try {
       const { error } = await supabase
         .from('order_notifications')
-        .update({ 
-          is_read: true, 
-          read_at: new Date().toISOString() 
+        .update({
+          is_read: true
         })
         .eq('id', notificationId);
 
@@ -185,8 +184,7 @@ const OrderNotifications = ({ notifications, count, onRefresh }: OrderNotificati
       const { error } = await supabase
         .from('order_notifications')
         .update({
-          is_read: true,
-          read_at: new Date().toISOString()
+          is_read: true
         })
         .eq('is_read', false);
 
@@ -328,7 +326,7 @@ const OrderNotifications = ({ notifications, count, onRefresh }: OrderNotificati
         .from('order_notifications')
         .insert({
           order_id: order.id,
-          notification_type: 'new_order',
+          message: 'New test order received',
           is_read: false
         });
 
