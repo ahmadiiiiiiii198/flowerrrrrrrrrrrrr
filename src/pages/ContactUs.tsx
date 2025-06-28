@@ -198,10 +198,8 @@ const ContactUs = () => {
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50">
       <Header />
       
-      {/* Hero Section */}
       <section className="relative py-20 bg-gradient-to-r from-emerald-600 to-green-700 text-white overflow-hidden">
         <div className="absolute inset-0 bg-black/20"></div>
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
@@ -210,7 +208,7 @@ const ContactUs = () => {
                 <Flower2 className="h-12 w-12 text-white" />
               </div>
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-green-100 bg-clip-text text-transparent">
+            <h1 className="text-5xl md:text-6xl font-bold mb-6">
               Contattaci
             </h1>
             <p className="text-xl md:text-2xl text-green-100 max-w-3xl mx-auto leading-relaxed">
@@ -221,12 +219,10 @@ const ContactUs = () => {
         </div>
       </section>
 
-      {/* Main Content */}
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 max-w-7xl mx-auto">
             
-            {/* Contact Form */}
             <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
               <CardHeader className="bg-gradient-to-r from-emerald-600 to-green-700 text-white rounded-t-lg">
                 <CardTitle className="text-2xl font-bold flex items-center gap-3">
@@ -335,7 +331,6 @@ const ContactUs = () => {
               </CardContent>
             </Card>
 
-            {/* Contact Information */}
             <div className="space-y-8">
               <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
                 <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-700 text-white rounded-t-lg">
@@ -388,7 +383,6 @@ const ContactUs = () => {
                 </CardContent>
               </Card>
 
-              {/* Map Placeholder */}
               <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
                 <CardContent className="p-0">
                   <div className="h-64 bg-gradient-to-br from-emerald-100 to-green-200 rounded-lg flex items-center justify-center">
