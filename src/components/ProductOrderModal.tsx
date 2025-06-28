@@ -60,13 +60,12 @@ const DirectPaymentButton: React.FC<DirectPaymentButtonProps> = ({
           status: 'payment_pending',
           payment_status: 'pending',
           payment_method: 'stripe',
-          notes: `Product Order - ${product.name}\nQuantity: ${orderData.quantity}\nSpecial Requests: ${orderData.specialRequests}\nDelivery Date: ${orderData.deliveryDate}`,
+          notes: `Product Order - ${product.name}\nQuantity: ${orderData.quantity}\nSpecial Requests: ${orderData.specialRequests}`,
           metadata: {
             product_id: product.id,
             product_name: product.name,
             quantity: orderData.quantity,
             unit_price: product.price,
-            delivery_date: orderData.deliveryDate,
             special_requests: orderData.specialRequests
           }
         })
@@ -93,7 +92,6 @@ const DirectPaymentButton: React.FC<DirectPaymentButtonProps> = ({
           quantity: orderData.quantity,
           subtotal: subtotal,  // Required field
           metadata: {
-            delivery_date: orderData.deliveryDate,
             special_requests: orderData.specialRequests
           }
         });
@@ -223,7 +221,6 @@ interface OrderData {
   customerPhone: string;
   quantity: number;
   specialRequests: string;
-  deliveryDate: string;
   deliveryAddress: string;
 }
 
@@ -240,7 +237,6 @@ const ProductOrderModal: React.FC<ProductOrderModalProps> = ({ product, isOpen, 
     customerPhone: '',
     quantity: 1,
     specialRequests: '',
-    deliveryDate: '',
     deliveryAddress: ''
   });
 
@@ -317,7 +313,7 @@ const ProductOrderModal: React.FC<ProductOrderModalProps> = ({ product, isOpen, 
       if (!addressToValidate) {
         toast({
           title: 'Indirizzo Validato ✅',
-          description: `Consegna disponibile - ${result.estimatedTime}`,
+          description: 'Consegna disponibile',
         });
       }
       return true;
@@ -389,7 +385,7 @@ const ProductOrderModal: React.FC<ProductOrderModalProps> = ({ product, isOpen, 
           coordinates: addressValidation.coordinates,
           formattedAddress: addressValidation.formattedAddress
         },
-        notes: `Pay Later Order - Product: ${product.name}\nQuantity: ${orderData.quantity}\nSpecial Requests: ${orderData.specialRequests}\nDelivery Date: ${orderData.deliveryDate}`
+        notes: `Pay Later Order - Product: ${product.name}\nQuantity: ${orderData.quantity}\nSpecial Requests: ${orderData.specialRequests}`
       })
       .select()
       .single();
@@ -484,28 +480,17 @@ const ProductOrderModal: React.FC<ProductOrderModalProps> = ({ product, isOpen, 
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="customerPhone" className="flex items-center gap-2">
-                  <Phone className="h-4 w-4" />
-                  Telefono
-                </Label>
-                <Input
-                  id="customerPhone"
-                  value={orderData.customerPhone}
-                  onChange={(e) => handleInputChange('customerPhone', e.target.value)}
-                  placeholder="+39 123 456 7890"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="deliveryDate">Data di Consegna</Label>
-                <Input
-                  id="deliveryDate"
-                  type="date"
-                  value={orderData.deliveryDate}
-                  onChange={(e) => handleInputChange('deliveryDate', e.target.value)}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="customerPhone" className="flex items-center gap-2">
+                <Phone className="h-4 w-4" />
+                Telefono
+              </Label>
+              <Input
+                id="customerPhone"
+                value={orderData.customerPhone}
+                onChange={(e) => handleInputChange('customerPhone', e.target.value)}
+                placeholder="+39 123 456 7890"
+              />
             </div>
 
             {/* Quantity */}
@@ -575,7 +560,6 @@ const ProductOrderModal: React.FC<ProductOrderModalProps> = ({ product, isOpen, 
                       <CheckCircle className="h-4 w-4" />
                       <div>
                         <div className="font-medium">✅ Consegna Disponibile</div>
-                        <div>Tempo stimato: {addressValidation.estimatedTime}</div>
                         {addressValidation.deliveryFee > 0 && (
                           <div>Costo consegna: €{addressValidation.deliveryFee.toFixed(2)}</div>
                         )}
@@ -676,7 +660,6 @@ const ProductOrderModal: React.FC<ProductOrderModalProps> = ({ product, isOpen, 
                           customerPhone: '',
                           quantity: 1,
                           specialRequests: '',
-                          deliveryDate: '',
                           deliveryAddress: ''
                         });
                         onClose();
@@ -750,7 +733,6 @@ const ProductOrderModal: React.FC<ProductOrderModalProps> = ({ product, isOpen, 
                               customerPhone: '',
                               quantity: 1,
                               specialRequests: '',
-                              deliveryDate: '',
                               deliveryAddress: ''
                             });
                             onClose();

@@ -21,7 +21,6 @@ interface OrderFormData {
   productDescription: string;
   quantity: number;
   specialRequests: string;
-  deliveryDate: string;
   deliveryAddress: string;
 }
 
@@ -30,7 +29,6 @@ interface AddressValidationResult {
   isWithinZone: boolean;
   distance: number;
   deliveryFee: number;
-  estimatedTime: string;
   formattedAddress: string;
   coordinates: { lat: number; lng: number };
   error?: string;
@@ -52,7 +50,6 @@ const EnhancedOrderForm = () => {
     productDescription: '',
     quantity: 1,
     specialRequests: '',
-    deliveryDate: '',
     deliveryAddress: ''
   });
 
@@ -135,10 +132,9 @@ const EnhancedOrderForm = () => {
         status: 'payment_pending',
         metadata: {
           coordinates: addressValidation.coordinates,
-          deliveryFee: addressValidation.deliveryFee,
-          estimatedTime: addressValidation.estimatedTime
+          deliveryFee: addressValidation.deliveryFee
         },
-        notes: `Category: ${formData.category}\nProduct: ${formData.productDescription}\nQuantity: ${formData.quantity}\nSpecial Requests: ${formData.specialRequests}\nDelivery Date: ${formData.deliveryDate}`
+        notes: `Category: ${formData.category}\nProduct: ${formData.productDescription}\nQuantity: ${formData.quantity}\nSpecial Requests: ${formData.specialRequests}`
       })
       .select()
       .single();
@@ -267,24 +263,12 @@ const EnhancedOrderForm = () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="deliveryDate">Preferred Delivery Date</Label>
-          <Input
-            id="deliveryDate"
-            type="date"
-            value={formData.deliveryDate}
-            onChange={(e) => handleInputChange('deliveryDate', e.target.value)}
-            min={new Date().toISOString().split('T')[0]}
-          />
+      <div className="space-y-2">
+        <Label>Estimated Price</Label>
+        <div className="text-2xl font-bold text-green-600">
+          €{calculateEstimatedPrice().toFixed(2)}
         </div>
-        <div className="space-y-2">
-          <Label>Estimated Price</Label>
-          <div className="text-2xl font-bold text-green-600">
-            €{calculateEstimatedPrice().toFixed(2)}
-          </div>
-          <p className="text-sm text-gray-500">+ delivery fee (calculated after address validation)</p>
-        </div>
+        <p className="text-sm text-gray-500">+ delivery fee (calculated after address validation)</p>
       </div>
 
       <div className="space-y-2">
@@ -367,7 +351,7 @@ const EnhancedOrderForm = () => {
         <div className="text-center">
           <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
           <h3 className="text-lg font-semibold mb-2">Address Validated!</h3>
-          <p className="text-gray-600">Delivery available - {addressValidation.estimatedTime}</p>
+          <p className="text-gray-600">Delivery available</p>
         </div>
 
         <div className="bg-green-50 p-4 rounded-lg">

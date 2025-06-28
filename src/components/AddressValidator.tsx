@@ -74,7 +74,7 @@ const AddressValidator = ({ onValidAddress, orderAmount = 0, initialAddress = ''
         onValidAddress(result);
         toast({
           title: 'Address Validated',
-          description: `Delivery available - ${result.estimatedTime}`,
+          description: 'Delivery available',
         });
       } else if (result.error) {
         toast({
