@@ -219,10 +219,76 @@ export default function SoundManager() {
   };
 
   const playBuiltInSound = (soundName: string) => {
-    // This will be connected to the existing audio system
+    // Create different sound types based on the sound name
     setPlayingSound('built-in-preview');
-    
-    // Simulate built-in sound preview
+
+    if (soundName.includes('EXTREME ALARM')) {
+      console.log('🚨 Playing EXTREME ALARM sound preview!');
+
+      // Create EXTREMELY POWERFUL ALARM SOUND
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+
+      // Create multiple oscillators for maximum impact
+      const osc1 = audioContext.createOscillator();
+      const osc2 = audioContext.createOscillator();
+      const osc3 = audioContext.createOscillator();
+      const gain1 = audioContext.createGain();
+      const gain2 = audioContext.createGain();
+      const gain3 = audioContext.createGain();
+      const masterGain = audioContext.createGain();
+
+      // Connect audio graph
+      osc1.connect(gain1);
+      osc2.connect(gain2);
+      osc3.connect(gain3);
+      gain1.connect(masterGain);
+      gain2.connect(masterGain);
+      gain3.connect(masterGain);
+      masterGain.connect(audioContext.destination);
+
+      // EXTREMELY HIGH FREQUENCIES for maximum audibility
+      osc1.frequency.setValueAtTime(1800, audioContext.currentTime); // VERY HIGH PIERCING
+      osc2.frequency.setValueAtTime(1400, audioContext.currentTime); // HIGH PIERCING
+      osc3.frequency.setValueAtTime(1000, audioContext.currentTime); // MID-HIGH
+
+      // Different waveforms for complexity
+      osc1.type = 'square'; // Harsh square wave
+      osc2.type = 'sawtooth'; // Sharp sawtooth
+      osc3.type = 'triangle'; // Triangle wave
+
+      // MAXIMUM VOLUME with pulsing effect
+      const currentTime = audioContext.currentTime;
+      masterGain.gain.setValueAtTime(1.0, currentTime);
+
+      // Create pulsing alarm pattern
+      for (let i = 0; i < 4; i++) {
+        const pulseStart = currentTime + (i * 0.4);
+        gain1.gain.setValueAtTime(0, pulseStart);
+        gain2.gain.setValueAtTime(0, pulseStart);
+        gain3.gain.setValueAtTime(0, pulseStart);
+
+        gain1.gain.linearRampToValueAtTime(1.0, pulseStart + 0.05);
+        gain2.gain.linearRampToValueAtTime(1.0, pulseStart + 0.05);
+        gain3.gain.linearRampToValueAtTime(1.0, pulseStart + 0.05);
+
+        gain1.gain.setValueAtTime(1.0, pulseStart + 0.3);
+        gain2.gain.setValueAtTime(1.0, pulseStart + 0.3);
+        gain3.gain.setValueAtTime(1.0, pulseStart + 0.3);
+
+        gain1.gain.linearRampToValueAtTime(0, pulseStart + 0.35);
+        gain2.gain.linearRampToValueAtTime(0, pulseStart + 0.35);
+        gain3.gain.linearRampToValueAtTime(0, pulseStart + 0.35);
+      }
+
+      osc1.start(currentTime);
+      osc2.start(currentTime);
+      osc3.start(currentTime);
+      osc1.stop(currentTime + 2.0);
+      osc2.stop(currentTime + 2.0);
+      osc3.stop(currentTime + 2.0);
+    }
+
+    // Reset playing state after sound completes
     setTimeout(() => {
       setPlayingSound(null);
     }, 3000);

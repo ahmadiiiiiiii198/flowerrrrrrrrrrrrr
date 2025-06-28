@@ -106,16 +106,16 @@ export interface NotificationChannel {
   handler: (notification: NotificationData) => Promise<void>;
 }
 
-// Default notification settings
+// Default notification settings - EXTREMELY AGGRESSIVE FOR MAXIMUM ATTENTION
 export const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
   enabled: true,
   soundEnabled: true,
   vibrationEnabled: true,
   browserNotificationsEnabled: true,
   emailNotificationsEnabled: false,
-  ringDuration: 3,
-  ringInterval: 2,
-  maxRings: 10,
+  ringDuration: 5, // LONGER RING DURATION
+  ringInterval: 1, // SHORTER INTERVAL BETWEEN RINGS
+  maxRings: 20, // MORE RINGS - IMPOSSIBLE TO MISS
   notificationTypes: {
     order_created: {
       enabled: true,
@@ -156,42 +156,42 @@ export const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
   },
 };
 
-// Audio patterns for different notification types
+// Audio patterns for different notification types - EXTREMELY STRONG AND AUDIBLE
 export const AUDIO_PATTERNS: Record<NotificationType, AudioNotificationConfig> = {
   order_created: {
-    frequency: 800,
-    duration: 0.5,
+    frequency: 1200, // HIGHER FREQUENCY - MORE PIERCING
+    duration: 1.0, // LONGER DURATION
     volume: 1.0, // MAXIMUM VOLUME
-    pattern: 'triple',
+    pattern: 'continuous', // CONTINUOUS PATTERN - IMPOSSIBLE TO MISS
   },
   order_paid: {
-    frequency: 1000,
-    duration: 0.3,
+    frequency: 1500, // VERY HIGH FREQUENCY - EXTREMELY AUDIBLE
+    duration: 0.8, // LONGER DURATION
     volume: 1.0, // MAXIMUM VOLUME
-    pattern: 'double',
+    pattern: 'triple', // TRIPLE BEEPS
   },
   order_updated: {
-    frequency: 600,
-    duration: 0.2,
+    frequency: 1000, // HIGHER FREQUENCY
+    duration: 0.6, // LONGER DURATION
     volume: 1.0, // MAXIMUM VOLUME
-    pattern: 'single',
+    pattern: 'double', // DOUBLE BEEPS
   },
   order_cancelled: {
-    frequency: 400,
-    duration: 0.8,
+    frequency: 800, // STRONG FREQUENCY
+    duration: 1.2, // MUCH LONGER DURATION
     volume: 1.0, // MAXIMUM VOLUME
-    pattern: 'single',
+    pattern: 'continuous', // CONTINUOUS PATTERN
   },
   payment_failed: {
-    frequency: 300,
-    duration: 1.0,
+    frequency: 500, // DEEP URGENT FREQUENCY
+    duration: 2.0, // VERY LONG DURATION
     volume: 1.0, // MAXIMUM VOLUME
-    pattern: 'continuous',
+    pattern: 'continuous', // CONTINUOUS URGENT PATTERN
   },
   payment_completed: {
-    frequency: 1200,
-    duration: 0.4,
+    frequency: 1800, // EXTREMELY HIGH FREQUENCY - VERY PIERCING
+    duration: 0.8, // LONGER DURATION
     volume: 1.0, // MAXIMUM VOLUME
-    pattern: 'single', // Single notification for completed Stripe payments
+    pattern: 'triple', // TRIPLE SUCCESS BEEPS
   },
 };

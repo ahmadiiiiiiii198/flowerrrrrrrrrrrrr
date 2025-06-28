@@ -166,7 +166,7 @@ const Hero = () => {
               className="group bg-gradient-to-r from-peach-500 via-coral-500 to-peach-600 text-white px-10 py-4 rounded-full font-semibold font-inter hover:from-peach-600 hover:via-coral-600 hover:to-peach-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl hover-lift animate-pulse-glow"
             >
               <span className="flex items-center justify-center space-x-2">
-                <span>Shop Flowers</span>
+                <span>Scopri Fiori</span>
                 <Flower2 className="group-hover:animate-bloom" size={18} />
               </span>
             </button>
@@ -177,7 +177,7 @@ const Hero = () => {
               className="group bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-10 py-4 rounded-full font-semibold font-inter hover:from-emerald-600 hover:to-emerald-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl hover-lift animate-bounce-gentle"
             >
               <span className="flex items-center justify-center space-x-2">
-                <span>Browse Plants</span>
+                <span>Contatti</span>
                 <Flower2 className="group-hover:animate-bloom" size={18} />
               </span>
             </button>

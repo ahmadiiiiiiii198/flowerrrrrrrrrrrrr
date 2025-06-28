@@ -179,8 +179,8 @@ class ContinuousAudioNotifier {
         this.playDualToneRing();
       }
 
-      // Schedule next ring cycle
-      const interval = this.activeSound?.sound_type === 'custom' ? 5000 : 4000;
+      // Schedule next ring cycle - MUCH MORE FREQUENT
+      const interval = this.activeSound?.sound_type === 'custom' ? 3000 : 2000; // SHORTER INTERVALS
       this.timeoutId = setTimeout(() => {
         if (this.isRinging) {
           this.playRingTone();
@@ -248,9 +248,9 @@ class ContinuousAudioNotifier {
     gainNode2.connect(masterGain);
     masterGain.connect(this.audioContext.destination);
 
-    // Set frequencies for pleasant ringing (like a phone)
-    oscillator1.frequency.setValueAtTime(880, this.audioContext.currentTime); // A5 note
-    oscillator2.frequency.setValueAtTime(1108, this.audioContext.currentTime); // C#6 note
+    // Set EXTREMELY POWERFUL frequencies for MAXIMUM AUDIBILITY
+    oscillator1.frequency.setValueAtTime(1500, this.audioContext.currentTime); // VERY HIGH PIERCING TONE
+    oscillator2.frequency.setValueAtTime(1200, this.audioContext.currentTime); // HIGH PIERCING TONE
     oscillator1.type = 'sine';
     oscillator2.type = 'sine';
 
@@ -259,16 +259,20 @@ class ContinuousAudioNotifier {
     // Master volume - MAXIMUM VOLUME
     masterGain.gain.setValueAtTime(1.0, currentTime);
 
-    // Ring pattern: ring-ring-pause-ring-ring-pause
+    // AGGRESSIVE ring pattern: CONTINUOUS POWERFUL BURSTS
     // First ring
     this.createRingBurst(gainNode1, gainNode2, currentTime, 0);
     // Second ring
+    this.createRingBurst(gainNode1, gainNode2, currentTime, 0.4);
+    // Third ring
     this.createRingBurst(gainNode1, gainNode2, currentTime, 0.8);
+    // Fourth ring
+    this.createRingBurst(gainNode1, gainNode2, currentTime, 1.2);
 
     oscillator1.start(currentTime);
     oscillator2.start(currentTime);
-    oscillator1.stop(currentTime + 2.0);
-    oscillator2.stop(currentTime + 2.0);
+    oscillator1.stop(currentTime + 2.5); // LONGER DURATION
+    oscillator2.stop(currentTime + 2.5); // LONGER DURATION
   }
 
   private createRingBurst(gainNode1: GainNode, gainNode2: GainNode, startTime: number, offset: number) {

@@ -256,12 +256,12 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
         {isProcessing ? (
           <>
             <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-            Processing Payment...
+            Elaborazione Pagamento...
           </>
         ) : (
           <>
             <CreditCard className="h-5 w-5 mr-2" />
-            {children || `Pay €${totalAmount.toFixed(2)} with Stripe`}
+            {children || `Paga €${totalAmount.toFixed(2)} con Stripe`}
           </>
         )}
       </Button>
