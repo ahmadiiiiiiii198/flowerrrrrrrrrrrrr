@@ -87,7 +87,7 @@ const EnhancedOrderForm = () => {
   };
 
   const validateFormStep1 = () => {
-    if (!formData.customerName || !formData.customerEmail || !formData.category || !formData.productDescription || !formData.deliveryAddress) {
+    if (!formData.customerName || !formData.customerEmail || !formData.customerPhone || !formData.category || !formData.productDescription || !formData.deliveryAddress) {
       toast({
         title: 'Missing Information',
         description: 'Please fill in all required fields before proceeding.',
@@ -126,7 +126,7 @@ const EnhancedOrderForm = () => {
         order_number: orderNumber,
         customer_name: formData.customerName,
         customer_email: formData.customerEmail,
-        customer_phone: formData.customerPhone || null,
+        customer_phone: formData.customerPhone,
         customer_address: addressValidation.formattedAddress, // Use customer_address column
         total_amount: totalAmount,
         status: 'payment_pending',
@@ -211,7 +211,7 @@ const EnhancedOrderForm = () => {
       <div className="space-y-2">
         <Label htmlFor="customerPhone" className="flex items-center gap-2">
           <Phone className="h-4 w-4" />
-          Phone Number
+          Phone Number *
         </Label>
         <Input
           id="customerPhone"
@@ -219,6 +219,7 @@ const EnhancedOrderForm = () => {
           value={formData.customerPhone}
           onChange={(e) => handleInputChange('customerPhone', e.target.value)}
           placeholder="Enter your phone number"
+          required
         />
       </div>
 
@@ -389,7 +390,7 @@ const EnhancedOrderForm = () => {
           customerInfo={{
             name: formData.customerName,
             email: formData.customerEmail,
-            phone: formData.customerPhone || undefined,
+            phone: formData.customerPhone,
           }}
           onCreateOrder={createOrder}
         />

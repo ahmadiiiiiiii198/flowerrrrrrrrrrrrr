@@ -54,7 +54,7 @@ const DirectPaymentButton: React.FC<DirectPaymentButtonProps> = ({
         .insert({
           customer_name: orderData.customerName,
           customer_email: orderData.customerEmail,
-          customer_phone: orderData.customerPhone || null,
+          customer_phone: orderData.customerPhone,
           customer_address: orderData.deliveryAddress,
           total_amount: totalAmount,
           status: 'payment_pending',
@@ -143,7 +143,7 @@ const DirectPaymentButton: React.FC<DirectPaymentButtonProps> = ({
         metadata: {
           order_id: order.id,
           customer_name: orderData.customerName,
-          customer_phone: orderData.customerPhone || '',
+          customer_phone: orderData.customerPhone,
           source: 'francesco_fiori_website',
           order_type: 'product_order',
         }
@@ -374,7 +374,7 @@ const ProductOrderModal: React.FC<ProductOrderModalProps> = ({ product, isOpen, 
         order_number: orderNumber,
         customer_name: orderData.customerName,
         customer_email: orderData.customerEmail,
-        customer_phone: orderData.customerPhone || null,
+        customer_phone: orderData.customerPhone,
         customer_address: orderData.deliveryAddress, // Use customer_address column
         total_amount: totalAmount,
         status: 'pending', // Pay later orders start as pending
@@ -483,13 +483,14 @@ const ProductOrderModal: React.FC<ProductOrderModalProps> = ({ product, isOpen, 
             <div className="space-y-2">
               <Label htmlFor="customerPhone" className="flex items-center gap-2">
                 <Phone className="h-4 w-4" />
-                Telefono
+                Telefono *
               </Label>
               <Input
                 id="customerPhone"
                 value={orderData.customerPhone}
                 onChange={(e) => handleInputChange('customerPhone', e.target.value)}
                 placeholder="+39 123 456 7890"
+                required
               />
             </div>
 
@@ -623,7 +624,7 @@ const ProductOrderModal: React.FC<ProductOrderModalProps> = ({ product, isOpen, 
 
               {/* Debug info */}
               <div className="text-xs text-gray-500 mb-2">
-                Form valid: {orderData.customerName && orderData.customerEmail && orderData.deliveryAddress ? 'Yes' : 'No'} |
+                Form valid: {orderData.customerName && orderData.customerEmail && orderData.customerPhone && orderData.deliveryAddress ? 'Yes' : 'No'} |
                 Address validated: {addressValidation?.isValid && addressValidation?.isWithinZone ? 'Yes' : 'No'}
               </div>
 
@@ -644,7 +645,7 @@ const ProductOrderModal: React.FC<ProductOrderModalProps> = ({ product, isOpen, 
                     </p>
                   </div>
 
-                  {orderData.customerName && orderData.customerEmail && orderData.deliveryAddress &&
+                  {orderData.customerName && orderData.customerEmail && orderData.customerPhone && orderData.deliveryAddress &&
                    addressValidation?.isValid && addressValidation?.isWithinZone ? (
                     <DirectPaymentButton
                       product={product}
@@ -675,7 +676,7 @@ const ProductOrderModal: React.FC<ProductOrderModalProps> = ({ product, isOpen, 
                   ) : (
                     <div className="bg-amber-50 p-4 rounded-lg">
                       <p className="text-amber-800 text-sm">
-                        {!orderData.customerName || !orderData.customerEmail || !orderData.deliveryAddress
+                        {!orderData.customerName || !orderData.customerEmail || !orderData.customerPhone || !orderData.deliveryAddress
                           ? 'Compila tutti i campi obbligatori sopra per procedere al pagamento.'
                           : !addressValidation?.isValid || !addressValidation?.isWithinZone
                           ? 'Valida l\'indirizzo di consegna prima di procedere al pagamento.'
@@ -705,7 +706,7 @@ const ProductOrderModal: React.FC<ProductOrderModalProps> = ({ product, isOpen, 
                     </Button>
                     <Button
                       type="button"
-                      disabled={isSubmitting || !orderData.customerName || !orderData.customerEmail || !orderData.deliveryAddress ||
+                      disabled={isSubmitting || !orderData.customerName || !orderData.customerEmail || !orderData.customerPhone || !orderData.deliveryAddress ||
                                !addressValidation?.isValid || !addressValidation?.isWithinZone}
                       onClick={async () => {
                         setIsSubmitting(true);
