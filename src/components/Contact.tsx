@@ -7,6 +7,8 @@ import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import PatternDivider from "./PatternDivider";
 import { useToast } from "@/hooks/use-toast";
 import OrderOptionsModal from "./OrderOptionsModal";
+import BusinessHoursStatus from "./BusinessHoursStatus";
+import { useBusinessHours } from "@/hooks/useBusinessHours";
 
 interface ContactContent {
   address: string;
@@ -19,6 +21,7 @@ interface ContactContent {
 
 const Contact = () => {
   const { toast } = useToast();
+  const { formattedHours } = useBusinessHours();
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -27,7 +30,7 @@ const Contact = () => {
     guests: "",
     message: ""
   });
-  
+
   const [availableSeats, setAvailableSeats] = useState(50); // Default value
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
@@ -36,7 +39,7 @@ const Contact = () => {
     phone: "+393498851455",
     email: "Dbrfnc56m31@gmail.com",
     mapUrl: "https://maps.google.com",
-    hours: "Lun-Dom: 08:00 - 19:00"
+    hours: formattedHours || "Lun-Dom: 08:00 - 19:00"
   });
   
   useEffect(() => {
@@ -183,6 +186,11 @@ const Contact = () => {
               >
                 Inizia il Tuo Ordine
               </Button>
+
+              {/* Business Hours Status */}
+              <div className="mt-4">
+                <BusinessHoursStatus variant="banner" />
+              </div>
             </div>
           </div>
           
@@ -219,7 +227,7 @@ const Contact = () => {
                   <Clock className="text-persian-gold mr-3 mt-1 flex-shrink-0" size={20} />
                   <div>
                     <h4 className="font-medium">Hours</h4>
-                    <p className="text-gray-300">{contactContent.hours}</p>
+                    <p className="text-gray-300">{formattedHours || contactContent.hours}</p>
                   </div>
                 </div>
               </div>

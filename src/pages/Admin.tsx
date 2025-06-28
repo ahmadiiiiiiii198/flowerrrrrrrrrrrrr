@@ -23,6 +23,7 @@ import HeroDebugger from '@/components/admin/HeroDebugger';
 import HeroContentEditor from '@/components/admin/HeroContentEditor';
 import ContactInfoEditor from '@/components/admin/ContactInfoEditor';
 import HeroImageFixer from '@/components/admin/HeroImageFixer';
+import HoursSettings from '@/components/admin/HoursSettings';
 
 // import TestOrderButton from '@/components/TestOrderButton';
 import { testDatabaseConnection } from '@/utils/initializeDatabase';
@@ -243,6 +244,12 @@ const Admin = () => {
                 </div>
                 <span className="text-xs font-medium text-gray-700">Telefono</span>
               </TabsTrigger>
+              <TabsTrigger value="hours" className="flex flex-col items-center gap-2 p-3 bg-white/90 rounded-lg shadow-sm border border-amber-200 hover:bg-amber-50 transition-all duration-200 hover-scale data-[state=active]:bg-amber-100">
+                <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
+                  <span className="text-amber-600 text-sm">🕒</span>
+                </div>
+                <span className="text-xs font-medium text-gray-700">Orari</span>
+              </TabsTrigger>
               <TabsTrigger value="hero" className="flex flex-col items-center gap-2 p-3 bg-white/90 rounded-lg shadow-sm border border-purple-200 hover:bg-purple-50 transition-all duration-200 hover-scale data-[state=active]:bg-purple-100">
                 <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
                   <span className="text-purple-600 text-sm">🏠</span>
@@ -316,6 +323,7 @@ const Admin = () => {
           <div className="hidden md:block">
             <TabsList className="grid grid-cols-6 lg:grid-cols-12 w-full gap-1 p-1 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg">
               <TabsTrigger value="phone" className="text-sm px-3 py-2 hover-scale">Telefono</TabsTrigger>
+              <TabsTrigger value="hours" className="text-sm px-3 py-2 hover-scale">Orari</TabsTrigger>
               <TabsTrigger value="hero" className="text-sm px-3 py-2 hover-scale">Hero</TabsTrigger>
               <TabsTrigger value="logo" className="text-sm px-3 py-2 hover-scale">Logo</TabsTrigger>
               <TabsTrigger value="categories" className="text-sm px-3 py-2 hover-scale">Categorie</TabsTrigger>
@@ -333,6 +341,12 @@ const Admin = () => {
           <TabsContent value="phone" className="space-y-2 md:space-y-4 animate-fade-in-up">
             <div className="animate-fade-in-right animate-stagger-1">
               <ContactInfoEditor />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="hours" className="space-y-2 md:space-y-4 animate-fade-in-up">
+            <div className="animate-fade-in-right animate-stagger-2">
+              <HoursSettings />
             </div>
           </TabsContent>
 

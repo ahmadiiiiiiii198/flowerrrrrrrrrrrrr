@@ -1,13 +1,16 @@
 
 import React from 'react';
 import { Flower } from 'lucide-react';
+import { useBusinessHours } from '@/hooks/useBusinessHours';
 
 const Footer = () => {
+  const { formattedHours } = useBusinessHours();
+
   return (
     <footer className="bg-gray-800 text-white py-12">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="col-span-1 md:col-span-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="col-span-1 md:col-span-2 lg:col-span-1">
             <div className="flex items-center space-x-3 mb-4">
               <img 
                 src="/lovable-uploads/c329c8f3-84d0-4928-bcae-d840d21eb631.png" 
@@ -46,6 +49,13 @@ const Footer = () => {
               <li>Plant Care Services</li>
               <li>Custom Bouquets</li>
             </ul>
+          </div>
+
+          <div>
+            <h3 className="font-semibold mb-4">Orari di Apertura</h3>
+            <div className="text-gray-300 text-sm leading-relaxed">
+              {formattedHours || 'Lun-Dom: 08:00 - 19:00'}
+            </div>
           </div>
         </div>
         
