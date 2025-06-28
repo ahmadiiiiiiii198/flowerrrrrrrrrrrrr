@@ -55,8 +55,6 @@ const EnhancedOrderForm = () => {
     deliveryDate: '',
     deliveryAddress: ''
   });
-  
-  const { toast } = useToast();
 
   const categories = [
     { value: 'matrimoni', label: 'Matrimoni - Wedding Arrangements' },

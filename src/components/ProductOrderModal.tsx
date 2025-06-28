@@ -215,7 +215,6 @@ const ProductOrderModal: React.FC<ProductOrderModalProps> = ({ product, isOpen, 
     deliveryDate: '',
     deliveryAddress: ''
   });
-  const { toast } = useToast();
 
   // Cleanup timeout on unmount
   useEffect(() => {
