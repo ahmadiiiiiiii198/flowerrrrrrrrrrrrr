@@ -98,6 +98,19 @@ const DirectPaymentButton: React.FC<DirectPaymentButtonProps> = ({
 
       // Step 3: Create Stripe session directly
       console.log('💳 Creating Stripe session...');
+      console.log('📦 Product data:', JSON.stringify(product, null, 2));
+      console.log('📋 Order data:', JSON.stringify(orderData, null, 2));
+
+      // Validate product data
+      if (!product.name || !product.name.trim()) {
+        throw new Error('Product name is required');
+      }
+      if (!product.price || product.price <= 0) {
+        throw new Error('Product price must be greater than 0');
+      }
+      if (!orderData.quantity || orderData.quantity <= 0) {
+        throw new Error('Order quantity must be greater than 0');
+      }
 
       const stripeData = {
         payment_method_types: ['card'],
@@ -105,12 +118,12 @@ const DirectPaymentButton: React.FC<DirectPaymentButtonProps> = ({
           price_data: {
             currency: 'eur',
             product_data: {
-              name: product.name,
-              description: product.description || '',
+              name: product.name.trim(),
+              description: (product.description || '').trim() || `${product.name.trim()} - Francesco Fiori`,
             },
             unit_amount: Math.round(product.price * 100),
           },
-          quantity: orderData.quantity,
+          quantity: Math.max(1, Math.floor(orderData.quantity)),
         }],
         mode: 'payment',
         customer_email: orderData.customerEmail,
@@ -134,14 +147,20 @@ const DirectPaymentButton: React.FC<DirectPaymentButtonProps> = ({
         ? 'http://localhost:3003/create-checkout-session'
         : '/.netlify/functions/create-checkout-session';
 
+      console.log('🌐 Using API URL:', apiUrl);
+      console.log('📤 Sending Stripe data:', JSON.stringify(stripeData, null, 2));
+
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(stripeData),
       });
 
+      console.log('📡 Response status:', response.status);
+
       if (!response.ok) {
         const errorText = await response.text();
+        console.error('❌ Stripe server error response:', errorText);
         throw new Error(`Stripe error: ${response.status} - ${errorText}`);
       }
 

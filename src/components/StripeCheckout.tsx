@@ -43,20 +43,32 @@ async function processStripePayment(
 ): Promise<void> {
   console.log('💳 Starting direct Stripe payment...');
 
-  // Build request data
+  // Build request data with enhanced validation
   const requestData = {
     payment_method_types: ['card'],
-    line_items: items.map(item => ({
-      price_data: {
-        currency: 'eur',
-        product_data: {
-          name: item.name,
-          description: item.description || '',
+    line_items: items.map(item => {
+      // Ensure all required fields are present and valid
+      const itemName = (item.name || '').trim();
+      const itemDescription = (item.description || '').trim();
+      const itemPrice = Math.max(0.01, item.price || 0); // Minimum 1 cent
+      const itemQuantity = Math.max(1, Math.floor(item.quantity || 1));
+
+      if (!itemName) {
+        throw new Error(`Item name is required for item: ${JSON.stringify(item)}`);
+      }
+
+      return {
+        price_data: {
+          currency: 'eur',
+          product_data: {
+            name: itemName,
+            description: itemDescription || `${itemName} - Francesco Fiori`,
+          },
+          unit_amount: Math.round(itemPrice * 100), // Convert to cents
         },
-        unit_amount: Math.round(item.price * 100),
-      },
-      quantity: item.quantity,
-    })),
+        quantity: itemQuantity,
+      };
+    }),
     mode: 'payment',
     customer_email: customerInfo.email,
     billing_address_collection: 'required',
@@ -75,11 +87,14 @@ async function processStripePayment(
   };
 
   console.log('📤 Sending to Stripe server...');
+  console.log('📋 Request data:', JSON.stringify(requestData, null, 2));
 
   // Use Netlify function for production, localhost for development
   const apiUrl = window.location.hostname === 'localhost'
     ? 'http://localhost:3003/create-checkout-session'
     : '/.netlify/functions/create-checkout-session';
+
+  console.log('🌐 Using API URL:', apiUrl);
 
   // Make request
   const response = await fetch(apiUrl, {
@@ -88,8 +103,11 @@ async function processStripePayment(
     body: JSON.stringify(requestData),
   });
 
+  console.log('📡 Response status:', response.status);
+
   if (!response.ok) {
     const errorText = await response.text();
+    console.error('❌ Stripe server error response:', errorText);
     throw new Error(`Stripe server error: ${response.status} - ${errorText}`);
   }
 
@@ -119,10 +137,26 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
   const handleCheckout = async () => {
     console.log('🚀 Checkout button clicked');
 
-    // Validation
+    // Enhanced validation
     if (!items.length || !customerInfo.name || !customerInfo.email) {
       alert('Please fill in all required fields');
       return;
+    }
+
+    // Validate each item
+    for (const item of items) {
+      if (!item.name || !item.name.trim()) {
+        alert('All items must have a name');
+        return;
+      }
+      if (!item.price || item.price <= 0) {
+        alert('All items must have a valid price');
+        return;
+      }
+      if (!item.quantity || item.quantity <= 0) {
+        alert('All items must have a valid quantity');
+        return;
+      }
     }
 
     setIsProcessing(true);
