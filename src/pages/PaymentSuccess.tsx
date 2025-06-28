@@ -188,14 +188,14 @@ const PaymentSuccess = () => {
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-3 pt-4">
-                      <Button 
-                        onClick={() => navigate('/products')}
+                      <Button
+                        onClick={() => navigate('/menu')}
                         className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
                       >
                         <Package className="h-4 w-4 mr-2" />
                         Continue Shopping
                       </Button>
-                      <Button 
+                      <Button
                         onClick={() => navigate('/')}
                         variant="outline"
                         className="flex-1"

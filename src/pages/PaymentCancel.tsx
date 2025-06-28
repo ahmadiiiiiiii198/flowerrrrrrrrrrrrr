@@ -37,11 +37,11 @@ const PaymentCancel = () => {
   }, [orderId, toast]);
 
   const handleRetryPayment = () => {
-    // Navigate back to the order page or products page
+    // Navigate back to the order page or menu page
     if (orderId) {
       navigate(`/order?retry=${orderId}`);
     } else {
-      navigate('/products');
+      navigate('/menu');
     }
   };
 
@@ -102,8 +102,8 @@ const PaymentCancel = () => {
                       <CreditCard className="h-4 w-4 mr-2" />
                       Try Payment Again
                     </Button>
-                    <Button 
-                      onClick={() => navigate('/products')}
+                    <Button
+                      onClick={() => navigate('/menu')}
                       variant="outline"
                       className="flex-1"
                     >
