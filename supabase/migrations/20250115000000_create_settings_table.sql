@@ -76,6 +76,10 @@ INSERT INTO settings (key, value) VALUES
     '{"address": "Piazza della Repubblica, 10100 Torino TO", "phone": "+393498851455", "email": "Dbrfnc56m31@gmail.com", "mapUrl": "https://maps.google.com", "hours": "Lun-Dom: 08:00 - 19:00"}'
   ),
   (
+    'businessHours',
+    '{"monday": {"isOpen": true, "openTime": "08:00", "closeTime": "19:00"}, "tuesday": {"isOpen": true, "openTime": "08:00", "closeTime": "19:00"}, "wednesday": {"isOpen": true, "openTime": "08:00", "closeTime": "19:00"}, "thursday": {"isOpen": true, "openTime": "08:00", "closeTime": "19:00"}, "friday": {"isOpen": true, "openTime": "08:00", "closeTime": "19:00"}, "saturday": {"isOpen": true, "openTime": "08:00", "closeTime": "19:00"}, "sunday": {"isOpen": true, "openTime": "08:00", "closeTime": "19:00"}}'
+  ),
+  (
     'galleryContent',
     '{"heading": "La Nostra Galleria", "subheading": "Scopri le nostre creazioni floreali"}'
   ),

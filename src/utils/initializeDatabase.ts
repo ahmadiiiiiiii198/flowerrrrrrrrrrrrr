@@ -299,6 +299,18 @@ async function initializeDefaultSettings(): Promise<boolean> {
           mapUrl: "https://maps.google.com",
           hours: "Lun-Dom: 08:00 - 19:00"
         }
+      },
+      {
+        key: 'businessHours',
+        value: {
+          monday: { isOpen: true, openTime: '08:00', closeTime: '19:00' },
+          tuesday: { isOpen: true, openTime: '08:00', closeTime: '19:00' },
+          wednesday: { isOpen: true, openTime: '08:00', closeTime: '19:00' },
+          thursday: { isOpen: true, openTime: '08:00', closeTime: '19:00' },
+          friday: { isOpen: true, openTime: '08:00', closeTime: '19:00' },
+          saturday: { isOpen: true, openTime: '08:00', closeTime: '19:00' },
+          sunday: { isOpen: true, openTime: '08:00', closeTime: '19:00' }
+        }
       }
     ];
 
