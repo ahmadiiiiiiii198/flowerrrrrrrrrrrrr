@@ -74,9 +74,9 @@ const ContactInfoEditor = () => {
   const createDefaultContactInfo = async () => {
     const defaultContact = {
       phone: '+393498851455',
-      email: 'info@francescofiori.it',
-      address: 'Via Roma 123, Città',
-      hours: 'Lun-Sab: 8:00-19:00, Dom: 9:00-13:00'
+      email: 'Dbrfnc56m31@gmail.com',
+      address: 'Piazza della Repubblica, 10100 Torino TO',
+      hours: 'Lun-Dom: 08:00 - 19:00'
     };
 
     try {

@@ -170,10 +170,10 @@ CREATE POLICY "Allow public read access to order_items"
       {
         key: 'contactContent',
         value: {
-          phone: "+39 123 456 7890",
-          email: "info@francescofiori.it",
-          address: "Via dei Fiori 123, Milano, Italia",
-          hours: "Lun-Sab: 8:00-19:00, Dom: 9:00-13:00"
+          phone: "+393498851455",
+          email: "Dbrfnc56m31@gmail.com",
+          address: "Piazza della Repubblica, 10100 Torino TO",
+          hours: "Lun-Dom: 08:00 - 19:00"
         }
       },
       {

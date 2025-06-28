@@ -16,12 +16,12 @@ const Footer = () => {
               />
             </div>
             <p className="text-gray-300 mb-4 max-w-md">
-              Creating beautiful floral arrangements and providing premium plants 
+              Creating beautiful floral arrangements and providing premium plants
               for over 20 years. Your trusted partner for life's special moments.
             </p>
             <div className="text-sm text-gray-400">
-              <p>Via dei Fiori 123, 00100 Roma, Italy</p>
-              <p>Tel: +39 06 1234 5678</p>
+              <p>Piazza della Repubblica, 10100 Torino TO</p>
+              <p>Tel: +393498851455</p>
               <p>Email: Dbrfnc56m31@gmail.com</p>
             </div>
           </div>
