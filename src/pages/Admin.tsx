@@ -22,6 +22,7 @@ import SoundManager from '@/components/SoundManager';
 import HeroDebugger from '@/components/admin/HeroDebugger';
 import HeroContentEditor from '@/components/admin/HeroContentEditor';
 import ContactInfoEditor from '@/components/admin/ContactInfoEditor';
+import ContactMessagesManager from '@/components/admin/ContactMessagesManager';
 import HeroImageFixer from '@/components/admin/HeroImageFixer';
 import HoursSettings from '@/components/admin/HoursSettings';
 
@@ -310,6 +311,12 @@ const Admin = () => {
                 </div>
                 <span className="text-xs font-medium text-gray-700">{t('stripe')}</span>
               </TabsTrigger>
+              <TabsTrigger value="contact-messages" className="flex flex-col items-center gap-2 p-3 bg-white/90 rounded-lg shadow-sm border border-blue-200 hover:bg-blue-50 transition-all duration-200 hover-scale data-[state=active]:bg-blue-100">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span className="text-blue-600 text-sm">💬</span>
+                </div>
+                <span className="text-xs font-medium text-gray-700">Messaggi</span>
+              </TabsTrigger>
               <TabsTrigger value="notifications" className="flex flex-col items-center gap-2 p-3 bg-white/90 rounded-lg shadow-sm border border-rose-200 hover:bg-rose-50 transition-all duration-200 hover-scale data-[state=active]:bg-rose-100">
                 <div className="w-8 h-8 bg-rose-100 rounded-full flex items-center justify-center">
                   <span className="text-rose-600 text-sm">🎵</span>
@@ -321,7 +328,7 @@ const Admin = () => {
 
           {/* Desktop Horizontal Tabs */}
           <div className="hidden md:block">
-            <TabsList className="grid grid-cols-6 lg:grid-cols-12 w-full gap-1 p-1 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg">
+            <TabsList className="grid grid-cols-6 lg:grid-cols-14 w-full gap-1 p-1 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg">
               <TabsTrigger value="phone" className="text-sm px-3 py-2 hover-scale">Telefono</TabsTrigger>
               <TabsTrigger value="hours" className="text-sm px-3 py-2 hover-scale">Orari</TabsTrigger>
               <TabsTrigger value="hero" className="text-sm px-3 py-2 hover-scale">Hero</TabsTrigger>
@@ -334,6 +341,7 @@ const Admin = () => {
               <TabsTrigger value="orders" className="text-sm px-3 py-2 hover-scale">{t('orders')}</TabsTrigger>
               <TabsTrigger value="shipping" className="text-sm px-3 py-2 hover-scale">{t('shipping')}</TabsTrigger>
               <TabsTrigger value="stripe" className="text-sm px-3 py-2 hover-scale">{t('stripe')}</TabsTrigger>
+              <TabsTrigger value="contact-messages" className="text-sm px-3 py-2 hover-scale">Messaggi</TabsTrigger>
               <TabsTrigger value="notifications" className="text-sm px-3 py-2 hover-scale">{t('music')}</TabsTrigger>
             </TabsList>
           </div>
@@ -465,6 +473,12 @@ const Admin = () => {
               <div className="animate-fade-in-right">
                 <StripeSettings />
               </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="contact-messages" className="space-y-2 md:space-y-4 animate-fade-in-up">
+            <div className="bg-white/95 backdrop-blur-sm rounded-xl p-3 md:p-6 shadow-lg border border-blue-100">
+              <ContactMessagesManager />
             </div>
           </TabsContent>
 

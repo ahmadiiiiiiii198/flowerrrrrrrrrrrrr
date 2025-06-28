@@ -13,6 +13,7 @@ import Admin from "./pages/Admin";
 import AdminMinimal from "./pages/AdminMinimal";
 import Order from "./pages/Order";
 import OrderDashboardPro from "./pages/OrderDashboardPro";
+import ContactUs from "./pages/ContactUs";
 import MenuPage from "./pages/MenuPage";
 import NotFound from "./pages/NotFound";
 import PaymentSuccess from "./pages/PaymentSuccess";
@@ -50,6 +51,11 @@ const App = () => (
               <Route path="/orders" element={
                 <ErrorBoundary componentName="OrderDashboard">
                   <OrderDashboardPro />
+                </ErrorBoundary>
+              } />
+              <Route path="/contact" element={
+                <ErrorBoundary componentName="ContactUs">
+                  <ContactUs />
                 </ErrorBoundary>
               } />
 

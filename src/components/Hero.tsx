@@ -156,13 +156,26 @@ const Hero = () => {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-6 justify-center pt-4 animate-fade-in-up animate-stagger-2">
-            <button className="group bg-gradient-to-r from-peach-500 via-coral-500 to-peach-600 text-white px-10 py-4 rounded-full font-semibold font-inter hover:from-peach-600 hover:via-coral-600 hover:to-peach-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl hover-lift animate-pulse-glow">
+            <button
+              onClick={() => {
+                const productsSection = document.getElementById('products');
+                if (productsSection) {
+                  productsSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              className="group bg-gradient-to-r from-peach-500 via-coral-500 to-peach-600 text-white px-10 py-4 rounded-full font-semibold font-inter hover:from-peach-600 hover:via-coral-600 hover:to-peach-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl hover-lift animate-pulse-glow"
+            >
               <span className="flex items-center justify-center space-x-2">
                 <span>Shop Flowers</span>
                 <Flower2 className="group-hover:animate-bloom" size={18} />
               </span>
             </button>
-            <button className="group bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-10 py-4 rounded-full font-semibold font-inter hover:from-emerald-600 hover:to-emerald-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl hover-lift animate-bounce-gentle">
+            <button
+              onClick={() => {
+                window.location.href = '/contact';
+              }}
+              className="group bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-10 py-4 rounded-full font-semibold font-inter hover:from-emerald-600 hover:to-emerald-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl hover-lift animate-bounce-gentle"
+            >
               <span className="flex items-center justify-center space-x-2">
                 <span>Browse Plants</span>
                 <Flower2 className="group-hover:animate-bloom" size={18} />
