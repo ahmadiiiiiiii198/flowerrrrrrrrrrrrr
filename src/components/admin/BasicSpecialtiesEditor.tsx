@@ -416,6 +416,21 @@ const BasicSpecialtiesEditor: React.FC = () => {
               </h3>
               <div className="mb-6 p-4 border-2 border-dashed border-gray-300 rounded-lg">
                 <MultipleImageUploader
+                  onImagesSelected={(imageUrls) => {
+                    // Handle simple image URLs (fallback)
+                    const newSpecialties = imageUrls.map((url, index) => ({
+                      id: `${Date.now()}-${index}`,
+                      title: `New Specialty ${content.specialties.length + index + 1}`,
+                      description: 'Add description for this specialty',
+                      image: url,
+                      price: '€0.00'
+                    }));
+
+                    setContent({
+                      ...content,
+                      specialties: [...content.specialties, ...newSpecialties]
+                    });
+                  }}
                   onImagesWithLabelsSelected={(imagesWithLabels) => {
                     // Create new specialties for each uploaded image with label as title
                     const newSpecialties = imagesWithLabels.map((item, index) => ({

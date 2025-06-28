@@ -126,6 +126,7 @@ export const useGalleryOperations = ({
         const { data, error } = await supabase.storage
           .from('gallery')
           .upload(fileName, file, {
+            contentType: file.type,
             cacheControl: '3600',
             upsert: false
           });

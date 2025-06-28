@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/hooks/use-language';
-import { Loader2, Truck, Package, CheckCircle, Clock, X, Trash2 } from 'lucide-react';
+import { Loader2, Truck, Package, CheckCircle, Clock, X, Trash2, MessageSquare } from 'lucide-react';
 
 interface Order {
   id: string;
@@ -25,6 +25,8 @@ interface Order {
   tracking_number: string | null;
   shipped_at: string | null;
   delivered_at: string | null;
+  order_type?: string;
+  custom_request_description?: string;
 }
 
 interface OrderDetailsProps {
@@ -296,6 +298,19 @@ const OrderDetails = ({ order, onUpdate, onDelete }: OrderDetailsProps) => {
             )}
           </div>
         </div>
+
+        {/* Custom Request Description */}
+        {order.order_type === 'custom_request' && order.custom_request_description && (
+          <div className="bg-blue-50 p-3 sm:p-4 rounded-lg border border-blue-200">
+            <h4 className="font-bold mb-3 sm:mb-4 text-sm sm:text-base md:text-lg text-blue-900 border-b border-blue-300 pb-2 flex items-center gap-2">
+              <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" />
+              Richiesta del Cliente
+            </h4>
+            <div className="text-xs sm:text-sm md:text-base">
+              <p className="text-blue-800 leading-relaxed">{order.custom_request_description}</p>
+            </div>
+          </div>
+        )}
 
         {/* Order Information */}
         <div className="bg-emerald-50 p-3 sm:p-4 rounded-lg border border-emerald-200">

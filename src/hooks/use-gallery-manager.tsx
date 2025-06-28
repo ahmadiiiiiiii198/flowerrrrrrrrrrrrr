@@ -23,7 +23,7 @@ export const useGalleryManager = () => {
       const { data: settingsData, error: settingsError } = await supabase
         .from('settings')
         .select('value, updated_at')
-        .eq('key', 'galleryImages')
+        .eq('key', 'gallery_images')
         .order('updated_at', { ascending: false })
         .limit(1);
 

@@ -11,7 +11,7 @@ interface ImageWithLabel {
 }
 
 interface MultipleImageUploaderProps {
-  onImagesSelected: (imageUrls: string[]) => void;
+  onImagesSelected?: (imageUrls: string[]) => void;
   onImagesWithLabelsSelected?: (images: ImageWithLabel[]) => void;
   buttonLabel?: string;
   className?: string;
@@ -141,6 +141,7 @@ const MultipleImageUploader: React.FC<MultipleImageUploaderProps> = ({
         const { data, error } = await supabase.storage
           .from(bucketName)
           .upload(filePath, file, {
+            contentType: file.type,
             cacheControl: '3600',
             upsert: true
           });
@@ -181,7 +182,9 @@ const MultipleImageUploader: React.FC<MultipleImageUploaderProps> = ({
       } else {
         const newImages = [...previewImages, ...uploadedUrls];
         setPreviewImages(newImages);
-        onImagesSelected(newImages);
+        if (onImagesSelected) {
+          onImagesSelected(newImages);
+        }
       }
       
       toast({
@@ -212,7 +215,9 @@ const MultipleImageUploader: React.FC<MultipleImageUploaderProps> = ({
     } else {
       const newImages = previewImages.filter((_, i) => i !== index);
       setPreviewImages(newImages);
-      onImagesSelected(newImages);
+      if (onImagesSelected) {
+        onImagesSelected(newImages);
+      }
     }
   };
 

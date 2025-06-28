@@ -9,7 +9,9 @@ import {
   Clock,
   CheckCircle2,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  MessageSquare,
+  MapPin
 } from 'lucide-react';
 
 // Types
@@ -28,6 +30,8 @@ interface Order {
   metadata?: any;
   created_at: string;
   updated_at: string;
+  order_type?: string;
+  custom_request_description?: string;
 }
 
 const OrderDashboardSimple: React.FC = () => {
@@ -44,7 +48,11 @@ const OrderDashboardSimple: React.FC = () => {
     try {
       const { data, error } = await supabase
         .from('orders')
-        .select('*')
+        .select(`
+          *,
+          order_type,
+          custom_request_description
+        `)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -137,6 +145,11 @@ const OrderDashboardSimple: React.FC = () => {
                               {order.status}
                             </span>
                           </Badge>
+                          {order.order_type === 'custom_request' && (
+                            <Badge className="bg-blue-100 text-blue-800 border-blue-300">
+                              Richiesta Personalizzata
+                            </Badge>
+                          )}
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
@@ -148,13 +161,31 @@ const OrderDashboardSimple: React.FC = () => {
                           </div>
                           <div>
                             {order.customer_address && (
-                              <p className="text-sm text-gray-600 mb-2">{order.customer_address}</p>
+                              <div className="mb-2 p-2 bg-amber-50 border border-amber-200 rounded">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <MapPin className="w-3 h-3 text-amber-700" />
+                                  <span className="text-xs font-semibold text-amber-900">Consegna:</span>
+                                </div>
+                                <p className="text-sm text-amber-800">{order.customer_address}</p>
+                              </div>
                             )}
                             <p className="text-xs text-gray-500">
                               Created: {new Date(order.created_at).toLocaleString()}
                             </p>
                           </div>
                         </div>
+
+                        {/* Custom Request Description */}
+                        {order.order_type === 'custom_request' && order.custom_request_description && (
+                          <div className="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <h4 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                              <MessageSquare className="w-4 h-4" />
+                              Richiesta del Cliente:
+                            </h4>
+                            <p className="text-sm text-blue-800 leading-relaxed">{order.custom_request_description}</p>
+                          </div>
+                        )}
+
                         {order.notes && (
                           <div className="mt-3 p-3 bg-gray-50 rounded">
                             <p className="text-sm text-gray-700">{order.notes}</p>

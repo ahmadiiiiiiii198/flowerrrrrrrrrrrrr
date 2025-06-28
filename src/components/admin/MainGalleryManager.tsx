@@ -106,7 +106,7 @@ const MainGalleryManager = () => {
       // Check if the setting exists
       const { data: existingSetting, error: fetchError } = await supabase
         .from('settings')
-        .select('id')
+        .select('key')
         .eq('key', 'gallery_images')
         .single();
 
@@ -131,8 +131,7 @@ const MainGalleryManager = () => {
           .from('settings')
           .insert({
             key: 'gallery_images',
-            value: imageData,
-            description: 'Main website gallery images for La Nostra Galleria section'
+            value: imageData
           });
       }
 
@@ -168,13 +167,17 @@ const MainGalleryManager = () => {
       const filePath = `gallery/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('uploads')
-        .upload(filePath, file);
+        .from('gallery')
+        .upload(filePath, file, {
+          contentType: file.type,
+          cacheControl: '3600',
+          upsert: false
+        });
 
       if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage
-        .from('uploads')
+        .from('gallery')
         .getPublicUrl(filePath);
 
       const newImages = [...images];
@@ -336,9 +339,15 @@ const MainGalleryManager = () => {
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-4">Caricamento Multiplo</h3>
             <MultipleImageUploader
+              onImagesSelected={(imageUrls) => {
+                // Handle simple image URLs (fallback)
+                const imagesWithLabels = imageUrls.map(url => ({ url, label: '' }));
+                handleMultipleUpload(imagesWithLabels);
+              }}
               onImagesWithLabelsSelected={handleMultipleUpload}
-              bucketName="uploads"
-              folderPath="gallery"
+              bucketName="gallery"
+              folderPath=""
+              enableLabels={true}
             />
           </div>
 

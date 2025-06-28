@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import PatternDivider from "./PatternDivider";
 import { useToast } from "@/hooks/use-toast";
+import OrderOptionsModal from "./OrderOptionsModal";
 
 interface ContactContent {
   address: string;
@@ -29,6 +30,7 @@ const Contact = () => {
   
   const [availableSeats, setAvailableSeats] = useState(50); // Default value
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const [contactContent, setContactContent] = useState<ContactContent>({
     address: "Piazza della Repubblica, 10100 Torino TO",
     phone: "+393498851455",
@@ -169,108 +171,19 @@ const Contact = () => {
         <div className="grid md:grid-cols-2 gap-10">
           <div className="bg-persian-navy/50 p-6 rounded-lg backdrop-blur shimmer">
             <h3 className="text-2xl font-playfair text-persian-gold mb-6">Fai un Ordine</h3>
-            
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium mb-1">
-                    Your Name*
-                  </label>
-                  <Input
-                    id="name"
-                    placeholder="John Doe"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="bg-white/10 border-persian-gold/30 text-white placeholder:text-gray-400"
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium mb-1">
-                    Phone Number*
-                  </label>
-                  <Input
-                    id="phone"
-                    placeholder="+393498851455"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="bg-white/10 border-persian-gold/30 text-white placeholder:text-gray-400"
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="date" className="block text-sm font-medium mb-1">
-                    Date*
-                  </label>
-                  <Input
-                    id="date"
-                    type="date"
-                    value={formData.date}
-                    onChange={handleChange}
-                    className="bg-white/10 border-persian-gold/30 text-white"
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="time" className="block text-sm font-medium mb-1">
-                    Time*
-                  </label>
-                  <Input
-                    id="time"
-                    type="time"
-                    value={formData.time}
-                    onChange={handleChange}
-                    className="bg-white/10 border-persian-gold/30 text-white"
-                    min="11:30"
-                    max="21:00"
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <label htmlFor="guests" className="block text-sm font-medium mb-1">
-                  Number of Guests*
-                </label>
-                <Input
-                  id="guests"
-                  type="number"
-                  placeholder="2"
-                  min="1"
-                  max={availableSeats}
-                  value={formData.guests}
-                  onChange={handleChange}
-                  className="bg-white/10 border-persian-gold/30 text-white placeholder:text-gray-400"
-                  required
-                />
-                <p className="text-xs text-gray-300 mt-1">Maximum {availableSeats} guests per reservation</p>
-              </div>
-              
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium mb-1">
-                  Special Requests
-                </label>
-                <Textarea
-                  id="message"
-                  placeholder="Any special requirements or requests..."
-                  value={formData.message}
-                  onChange={handleChange}
-                  className="bg-white/10 border-persian-gold/30 text-white placeholder:text-gray-400"
-                  rows={4}
-                />
-              </div>
-              
-              <Button 
-                type="submit" 
-                className="bg-persian-gold text-persian-navy hover:bg-persian-gold/90 w-full"
-                disabled={isSubmitting}
+
+            <div className="space-y-4">
+              <p className="text-gray-300 mb-6">
+                Scegli come vuoi ordinare: dai nostri prodotti disponibili o con una richiesta personalizzata.
+              </p>
+
+              <Button
+                onClick={() => setIsOrderModalOpen(true)}
+                className="bg-persian-gold text-persian-navy hover:bg-persian-gold/90 w-full py-3 text-lg font-semibold"
               >
-                {isSubmitting ? "Processing..." : "Request Reservation"}
+                Inizia il Tuo Ordine
               </Button>
-            </form>
+            </div>
           </div>
           
           <div>
@@ -333,6 +246,11 @@ const Contact = () => {
         </div>
       </div>
     </section>
+
+    <OrderOptionsModal
+      isOpen={isOrderModalOpen}
+      onClose={() => setIsOrderModalOpen(false)}
+    />
   );
 };
 

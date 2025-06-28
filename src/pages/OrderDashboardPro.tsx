@@ -37,7 +37,8 @@ import {
   Users,
   ShoppingBag,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  MessageSquare
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -61,6 +62,8 @@ interface Order {
   metadata?: any;
   created_at: string;
   updated_at: string;
+  order_type?: string;
+  custom_request_description?: string;
 }
 
 interface Notification {
@@ -375,7 +378,9 @@ const OrderDashboardPro: React.FC = () => {
           notes,
           metadata,
           created_at,
-          updated_at
+          updated_at,
+          order_type,
+          custom_request_description
         `)
         .order('created_at', { ascending: false });
 
@@ -1109,6 +1114,19 @@ const OrderDashboardPro: React.FC = () => {
                                 </span>
                               </Badge>
 
+                              {order.order_type === 'custom_request' && (
+                                <Badge className="bg-blue-100 text-blue-800 border border-blue-300 px-3 py-1 text-sm font-semibold">
+                                  Richiesta Personalizzata
+                                </Badge>
+                              )}
+
+                              {order.customer_address && (
+                                <Badge className="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1 text-sm font-semibold flex items-center gap-1">
+                                  <MapPin className="w-3 h-3" />
+                                  Consegna
+                                </Badge>
+                              )}
+
                               {/* Status Update Dropdown */}
                               <select
                                 value={order.status}
@@ -1151,11 +1169,16 @@ const OrderDashboardPro: React.FC = () => {
 
                               <div className="space-y-3">
                                 {order.customer_address && (
-                                  <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-amber-100 rounded-lg">
-                                      <MapPin className="w-4 h-4 text-amber-700" />
+                                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                                    <div className="flex items-start gap-3">
+                                      <div className="p-2 bg-amber-100 rounded-lg flex-shrink-0">
+                                        <MapPin className="w-4 h-4 text-amber-700" />
+                                      </div>
+                                      <div>
+                                        <div className="font-semibold text-amber-900 text-sm mb-1">Indirizzo di Consegna:</div>
+                                        <span className="text-amber-800 text-sm leading-relaxed">{order.customer_address}</span>
+                                      </div>
                                     </div>
-                                    <span className="text-gray-700 text-sm">{order.customer_address}</span>
                                   </div>
                                 )}
                                 <div className="flex items-center gap-3">
@@ -1176,6 +1199,17 @@ const OrderDashboardPro: React.FC = () => {
                                 </div>
                               </div>
                             </div>
+
+                            {/* Custom Request Description */}
+                            {order.order_type === 'custom_request' && order.custom_request_description && (
+                              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                                <h4 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                                  <MessageSquare className="w-4 h-4" />
+                                  Richiesta del Cliente:
+                                </h4>
+                                <p className="text-sm text-blue-800 leading-relaxed">{order.custom_request_description}</p>
+                              </div>
+                            )}
 
                             {order.notes && (
                               <div className="mt-4 p-4 bg-gray-100 rounded-xl border border-gray-200">

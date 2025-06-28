@@ -34,7 +34,11 @@ const OrderManagement = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('orders')
-        .select('*')
+        .select(`
+          *,
+          order_type,
+          custom_request_description
+        `)
         .order('created_at', { ascending: false });
       
       if (error) throw error;

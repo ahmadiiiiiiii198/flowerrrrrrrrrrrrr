@@ -170,6 +170,28 @@ const GalleryManager: React.FC = () => {
               Multiple Image Upload
             </h3>
             <MultipleImageUploader
+              onImagesSelected={(imageUrls) => {
+                // Handle simple image URLs (fallback)
+                imageUrls.forEach((url, index) => {
+                  const newImage: GalleryImage = {
+                    id: `${Date.now()}-${index}`,
+                    url: url,
+                    title: `Gallery Image ${images.length + index + 1}`,
+                    description: '',
+                    order: images.length + index,
+                    is_featured: false,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                  };
+                  addImage(newImage);
+                });
+
+                setHasChanges(true);
+                toast({
+                  title: `${imageUrls.length} images added`,
+                  description: `Successfully uploaded ${imageUrls.length} images to the gallery`,
+                });
+              }}
               onImagesWithLabelsSelected={(imagesWithLabels) => {
                 imagesWithLabels.forEach((item, index) => {
                   const newImage: GalleryImage = {
@@ -193,7 +215,7 @@ const GalleryManager: React.FC = () => {
               }}
               buttonLabel="Upload Multiple Images with Labels"
               bucketName="gallery"
-              folderPath="uploads"
+              folderPath=""
               maxFiles={50}
               enableLabels={true}
               className="border-2 border-dashed border-gray-300 rounded-lg p-4"

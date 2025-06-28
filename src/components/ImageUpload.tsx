@@ -68,6 +68,7 @@ const ImageUpload = ({ currentValue, onUpload, className }: ImageUploadProps) =>
       const { error: uploadError } = await supabase.storage
         .from('admin-uploads')
         .upload(filePath, file, {
+          contentType: file.type,
           cacheControl: '3600',
           upsert: false
         });

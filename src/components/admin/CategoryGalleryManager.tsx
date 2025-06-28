@@ -205,6 +205,7 @@ const CategoryGalleryManager: React.FC<CategoryGalleryManagerProps> = ({
       const { error: uploadError } = await supabase.storage
         .from('admin-uploads')
         .upload(filePath, file, {
+          contentType: file.type,
           cacheControl: '3600',
           upsert: false
         });
@@ -332,6 +333,17 @@ const CategoryGalleryManager: React.FC<CategoryGalleryManagerProps> = ({
         <div className="mb-6">
           <h3 className="text-lg font-semibold mb-4">Multiple Image Upload</h3>
           <MultipleImageUploader
+            onImagesSelected={(imageUrls) => {
+              // Handle simple image URLs (fallback)
+              const newImages = imageUrls.map((url, index) => ({
+                id: `${Date.now()}-${index}`,
+                url: url,
+                label: '',
+                order: index
+              }));
+              setImages(newImages);
+              saveImages(newImages);
+            }}
             onImagesWithLabelsSelected={(imagesWithLabels) => {
               const newImages = imagesWithLabels.map((item, index) => ({
                 id: `${Date.now()}-${index}`,
