@@ -62,7 +62,6 @@ const OrderForm = () => {
       sameAsBilling: true
     }
   });
-  const { toast } = useToast();
 
   const categories = [
     { value: 'matrimoni', label: 'Matrimoni - Wedding Arrangements' },
