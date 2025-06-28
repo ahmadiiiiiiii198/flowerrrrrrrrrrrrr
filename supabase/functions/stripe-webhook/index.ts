@@ -51,7 +51,7 @@ serve(async (req) => {
           break
         }
 
-        // Update order status in database
+        // Update order status in database (only if currently payment_pending)
         const { error: updateError } = await supabaseClient
           .from('orders')
           .update({
@@ -64,6 +64,7 @@ serve(async (req) => {
             updated_at: new Date().toISOString(),
           })
           .eq('id', orderId)
+          .eq('status', 'payment_pending') // Only update if currently waiting for payment
 
         if (updateError) {
           console.error('Error updating order:', updateError)

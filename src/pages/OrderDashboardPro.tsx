@@ -385,6 +385,7 @@ const OrderDashboardPro: React.FC = () => {
           order_type,
           custom_request_description
         `)
+        .neq('status', 'payment_pending') // Exclude orders waiting for Stripe payment
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -467,6 +468,12 @@ const OrderDashboardPro: React.FC = () => {
         console.log('🚨 Payload details:', JSON.stringify(payload, null, 2));
         const newOrder = payload.new as Order;
 
+        // Skip payment_pending orders (they shouldn't appear in dashboard until paid)
+        if (newOrder.status === 'payment_pending') {
+          console.log('⏭️ Skipping payment_pending order - waiting for Stripe confirmation');
+          return;
+        }
+
         // Add to orders list - Use functional update to avoid stale closure
         setOrders(prev => {
           console.log('📝 Adding new order to list. Previous count:', prev.length);
@@ -482,7 +489,8 @@ const OrderDashboardPro: React.FC = () => {
             id: newOrder.id,
             order_number: newOrder.order_number,
             customer_name: newOrder.customer_name,
-            total_amount: newOrder.total_amount
+            total_amount: newOrder.total_amount,
+            status: newOrder.status
           });
           return updated;
         });
@@ -512,9 +520,42 @@ const OrderDashboardPro: React.FC = () => {
       }, (payload) => {
         console.log('📝 Order updated:', payload);
         const updatedOrder = payload.new as Order;
-        setOrders(prev => prev.map(order =>
-          order.id === updatedOrder.id ? updatedOrder : order
-        ));
+        const oldOrder = payload.old as Order;
+
+        setOrders(prev => {
+          // If order was payment_pending and now is paid, add it to the list
+          if (oldOrder.status === 'payment_pending' && updatedOrder.status !== 'payment_pending') {
+            console.log('💳 Order payment confirmed! Adding to dashboard:', updatedOrder.order_number);
+
+            // Show notification for newly paid order
+            toast({
+              title: '💳 Payment Confirmed!',
+              description: `Order #${updatedOrder.order_number} payment received - €${updatedOrder.total_amount}`,
+              duration: 8000,
+            });
+
+            // Check if order already exists to prevent duplicates
+            const orderExists = prev.some(order => order.id === updatedOrder.id);
+            if (orderExists) {
+              // Update existing order
+              return prev.map(order => order.id === updatedOrder.id ? updatedOrder : order);
+            } else {
+              // Add new order to the list
+              return [updatedOrder, ...prev];
+            }
+          }
+
+          // If order is payment_pending, don't show it
+          if (updatedOrder.status === 'payment_pending') {
+            console.log('⏭️ Updated order still payment_pending, keeping hidden');
+            return prev.filter(order => order.id !== updatedOrder.id);
+          }
+
+          // Normal update for visible orders
+          return prev.map(order =>
+            order.id === updatedOrder.id ? updatedOrder : order
+          );
+        });
       })
       .on('postgres_changes', {
         event: 'DELETE',

@@ -55,7 +55,7 @@ const PaymentSuccess = () => {
 
           const { supabase } = await import('@/integrations/supabase/client');
 
-          // Update order status for mock payment
+          // Update order status for mock payment (only if currently payment_pending)
           await supabase
             .from('orders')
             .update({
@@ -67,7 +67,8 @@ const PaymentSuccess = () => {
               paid_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
             })
-            .eq('id', orderId);
+            .eq('id', orderId)
+            .eq('status', 'payment_pending'); // Only update if currently waiting for payment
 
           // Get order details
           const { data: order } = await supabase
