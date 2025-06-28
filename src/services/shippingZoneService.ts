@@ -401,6 +401,11 @@ class ShippingZoneService {
     ];
     this.saveSettings();
   }
+
+  // Alias method for backward compatibility
+  public async validateAddress(address: string, orderAmount: number = 0): Promise<AddressValidationResult> {
+    return this.validateDeliveryAddress(address, orderAmount);
+  }
 }
 
 // Export singleton instance

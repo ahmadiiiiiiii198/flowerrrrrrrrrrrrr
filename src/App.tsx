@@ -5,7 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/hooks/use-language";
-import { CartProvider } from "@/hooks/use-cart";
+import { SimpleCartProvider } from "@/hooks/use-simple-cart";
+
 import ErrorBoundary from "./components/ErrorBoundary";
 import DiagnosticInfo from "./components/DiagnosticInfo";
 import BackgroundInitializer from "./components/BackgroundInitializer";
@@ -29,7 +30,7 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <LanguageProvider>
-          <CartProvider>
+          <SimpleCartProvider>
             <BackgroundInitializer />
             <Toaster />
             <Sonner />
@@ -84,7 +85,7 @@ const App = () => (
             </Routes>
           </BrowserRouter>
           <DiagnosticInfo />
-          </CartProvider>
+          </SimpleCartProvider>
         </LanguageProvider>
       </TooltipProvider>
     </QueryClientProvider>

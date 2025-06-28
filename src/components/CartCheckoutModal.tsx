@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, CreditCard, User, Mail, Phone, MapPin, AlertCircle } from 'lucide-react';
+import { Loader2, CreditCard, User, Mail, Phone, MapPin, AlertCircle, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { CartItem, useCart } from '@/hooks/use-cart';
+import { CartItem } from '@/hooks/use-simple-cart';
+import { useSimpleCart } from '@/hooks/use-simple-cart';
 import shippingZoneService from '@/services/shippingZoneService';
 import { useBusinessHours } from '@/hooks/useBusinessHours';
 
@@ -33,7 +33,7 @@ const CartCheckoutModal: React.FC<CartCheckoutModalProps> = ({
 }) => {
   const { toast } = useToast();
   const { validateOrderTime } = useBusinessHours();
-  const { clearCart } = useCart();
+  const { clearCart } = useSimpleCart();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isValidatingAddress, setIsValidatingAddress] = useState(false);
   const [addressValidation, setAddressValidation] = useState<any>(null);
@@ -341,13 +341,22 @@ const CartCheckoutModal: React.FC<CartCheckoutModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Checkout - {cartItems.length} Prodotti</DialogTitle>
-        </DialogHeader>
+    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+      <div
+        className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between p-6 border-b">
+          <h2 className="text-xl font-semibold">Checkout - {cartItems.length} Prodotti</h2>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-full"
+          >
+            <X size={20} />
+          </button>
+        </div>
 
-        <div className="space-y-6">
+        <div className="p-6 space-y-6">
           {/* Order Summary */}
           <div className="bg-gray-50 p-4 rounded-lg">
             <h3 className="font-medium mb-3">Riepilogo Ordine</h3>
@@ -545,8 +554,8 @@ const CartCheckoutModal: React.FC<CartCheckoutModalProps> = ({
             </TabsContent>
           </Tabs>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 };
 

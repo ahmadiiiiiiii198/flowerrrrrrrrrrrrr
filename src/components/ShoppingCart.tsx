@@ -15,35 +15,24 @@ interface ShoppingCartProps {
 }
 
 const ShoppingCart: React.FC<ShoppingCartProps> = ({ children }) => {
-  const { 
-    items, 
-    removeItem, 
-    updateQuantity, 
-    updateSpecialRequests, 
-    clearCart, 
-    getTotalItems, 
-    getTotalPrice,
-    isOpen,
-    setIsOpen 
-  } = useCart();
-  
+  const cart = useCart();
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   const handleQuantityChange = (productId: string, newQuantity: number) => {
     if (newQuantity < 1) {
-      removeItem(productId);
+      cart.removeItem(productId);
     } else {
-      updateQuantity(productId, newQuantity);
+      cart.updateQuantity(productId, newQuantity);
     }
   };
 
   const handleSpecialRequestsChange = (productId: string, specialRequests: string) => {
-    updateSpecialRequests(productId, specialRequests);
+    cart.updateSpecialRequests(productId, specialRequests);
   };
 
   return (
     <>
-      <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      <Sheet open={cart.isOpen} onOpenChange={cart.setIsOpen}>
         <SheetTrigger asChild>
           {children}
         </SheetTrigger>
@@ -51,12 +40,12 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({ children }) => {
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
               <ShoppingCart size={20} />
-              Carrello ({getTotalItems()})
+              Carrello ({cart.getTotalItems()})
             </SheetTitle>
           </SheetHeader>
           
           <div className="flex flex-col h-full">
-            {items.length === 0 ? (
+            {cart.items.length === 0 ? (
               <div className="flex-1 flex items-center justify-center">
                 <div className="text-center">
                   <ShoppingCart size={48} className="mx-auto text-gray-400 mb-4" />
@@ -67,7 +56,7 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({ children }) => {
             ) : (
               <>
                 <div className="flex-1 overflow-y-auto py-4 space-y-4">
-                  {items.map((item) => (
+                  {cart.items.map((item) => (
                     <div key={item.id} className="border rounded-lg p-4 space-y-3">
                       <div className="flex items-start gap-3">
                         <img
@@ -103,7 +92,7 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({ children }) => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => removeItem(item.product.id)}
+                              onClick={() => cart.removeItem(item.product.id)}
                               className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
                             >
                               <Trash2 size={14} />
@@ -136,13 +125,13 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({ children }) => {
                 <div className="border-t pt-4 space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="font-medium">Totale:</span>
-                    <span className="font-bold text-lg">€{getTotalPrice().toFixed(2)}</span>
+                    <span className="font-bold text-lg">€{cart.getTotalPrice().toFixed(2)}</span>
                   </div>
                   
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
-                      onClick={clearCart}
+                      onClick={cart.clearCart}
                       className="flex-1"
                     >
                       Svuota Carrello
@@ -165,8 +154,8 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({ children }) => {
       <CartCheckoutModal
         isOpen={isCheckoutOpen}
         onClose={() => setIsCheckoutOpen(false)}
-        cartItems={items}
-        totalAmount={getTotalPrice()}
+        cartItems={cart.items}
+        totalAmount={cart.getTotalPrice()}
       />
     </>
   );

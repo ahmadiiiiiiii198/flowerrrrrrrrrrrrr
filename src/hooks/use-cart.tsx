@@ -68,7 +68,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
   const updateQuantity = (productId: string, quantity: number) => {
     if (quantity <= 0) {
-      removeItem(productId);
+      setItems(prevItems => prevItems.filter(item => item.product.id !== productId));
       return;
     }
     setItems(prevItems =>

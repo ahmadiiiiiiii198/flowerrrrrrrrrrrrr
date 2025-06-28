@@ -3,10 +3,13 @@ import { ShoppingCart, Flower2, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import LanguageSelector from '@/components/LanguageSelector';
 import OrderOptionsModal from './OrderOptionsModal';
-import ShoppingCartComponent from './ShoppingCart';
-import { useCart } from '@/hooks/use-cart';
+import { useSimpleCart } from '@/hooks/use-simple-cart';
+import SimpleCart from './SimpleCart';
+
 
 const Header = () => {
+  const { getTotalItems, openCart } = useSimpleCart();
+
   // Use static logo settings to avoid hook issues
   const logoSettings = {
     logoUrl: "https://despodpgvkszyexvcbft.supabase.co/storage/v1/object/public/uploads/logos/1749735172947-oi6nr6gnk7.png",
@@ -16,7 +19,7 @@ const Header = () => {
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [logoError, setLogoError] = useState(false);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
-  const { getTotalItems } = useCart();
+
 
   // Static translations to avoid hook errors
   const t = (key: string) => {
@@ -106,15 +109,16 @@ const Header = () => {
                 <Plus size={16} className="animate-wiggle" />
                 {t('makeReservation')}
               </button>
-              <ShoppingCartComponent>
-                <button className="relative p-3 text-gray-700 hover:text-peach-600 transition-colors bg-gradient-to-br from-peach-50 to-amber-50 hover:from-peach-100 hover:to-amber-100 rounded-full group shadow-md hover:shadow-lg hover-lift animate-bounce-gentle animate-scale-in animate-stagger-3">
-                  <ShoppingCart size={20} className="group-hover:animate-wiggle" />
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-coral-500 to-peach-500 text-white text-xs rounded-full flex items-center justify-center font-inter font-semibold shadow-md animate-heartbeat">
-                    {getTotalItems()}
-                  </span>
-                  <Flower2 className="absolute -bottom-1 -right-1 text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-bounce animate-float" size={12} />
-                </button>
-              </ShoppingCartComponent>
+              <button
+                onClick={openCart}
+                className="relative p-3 text-gray-700 hover:text-peach-600 transition-colors bg-gradient-to-br from-peach-50 to-amber-50 hover:from-peach-100 hover:to-amber-100 rounded-full group shadow-md hover:shadow-lg hover-lift animate-bounce-gentle animate-scale-in animate-stagger-3"
+              >
+                <ShoppingCart size={20} className="group-hover:animate-wiggle" />
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-coral-500 to-peach-500 text-white text-xs rounded-full flex items-center justify-center font-inter font-semibold shadow-md animate-heartbeat">
+                  {getTotalItems()}
+                </span>
+                <Flower2 className="absolute -bottom-1 -right-1 text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-bounce animate-float" size={12} />
+              </button>
             </div>
           </div>
         </div>
@@ -124,6 +128,7 @@ const Header = () => {
         isOpen={isOrderModalOpen}
         onClose={() => setIsOrderModalOpen(false)}
       />
+      <SimpleCart />
     </>
   );
 };

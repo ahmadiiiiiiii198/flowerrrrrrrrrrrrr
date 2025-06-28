@@ -2,8 +2,9 @@
 import React from 'react';
 import { ShoppingCart, Eye, Tag } from 'lucide-react';
 import { Product } from '@/types/category';
-import { useCart } from '@/hooks/use-cart';
+
 import { useToast } from '@/hooks/use-toast';
+import { useSimpleCart } from '@/hooks/use-simple-cart';
 import { Badge } from '@/components/ui/badge';
 
 interface ProductCardProps {
@@ -26,8 +27,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
   onOrder,
   onViewDetails
 }) => {
-  const { addItem } = useCart();
   const { toast } = useToast();
+  const { addItem } = useSimpleCart();
 
   // Use product data if available, otherwise fall back to legacy props
   const productName = product?.name || name || '';
