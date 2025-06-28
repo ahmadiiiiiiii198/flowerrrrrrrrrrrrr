@@ -6,6 +6,7 @@ import Hero from '../components/Hero';
 import Categories from '../components/Categories';
 import Products from '../components/Products';
 import About from '../components/About';
+import ContactSection from '../components/ContactSection';
 import Footer from '../components/Footer';
 // Comprehensive fixes implemented for navbar and logo loading
 
@@ -34,8 +35,13 @@ const Index = () => {
           <About />
         </div>
       </ErrorBoundary>
-      <ErrorBoundary componentName="Footer">
+      <ErrorBoundary componentName="ContactSection">
         <div className="animate-fade-in-up animate-stagger-4">
+          <ContactSection />
+        </div>
+      </ErrorBoundary>
+      <ErrorBoundary componentName="Footer">
+        <div className="animate-fade-in-up animate-stagger-5">
           <Footer />
         </div>
       </ErrorBoundary>

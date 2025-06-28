@@ -1,18 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
 import { 
   MapPin, 
   Phone, 
   Mail, 
   Clock, 
-  Send, 
-  Loader2, 
   CheckCircle,
   MessageSquare,
   Flower2,
@@ -23,14 +16,6 @@ import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
-interface ContactFormData {
-  name: string;
-  email: string;
-  phone: string;
-  subject: string;
-  message: string;
-}
-
 interface ContactInfo {
   address: string;
   phone: string;
@@ -39,8 +24,6 @@ interface ContactInfo {
 }
 
 const ContactUs = () => {
-  const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [contactInfo, setContactInfo] = useState<ContactInfo>({
     address: 'Piazza della Repubblica, 10100 Torino TO',
@@ -49,15 +32,6 @@ const ContactUs = () => {
     hours: 'Lun-Dom: 08:00 - 19:00'
   });
 
-  const [formData, setFormData] = useState<ContactFormData>({
-    name: '',
-    email: '',
-    phone: '',
-    subject: '',
-    message: ''
-  });
-
-  // Load contact info from database
   useEffect(() => {
     loadContactInfo();
   }, []);
@@ -82,79 +56,6 @@ const ContactUs = () => {
       console.error('Error loading contact info:', error);
     }
   };
-
-  const handleInputChange = (field: keyof ContactFormData, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.name || !formData.email || !formData.subject || !formData.message) {
-      toast({
-        title: 'Campi Obbligatori',
-        description: 'Per favore compila tutti i campi obbligatori.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      const { error } = await supabase
-        .from('contact_messages')
-        .insert({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone || null,
-          subject: formData.subject,
-          message: formData.message,
-          status: 'new',
-          priority: 'normal'
-        });
-
-      if (error) throw error;
-
-      setIsSubmitted(true);
-      toast({
-        title: 'Messaggio Inviato! ✅',
-        description: 'Grazie per averci contattato. Ti risponderemo presto!',
-      });
-
-      // Reset form
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        subject: '',
-        message: ''
-      });
-
-    } catch (error) {
-      console.error('Error submitting contact form:', error);
-      toast({
-        title: 'Errore nell\'invio',
-        description: 'Si è verificato un errore. Riprova più tardi.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const subjectOptions = [
-    { value: 'general', label: 'Informazioni Generali' },
-    { value: 'order', label: 'Ordine Personalizzato' },
-    { value: 'wedding', label: 'Matrimoni e Eventi' },
-    { value: 'funeral', label: 'Composizioni Funebri' },
-    { value: 'delivery', label: 'Consegne' },
-    { value: 'complaint', label: 'Reclamo' },
-    { value: 'other', label: 'Altro' }
-  ];
 
   if (isSubmitted) {
     return (
@@ -221,179 +122,106 @@ const ContactUs = () => {
 
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 max-w-7xl mx-auto">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+                Le Nostre Informazioni di Contatto
+              </h2>
+              <p className="text-lg text-gray-600">
+                Puoi trovarci facilmente e contattarci attraverso i seguenti canali. 
+                Per inviare un messaggio, utilizza il modulo nella homepage.
+              </p>
+            </div>
             
-            <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
-              <CardHeader className="bg-gradient-to-r from-emerald-600 to-green-700 text-white rounded-t-lg">
-                <CardTitle className="text-2xl font-bold flex items-center gap-3">
-                  <MessageSquare className="h-6 w-6" />
-                  Invia un Messaggio
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-8">
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="name" className="text-gray-700 font-medium">
-                        Nome Completo *
-                      </Label>
-                      <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => handleInputChange('name', e.target.value)}
-                        placeholder="Il tuo nome"
-                        required
-                        className="border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
-                      />
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="space-y-8">
+                <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+                  <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-700 text-white rounded-t-lg">
+                    <CardTitle className="text-2xl font-bold">Informazioni di Contatto</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-8 space-y-6">
+                    <div className="flex items-start space-x-4">
+                      <div className="bg-emerald-100 p-3 rounded-full">
+                        <MapPin className="h-6 w-6 text-emerald-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-800 mb-1">Indirizzo</h3>
+                        <p className="text-gray-600">{contactInfo.address}</p>
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email" className="text-gray-700 font-medium">
-                        Email *
-                      </Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => handleInputChange('email', e.target.value)}
-                        placeholder="la-tua-email@esempio.com"
-                        required
-                        className="border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
-                      />
-                    </div>
-                  </div>
 
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="phone" className="text-gray-700 font-medium">
-                        Telefono
-                      </Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        value={formData.phone}
-                        onChange={(e) => handleInputChange('phone', e.target.value)}
-                        placeholder="+39 123 456 7890"
-                        className="border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
-                      />
+                    <div className="flex items-start space-x-4">
+                      <div className="bg-emerald-100 p-3 rounded-full">
+                        <Phone className="h-6 w-6 text-emerald-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-800 mb-1">Telefono</h3>
+                        <a href={`tel:${contactInfo.phone}`} className="text-emerald-600 hover:text-emerald-700 font-medium">
+                          {contactInfo.phone}
+                        </a>
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="subject" className="text-gray-700 font-medium">
-                        Oggetto *
-                      </Label>
-                      <Select value={formData.subject} onValueChange={(value) => handleInputChange('subject', value)}>
-                        <SelectTrigger className="border-gray-300 focus:border-emerald-500 focus:ring-emerald-500">
-                          <SelectValue placeholder="Seleziona un oggetto" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {subjectOptions.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="message" className="text-gray-700 font-medium">
-                      Messaggio *
-                    </Label>
-                    <Textarea
-                      id="message"
-                      value={formData.message}
-                      onChange={(e) => handleInputChange('message', e.target.value)}
-                      placeholder="Scrivi qui il tuo messaggio..."
-                      rows={6}
-                      required
-                      className="border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 resize-none"
-                    />
-                  </div>
+                    <div className="flex items-start space-x-4">
+                      <div className="bg-emerald-100 p-3 rounded-full">
+                        <Mail className="h-6 w-6 text-emerald-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-800 mb-1">Email</h3>
+                        <a href={`mailto:${contactInfo.email}`} className="text-emerald-600 hover:text-emerald-700 font-medium">
+                          {contactInfo.email}
+                        </a>
+                      </div>
+                    </div>
 
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800 text-white py-4 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        Invio in corso...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="mr-2 h-5 w-5" />
-                        Invia Messaggio
-                      </>
-                    )}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
+                    <div className="flex items-start space-x-4">
+                      <div className="bg-emerald-100 p-3 rounded-full">
+                        <Clock className="h-6 w-6 text-emerald-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-800 mb-1">Orari di Apertura</h3>
+                        <p className="text-gray-600">{contactInfo.hours}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
 
-            <div className="space-y-8">
-              <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-                <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-700 text-white rounded-t-lg">
-                  <CardTitle className="text-2xl font-bold">Informazioni di Contatto</CardTitle>
-                </CardHeader>
-                <CardContent className="p-8 space-y-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="bg-emerald-100 p-3 rounded-full">
-                      <MapPin className="h-6 w-6 text-emerald-600" />
+              <div className="space-y-8">
+                <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+                  <CardContent className="p-0">
+                    <div className="h-64 bg-gradient-to-br from-emerald-100 to-green-200 rounded-lg flex items-center justify-center">
+                      <div className="text-center">
+                        <MapPin className="h-12 w-12 text-emerald-600 mx-auto mb-4" />
+                        <p className="text-emerald-700 font-medium">Mappa Interattiva</p>
+                        <p className="text-emerald-600 text-sm">Clicca per aprire in Google Maps</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-800 mb-1">Indirizzo</h3>
-                      <p className="text-gray-600">{contactInfo.address}</p>
-                    </div>
-                  </div>
+                  </CardContent>
+                </Card>
 
-                  <div className="flex items-start space-x-4">
-                    <div className="bg-emerald-100 p-3 rounded-full">
-                      <Phone className="h-6 w-6 text-emerald-600" />
+                <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+                  <CardHeader className="bg-gradient-to-r from-emerald-600 to-green-700 text-white rounded-t-lg">
+                    <CardTitle className="text-xl font-bold">Come Raggiungerci</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <div className="space-y-4 text-gray-600">
+                      <p>
+                        <strong>In Auto:</strong> Siamo facilmente raggiungibili dal centro di Torino. 
+                        Parcheggio disponibile nelle vicinanze.
+                      </p>
+                      <p>
+                        <strong>Mezzi Pubblici:</strong> Fermata metro più vicina: Repubblica (Linea 1). 
+                        Autobus: linee 4, 6, 10, 18.
+                      </p>
+                      <p>
+                        <strong>A Piedi:</strong> Nel cuore del centro storico, a pochi passi 
+                        da Porta Palazzo e Via Po.
+                      </p>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-800 mb-1">Telefono</h3>
-                      <a href={`tel:${contactInfo.phone}`} className="text-emerald-600 hover:text-emerald-700 font-medium">
-                        {contactInfo.phone}
-                      </a>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start space-x-4">
-                    <div className="bg-emerald-100 p-3 rounded-full">
-                      <Mail className="h-6 w-6 text-emerald-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-800 mb-1">Email</h3>
-                      <a href={`mailto:${contactInfo.email}`} className="text-emerald-600 hover:text-emerald-700 font-medium">
-                        {contactInfo.email}
-                      </a>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start space-x-4">
-                    <div className="bg-emerald-100 p-3 rounded-full">
-                      <Clock className="h-6 w-6 text-emerald-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-800 mb-1">Orari di Apertura</h3>
-                      <p className="text-gray-600">{contactInfo.hours}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-                <CardContent className="p-0">
-                  <div className="h-64 bg-gradient-to-br from-emerald-100 to-green-200 rounded-lg flex items-center justify-center">
-                    <div className="text-center">
-                      <MapPin className="h-12 w-12 text-emerald-600 mx-auto mb-4" />
-                      <p className="text-emerald-700 font-medium">Mappa Interattiva</p>
-                      <p className="text-emerald-600 text-sm">Clicca per aprire in Google Maps</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </div>
         </div>
