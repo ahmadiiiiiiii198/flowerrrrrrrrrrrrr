@@ -204,7 +204,7 @@ class ContinuousAudioNotifier {
 
       // Create new audio instance with base64 data
       this.customAudio = new Audio(this.activeSound.file_url);
-      this.customAudio.volume = 0.7;
+      this.customAudio.volume = 1.0; // MAXIMUM VOLUME
 
       this.customAudio.onerror = () => {
         console.error('❌ Custom sound playback failed, falling back to built-in');
@@ -256,8 +256,8 @@ class ContinuousAudioNotifier {
 
     const currentTime = this.audioContext.currentTime;
 
-    // Master volume
-    masterGain.gain.setValueAtTime(0.15, currentTime);
+    // Master volume - MAXIMUM VOLUME
+    masterGain.gain.setValueAtTime(1.0, currentTime);
 
     // Ring pattern: ring-ring-pause-ring-ring-pause
     // First ring
@@ -275,15 +275,15 @@ class ContinuousAudioNotifier {
     const ringStart = startTime + offset;
     const ringDuration = 0.6;
 
-    // Fade in
+    // Fade in - MAXIMUM VOLUME
     gainNode1.gain.setValueAtTime(0, ringStart);
     gainNode2.gain.setValueAtTime(0, ringStart);
-    gainNode1.gain.linearRampToValueAtTime(1, ringStart + 0.05);
-    gainNode2.gain.linearRampToValueAtTime(0.8, ringStart + 0.05);
+    gainNode1.gain.linearRampToValueAtTime(1.0, ringStart + 0.05); // MAXIMUM
+    gainNode2.gain.linearRampToValueAtTime(1.0, ringStart + 0.05); // MAXIMUM
 
-    // Hold
-    gainNode1.gain.setValueAtTime(1, ringStart + ringDuration - 0.05);
-    gainNode2.gain.setValueAtTime(0.8, ringStart + ringDuration - 0.05);
+    // Hold - MAXIMUM VOLUME
+    gainNode1.gain.setValueAtTime(1.0, ringStart + ringDuration - 0.05); // MAXIMUM
+    gainNode2.gain.setValueAtTime(1.0, ringStart + ringDuration - 0.05); // MAXIMUM
 
     // Fade out
     gainNode1.gain.linearRampToValueAtTime(0, ringStart + ringDuration);

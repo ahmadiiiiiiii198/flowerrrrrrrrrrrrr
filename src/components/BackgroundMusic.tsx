@@ -31,7 +31,7 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({ className }) => {
       
       // Set initial volume from saved settings
       const settings = await audioService.getSettings();
-      setVolume(settings.volume || 0.5);
+      setVolume(settings.volume || 1.0); // DEFAULT TO MAXIMUM VOLUME
       
       // Check if user has interacted with the page
       const hasInteractedWithPage = sessionStorage.getItem('hasInteractedWithPage') === 'true';

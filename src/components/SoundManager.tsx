@@ -196,6 +196,7 @@ export default function SoundManager() {
       } else if (sound.file_url) {
         // Play custom uploaded sound (base64 data)
         const audio = new Audio(sound.file_url);
+        audio.volume = 1.0; // MAXIMUM VOLUME
         audioRef.current = audio;
 
         audio.onended = () => setPlayingSound(null);

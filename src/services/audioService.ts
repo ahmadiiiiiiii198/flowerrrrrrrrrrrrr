@@ -5,7 +5,7 @@ let settings = {
   songUrl: "/background-music.mp3",
   songTitle: "Default Music",
   autoplay: true,
-  volume: 0.5,
+  volume: 1.0, // MAXIMUM VOLUME
   customSong: false,
 };
 

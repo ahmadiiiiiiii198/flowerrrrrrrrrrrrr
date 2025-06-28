@@ -161,37 +161,37 @@ export const AUDIO_PATTERNS: Record<NotificationType, AudioNotificationConfig> =
   order_created: {
     frequency: 800,
     duration: 0.5,
-    volume: 0.7,
+    volume: 1.0, // MAXIMUM VOLUME
     pattern: 'triple',
   },
   order_paid: {
     frequency: 1000,
     duration: 0.3,
-    volume: 0.8,
+    volume: 1.0, // MAXIMUM VOLUME
     pattern: 'double',
   },
   order_updated: {
     frequency: 600,
     duration: 0.2,
-    volume: 0.5,
+    volume: 1.0, // MAXIMUM VOLUME
     pattern: 'single',
   },
   order_cancelled: {
     frequency: 400,
     duration: 0.8,
-    volume: 0.6,
+    volume: 1.0, // MAXIMUM VOLUME
     pattern: 'single',
   },
   payment_failed: {
     frequency: 300,
     duration: 1.0,
-    volume: 0.7,
+    volume: 1.0, // MAXIMUM VOLUME
     pattern: 'continuous',
   },
   payment_completed: {
     frequency: 1200,
     duration: 0.4,
-    volume: 0.8,
+    volume: 1.0, // MAXIMUM VOLUME
     pattern: 'single', // Single notification for completed Stripe payments
   },
 };
