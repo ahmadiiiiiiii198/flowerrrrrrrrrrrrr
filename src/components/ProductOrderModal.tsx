@@ -12,6 +12,7 @@ import { Product } from '@/types/category';
 import shippingZoneService from '@/services/shippingZoneService';
 import { useBusinessHours } from '@/hooks/useBusinessHours';
 import BusinessHoursStatus from './BusinessHoursStatus';
+import { businessHoursService } from '@/services/businessHoursService';
 
 // Direct payment button component - no abstractions
 interface DirectPaymentButtonProps {
@@ -34,6 +35,14 @@ const DirectPaymentButton: React.FC<DirectPaymentButtonProps> = ({
     setIsProcessing(true);
 
     try {
+      // Validate business hours first
+      console.log('🕒 Checking business hours...');
+      const businessHoursValidation = await businessHoursService.validateOrderTime();
+      if (!businessHoursValidation.valid) {
+        throw new Error(businessHoursValidation.message);
+      }
+      console.log('✅ Business hours validation passed');
+
       // Step 1: Create order directly
       console.log('📝 Creating order directly...');
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { CreditCard, Loader2 } from 'lucide-react';
+import { businessHoursService } from '@/services/businessHoursService';
 
 export interface CheckoutItem {
   id: string;
@@ -163,6 +164,14 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
     console.log('⏳ Processing started');
 
     try {
+      // Validate business hours before processing payment
+      console.log('🕒 Checking business hours...');
+      const businessHoursValidation = await businessHoursService.validateOrderTime();
+      if (!businessHoursValidation.valid) {
+        throw new Error(businessHoursValidation.message);
+      }
+      console.log('✅ Business hours validation passed');
+
       // Get order ID
       let finalOrderId = orderId;
 
