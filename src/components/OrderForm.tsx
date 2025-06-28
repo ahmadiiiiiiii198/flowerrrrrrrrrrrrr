@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, ShoppingCart, Phone, Mail, User, MapPin } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useBusinessHours } from '@/hooks/useBusinessHours';
+import BusinessHoursStatus from './BusinessHoursStatus';
 
 interface OrderFormData {
   customerName: string;
@@ -34,6 +36,8 @@ interface OrderFormData {
 }
 
 const OrderForm = () => {
+  const { toast } = useToast();
+  const { validateOrderTime } = useBusinessHours();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<OrderFormData>({
     customerName: '',
@@ -123,6 +127,12 @@ const OrderForm = () => {
     setIsSubmitting(true);
 
     try {
+      // Validate business hours first
+      const businessHoursValidation = await validateOrderTime();
+      if (!businessHoursValidation.valid) {
+        throw new Error(businessHoursValidation.message);
+      }
+
       // Validate required fields
       if (!formData.customerName || !formData.customerEmail || !formData.category) {
         throw new Error('Please fill in all required fields');
@@ -242,6 +252,11 @@ const OrderForm = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4 sm:p-6 md:p-8">
+        {/* Business Hours Status */}
+        <div className="mb-6">
+          <BusinessHoursStatus variant="banner" />
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
           {/* Customer Information */}
           <div className="space-y-4 sm:space-y-6">

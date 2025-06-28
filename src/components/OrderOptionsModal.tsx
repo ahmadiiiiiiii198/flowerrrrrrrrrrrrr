@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useBusinessHours } from '@/hooks/useBusinessHours';
 import { ShoppingCart, MessageSquare, Loader2, Package, Send } from 'lucide-react';
 
 interface OrderOptionsModalProps {
@@ -24,6 +25,7 @@ const OrderOptionsModal: React.FC<OrderOptionsModalProps> = ({ isOpen, onClose }
   const [showCustomForm, setShowCustomForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { validateOrderTime } = useBusinessHours();
   
   const [formData, setFormData] = useState<CustomRequestForm>({
     customerPhone: '',
@@ -62,7 +64,18 @@ const OrderOptionsModal: React.FC<OrderOptionsModalProps> = ({ isOpen, onClose }
 
   const handleSubmitCustomRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    // Validate business hours first
+    const businessHoursValidation = await validateOrderTime();
+    if (!businessHoursValidation.valid) {
+      toast({
+        title: 'Negozio Chiuso',
+        description: businessHoursValidation.message,
+        variant: 'destructive'
+      });
+      return;
+    }
+
     // Validation
     if (!formData.customerPhone.trim()) {
       toast({

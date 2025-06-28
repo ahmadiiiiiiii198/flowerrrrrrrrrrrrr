@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import AddressValidator from './AddressValidator';
 import StripeCheckout from './StripeCheckout';
 import shippingZoneService from '@/services/shippingZoneService';
+import { useBusinessHours } from '@/hooks/useBusinessHours';
 
 interface OrderFormData {
   customerName: string;
@@ -36,6 +37,8 @@ interface AddressValidationResult {
 }
 
 const EnhancedOrderForm = () => {
+  const { toast } = useToast();
+  const { validateOrderTime } = useBusinessHours();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState(1); // 1: Form, 2: Address Validation, 3: Payment
   const [addressValidation, setAddressValidation] = useState<AddressValidationResult | null>(null);
@@ -108,6 +111,12 @@ const EnhancedOrderForm = () => {
   };
 
   const createOrder = async () => {
+    // Validate business hours first
+    const businessHoursValidation = await validateOrderTime();
+    if (!businessHoursValidation.valid) {
+      throw new Error(businessHoursValidation.message);
+    }
+
     if (!addressValidation) {
       throw new Error('Address validation required');
     }

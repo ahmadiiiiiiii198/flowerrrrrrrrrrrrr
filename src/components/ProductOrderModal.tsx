@@ -10,6 +10,8 @@ import { Loader2, ShoppingCart, Plus, Minus, User, Mail, Phone, MapPin, CreditCa
 import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/types/category';
 import shippingZoneService from '@/services/shippingZoneService';
+import { useBusinessHours } from '@/hooks/useBusinessHours';
+import BusinessHoursStatus from './BusinessHoursStatus';
 
 // Direct payment button component - no abstractions
 interface DirectPaymentButtonProps {
@@ -198,6 +200,8 @@ interface OrderData {
 }
 
 const ProductOrderModal: React.FC<ProductOrderModalProps> = ({ product, isOpen, onClose }) => {
+  const { toast } = useToast();
+  const { validateOrderTime } = useBusinessHours();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isValidatingAddress, setIsValidatingAddress] = useState(false);
   const [addressValidation, setAddressValidation] = useState<any>(null);
@@ -327,6 +331,12 @@ const ProductOrderModal: React.FC<ProductOrderModalProps> = ({ product, isOpen, 
 
   // Create order function for "pay later" option
   const createOrder = async () => {
+    // Validate business hours first
+    const businessHoursValidation = await validateOrderTime();
+    if (!businessHoursValidation.valid) {
+      throw new Error(businessHoursValidation.message);
+    }
+
     if (!product || !addressValidation?.isValid) {
       throw new Error('Product or address validation missing');
     }
@@ -398,6 +408,9 @@ const ProductOrderModal: React.FC<ProductOrderModalProps> = ({ product, isOpen, 
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Business Hours Status */}
+          <BusinessHoursStatus variant="banner" />
+
           {/* Product Summary */}
           <div className="flex gap-4 p-4 bg-gray-50 rounded-lg">
             <img 
