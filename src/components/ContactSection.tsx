@@ -99,19 +99,64 @@ const ContactSection = () => {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
-        .from('contact_messages')
+      // Generate order number
+      const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+
+      // Create order from contact form
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
         .insert({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone || null,
-          subject: formData.subject,
-          message: formData.message,
-          status: 'new',
-          priority: 'normal'
+          order_number: orderNumber,
+          customer_name: formData.name,
+          customer_email: formData.email,
+          customer_phone: formData.phone || null,
+          customer_address: null, // No address provided in contact form
+          total_amount: 0, // Will be determined later
+          status: 'pending', // Custom request pending review
+          payment_status: 'pending',
+          notes: `Contact Form Request - Subject: ${subjectOptions.find(opt => opt.value === formData.subject)?.label}\nMessage: ${formData.message}`,
+          metadata: {
+            source: 'contact_form',
+            subject: formData.subject,
+            original_message: formData.message
+          }
+        })
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      // Create order item for custom request
+      const { error: itemError } = await supabase
+        .from('order_items')
+        .insert({
+          order_id: order.id,
+          product_id: 'custom-request',
+          product_name: `Custom Request - ${subjectOptions.find(opt => opt.value === formData.subject)?.label}`,
+          product_price: 0, // To be determined
+          quantity: 1,
+          subtotal: 0,
+          metadata: {
+            source: 'contact_form',
+            subject: formData.subject,
+            message: formData.message
+          }
         });
 
-      if (error) throw error;
+      if (itemError) throw itemError;
+
+      // Create notification for admin
+      const { error: notificationError } = await supabase
+        .from('order_notifications')
+        .insert({
+          order_id: order.id,
+          message: `New custom request from ${formData.name} - ${subjectOptions.find(opt => opt.value === formData.subject)?.label}`,
+          is_read: false
+        });
+
+      if (notificationError) {
+        console.error('Failed to create notification:', notificationError);
+      }
 
       toast({
         title: 'Messaggio Inviato! ✅',

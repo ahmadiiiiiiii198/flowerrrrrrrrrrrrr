@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Flower, Sparkles, Heart, Users, ShoppingBag } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ProductCard from './ProductCard';
-import ProductOrderModal from './ProductOrderModal';
+
 import { Product, ProductsByCategory } from '@/types/category';
 
 const Products = () => {
   const [products, setProducts] = useState<ProductsByCategory>({});
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+
   const [isLoading, setIsLoading] = useState(true);
   const [heading, setHeading] = useState("I Nostri Prodotti");
   const [subheading, setSubheading] = useState("Scopri la nostra selezione di fiori e composizioni per ogni occasione");
@@ -88,15 +87,7 @@ const Products = () => {
     }
   };
 
-  const handleOrderProduct = (product: Product) => {
-    setSelectedProduct(product);
-    setIsOrderModalOpen(true);
-  };
 
-  const handleCloseOrderModal = () => {
-    setIsOrderModalOpen(false);
-    setSelectedProduct(null);
-  };
 
   // Icon mapping for categories
   const getIconForCategory = (categorySlug: string) => {
@@ -212,7 +203,6 @@ const Products = () => {
                       >
                         <ProductCard
                           product={product}
-                          onOrder={handleOrderProduct}
                         />
                       </div>
                     ))}
@@ -257,12 +247,7 @@ const Products = () => {
         </div>
       </section>
 
-      {/* Order Modal */}
-      <ProductOrderModal
-        product={selectedProduct}
-        isOpen={isOrderModalOpen}
-        onClose={handleCloseOrderModal}
-      />
+
     </>
   );
 };

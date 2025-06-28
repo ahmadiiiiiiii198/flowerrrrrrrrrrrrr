@@ -3,6 +3,8 @@ import { ShoppingCart, Flower2, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import LanguageSelector from '@/components/LanguageSelector';
 import OrderOptionsModal from './OrderOptionsModal';
+import ShoppingCartComponent from './ShoppingCart';
+import { useCart } from '@/hooks/use-cart';
 
 const Header = () => {
   // Use static logo settings to avoid hook issues
@@ -14,15 +16,16 @@ const Header = () => {
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [logoError, setLogoError] = useState(false);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const { getTotalItems } = useCart();
 
   // Static translations to avoid hook errors
   const t = (key: string) => {
     const translations: Record<string, string> = {
       'home': 'Home',
-      'specialties': 'Categorie',
-      'menu': 'Prodotti',
-      'gallery': 'Galleria',
+      'categories': 'Categorie',
+      'products': 'Prodotti',
       'about': 'Chi Siamo',
+      'contact': 'Contatti',
       'makeReservation': 'Fai un Ordine'
     };
     return translations[key] || key;
@@ -75,19 +78,19 @@ const Header = () => {
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-peach-500 to-coral-500 transition-all duration-300 group-hover:w-full animate-shimmer"></span>
                 </a>
                 <a href="/#categories" className="text-gray-700 hover:text-coral-500 transition-colors font-medium font-inter relative group animate-fade-in-up animate-stagger-2 hover-scale">
-                  {t('specialties')}
+                  {t('categories')}
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-coral-500 to-peach-500 transition-all duration-300 group-hover:w-full animate-shimmer"></span>
                 </a>
-                <Link to="/menu" className="text-gray-700 hover:text-emerald-500 transition-colors font-medium font-inter relative group animate-fade-in-up animate-stagger-3 hover-scale">
-                  {t('menu')}
+                <a href="/#products" className="text-gray-700 hover:text-emerald-500 transition-colors font-medium font-inter relative group animate-fade-in-up animate-stagger-3 hover-scale">
+                  {t('products')}
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-emerald-500 to-emerald-600 transition-all duration-300 group-hover:w-full animate-shimmer"></span>
-                </Link>
-                <a href="/#gallery" className="text-gray-700 hover:text-amber-500 transition-colors font-medium font-inter relative group animate-fade-in-up animate-stagger-4 hover-scale">
-                  {t('gallery')}
+                </a>
+                <a href="/#about" className="text-gray-700 hover:text-amber-500 transition-colors font-medium font-inter relative group animate-fade-in-up animate-stagger-4 hover-scale">
+                  {t('about')}
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-amber-500 to-amber-600 transition-all duration-300 group-hover:w-full animate-shimmer"></span>
                 </a>
-                <a href="/#about" className="text-gray-700 hover:text-peach-500 transition-colors font-medium font-inter relative group animate-fade-in-up animate-stagger-5 hover-scale">
-                  {t('about')}
+                <a href="/#contact" className="text-gray-700 hover:text-peach-500 transition-colors font-medium font-inter relative group animate-fade-in-up animate-stagger-5 hover-scale">
+                  {t('contact')}
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-peach-500 to-coral-500 transition-all duration-300 group-hover:w-full animate-shimmer"></span>
                 </a>
               </nav>
@@ -103,11 +106,15 @@ const Header = () => {
                 <Plus size={16} className="animate-wiggle" />
                 {t('makeReservation')}
               </button>
-              <button className="relative p-3 text-gray-700 hover:text-peach-600 transition-colors bg-gradient-to-br from-peach-50 to-amber-50 hover:from-peach-100 hover:to-amber-100 rounded-full group shadow-md hover:shadow-lg hover-lift animate-bounce-gentle animate-scale-in animate-stagger-3">
-                <ShoppingCart size={20} className="group-hover:animate-wiggle" />
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-coral-500 to-peach-500 text-white text-xs rounded-full flex items-center justify-center font-inter font-semibold shadow-md animate-heartbeat">0</span>
-                <Flower2 className="absolute -bottom-1 -right-1 text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-bounce animate-float" size={12} />
-              </button>
+              <ShoppingCartComponent>
+                <button className="relative p-3 text-gray-700 hover:text-peach-600 transition-colors bg-gradient-to-br from-peach-50 to-amber-50 hover:from-peach-100 hover:to-amber-100 rounded-full group shadow-md hover:shadow-lg hover-lift animate-bounce-gentle animate-scale-in animate-stagger-3">
+                  <ShoppingCart size={20} className="group-hover:animate-wiggle" />
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-coral-500 to-peach-500 text-white text-xs rounded-full flex items-center justify-center font-inter font-semibold shadow-md animate-heartbeat">
+                    {getTotalItems()}
+                  </span>
+                  <Flower2 className="absolute -bottom-1 -right-1 text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-bounce animate-float" size={12} />
+                </button>
+              </ShoppingCartComponent>
             </div>
           </div>
         </div>

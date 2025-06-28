@@ -64,58 +64,41 @@ const Navbar = () => {
           <a href="/" className="hover:text-persian-gold transition-colors">
             {t('home')}
           </a>
-          <a 
-            href="/#specialties" 
+          <a
+            href="/#categories"
             className="hover:text-persian-gold transition-colors"
-            onClick={(e) => scrollToSection('specialties', e)}
+            onClick={(e) => scrollToSection('categories', e)}
           >
-            {t('specialties')}
+            {t('categories')}
           </a>
-          <a 
-            href="/#about" 
+          <a
+            href="/#products"
+            className="hover:text-persian-gold transition-colors"
+            onClick={(e) => scrollToSection('products', e)}
+          >
+            {t('products')}
+          </a>
+          <a
+            href="/#about"
             className="hover:text-persian-gold transition-colors"
             onClick={(e) => scrollToSection('about', e)}
           >
             {t('about')}
           </a>
-          <Link to="/menu" className="hover:text-persian-gold transition-colors">
-            {t('menu')}
-          </Link>
-          <a 
-            href="/#gallery" 
-            className="hover:text-persian-gold transition-colors"
-            onClick={(e) => scrollToSection('gallery', e)}
-          >
-            {t('gallery')}
-          </a>
-          <a 
-            href="/#reviews" 
-            className="hover:text-persian-gold transition-colors"
-            onClick={(e) => scrollToSection('reviews', e)}
-          >
-            {t('reviews')}
-          </a>
-          <a 
-            href="/#contact" 
+          <a
+            href="/#contact"
             className="hover:text-persian-gold transition-colors"
             onClick={(e) => scrollToSection('contact', e)}
           >
             {t('contact')}
           </a>
           <div className="flex items-center gap-2">
-            <Button 
+            <Button
               className="bg-persian-gold text-persian-navy hover:bg-persian-gold/90 flex items-center gap-2"
               onClick={(e) => scrollToSection('contact', e)}
             >
               <Utensils size={16} />
               {t('makeReservation')}
-            </Button>
-            <Button 
-              className="bg-persian-navy border border-persian-gold/30 text-persian-gold hover:bg-persian-gold/20 flex items-center gap-2"
-              onClick={(e) => scrollToSection('reviews', e)}
-            >
-              <Star size={16} />
-              {t('reviews')}
             </Button>
           </div>
           <BackgroundMusic />
@@ -139,57 +122,40 @@ const Navbar = () => {
             <a href="/" className="text-white hover:text-persian-gold transition-colors" onClick={toggleMenu}>
               {t('home')}
             </a>
-            <a 
-              href="/#specialties" 
-              className="text-white hover:text-persian-gold transition-colors" 
-              onClick={(e) => scrollToSection('specialties', e)}
+            <a
+              href="/#categories"
+              className="text-white hover:text-persian-gold transition-colors"
+              onClick={(e) => scrollToSection('categories', e)}
             >
-              {t('specialties')}
+              {t('categories')}
             </a>
-            <a 
-              href="/#about" 
-              className="text-white hover:text-persian-gold transition-colors" 
+            <a
+              href="/#products"
+              className="text-white hover:text-persian-gold transition-colors"
+              onClick={(e) => scrollToSection('products', e)}
+            >
+              {t('products')}
+            </a>
+            <a
+              href="/#about"
+              className="text-white hover:text-persian-gold transition-colors"
               onClick={(e) => scrollToSection('about', e)}
             >
               {t('about')}
             </a>
-            <Link to="/menu" className="text-white hover:text-persian-gold transition-colors" onClick={toggleMenu}>
-              {t('menu')}
-            </Link>
-            <a 
-              href="/#gallery" 
-              className="text-white hover:text-persian-gold transition-colors" 
-              onClick={(e) => scrollToSection('gallery', e)}
-            >
-              {t('gallery')}
-            </a>
-            <a 
-              href="/#reviews" 
-              className="text-white hover:text-persian-gold transition-colors" 
-              onClick={(e) => scrollToSection('reviews', e)}
-            >
-              {t('reviews')}
-            </a>
-            <a 
-              href="/#contact" 
-              className="text-white hover:text-persian-gold transition-colors" 
+            <a
+              href="/#contact"
+              className="text-white hover:text-persian-gold transition-colors"
               onClick={(e) => scrollToSection('contact', e)}
             >
               {t('contact')}
             </a>
-            <Button 
+            <Button
               className="bg-persian-gold text-persian-navy hover:bg-persian-gold/90 w-full flex items-center justify-center gap-2"
               onClick={(e) => scrollToSection('contact', e)}
             >
               <Utensils size={16} />
               {t('makeReservation')}
-            </Button>
-            <Button 
-              className="bg-persian-navy border border-persian-gold/30 text-persian-gold hover:bg-persian-gold/20 w-full flex items-center justify-center gap-2"
-              onClick={(e) => scrollToSection('reviews', e)}
-            >
-              <Star size={16} />
-              {t('reviews')}
             </Button>
           </div>
         </div>

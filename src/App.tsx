@@ -5,13 +5,14 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/hooks/use-language";
+import { CartProvider } from "@/hooks/use-cart";
 import ErrorBoundary from "./components/ErrorBoundary";
 import DiagnosticInfo from "./components/DiagnosticInfo";
 import BackgroundInitializer from "./components/BackgroundInitializer";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
 import AdminMinimal from "./pages/AdminMinimal";
-import Order from "./pages/Order";
+
 import OrderDashboardPro from "./pages/OrderDashboardPro";
 import ContactUs from "./pages/ContactUs";
 import MenuPage from "./pages/MenuPage";
@@ -28,10 +29,11 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <LanguageProvider>
-          <BackgroundInitializer />
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+          <CartProvider>
+            <BackgroundInitializer />
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
             <Routes>
               <Route path="/" element={
                 <ErrorBoundary componentName="Index">
@@ -43,11 +45,7 @@ const App = () => (
                   <Admin />
                 </ErrorBoundary>
               } />
-              <Route path="/order" element={
-                <ErrorBoundary componentName="Order">
-                  <Order />
-                </ErrorBoundary>
-              } />
+
               <Route path="/orders" element={
                 <ErrorBoundary componentName="OrderDashboard">
                   <OrderDashboardPro />
@@ -86,6 +84,7 @@ const App = () => (
             </Routes>
           </BrowserRouter>
           <DiagnosticInfo />
+          </CartProvider>
         </LanguageProvider>
       </TooltipProvider>
     </QueryClientProvider>

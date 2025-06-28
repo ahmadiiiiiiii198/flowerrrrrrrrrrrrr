@@ -2,6 +2,8 @@
 import React from 'react';
 import { ShoppingCart, Eye, Tag } from 'lucide-react';
 import { Product } from '@/types/category';
+import { useCart } from '@/hooks/use-cart';
+import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 
 interface ProductCardProps {
@@ -24,6 +26,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
   onOrder,
   onViewDetails
 }) => {
+  const { addItem } = useCart();
+  const { toast } = useToast();
+
   // Use product data if available, otherwise fall back to legacy props
   const productName = product?.name || name || '';
   const productPrice = product ? `€${product.price.toFixed(2)}` : price || '';
@@ -33,8 +38,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const stockQuantity = product?.stock_quantity || 0;
 
   const handleOrderClick = () => {
-    if (product && onOrder && isAvailable) {
-      onOrder(product);
+    if (product && isAvailable) {
+      addItem(product, 1);
+      toast({
+        title: 'Prodotto aggiunto al carrello! 🛒',
+        description: `${product.name} è stato aggiunto al tuo carrello.`,
+      });
     }
   };
 
@@ -114,7 +123,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             {productPrice}
           </span>
 
-          {product && onOrder ? (
+          {product ? (
             <button
               onClick={handleOrderClick}
               disabled={!isAvailable}
@@ -123,7 +132,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
                   ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
-              title={isAvailable ? 'Ordina ora' : 'Non disponibile'}
+              title={isAvailable ? 'Aggiungi al carrello' : 'Non disponibile'}
             >
               <ShoppingCart size={20} className={isAvailable ? 'group-hover/btn:animate-bounce' : ''} />
             </button>
