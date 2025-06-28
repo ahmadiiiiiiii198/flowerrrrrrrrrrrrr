@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -345,6 +345,9 @@ const OrderDashboardPro: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const { toast } = useToast();
 
+  // Ref to track subscription state and prevent duplicates
+  const subscriptionRef = useRef<{ orders: any; notifications: any } | null>(null);
+
   // Audio status monitoring
   useEffect(() => {
     const interval = setInterval(() => {
@@ -443,6 +446,15 @@ const OrderDashboardPro: React.FC = () => {
   // Real-time subscriptions with BULLETPROOF continuous ringing
   useEffect(() => {
     console.log('🔄 Setting up real-time subscriptions...');
+    console.log('🔍 Supabase client status:', supabase ? 'OK' : 'MISSING');
+
+    // Clean up existing subscriptions first
+    if (subscriptionRef.current) {
+      console.log('🧹 Cleaning up existing subscriptions...');
+      supabase.removeChannel(subscriptionRef.current.orders);
+      supabase.removeChannel(subscriptionRef.current.notifications);
+      subscriptionRef.current = null;
+    }
 
     const orderChannel = supabase
       .channel('orders-realtime-channel-' + Date.now()) // Unique channel name
@@ -452,15 +464,31 @@ const OrderDashboardPro: React.FC = () => {
         table: 'orders'
       }, (payload) => {
         console.log('🚨 NEW ORDER DETECTED!', payload);
+        console.log('🚨 Payload details:', JSON.stringify(payload, null, 2));
         const newOrder = payload.new as Order;
 
-        // Add to orders list
+        // Add to orders list - Use functional update to avoid stale closure
         setOrders(prev => {
           console.log('📝 Adding new order to list. Previous count:', prev.length);
+          // Check if order already exists to prevent duplicates
+          const orderExists = prev.some(order => order.id === newOrder.id);
+          if (orderExists) {
+            console.log('⚠️ Order already exists, skipping duplicate');
+            return prev;
+          }
           const updated = [newOrder, ...prev];
           console.log('📝 New order list count:', updated.length);
+          console.log('📝 New order details:', {
+            id: newOrder.id,
+            order_number: newOrder.order_number,
+            customer_name: newOrder.customer_name,
+            total_amount: newOrder.total_amount
+          });
           return updated;
         });
+
+        // Force a re-render by updating a dummy state
+        setLoading(false);
 
         // Always show toast notification
         toast({
@@ -549,10 +577,19 @@ const OrderDashboardPro: React.FC = () => {
         }
       });
 
+    // Store subscription references
+    subscriptionRef.current = {
+      orders: orderChannel,
+      notifications: notificationChannel
+    };
+
     return () => {
       console.log('🔌 Cleaning up real-time subscriptions...');
-      supabase.removeChannel(orderChannel);
-      supabase.removeChannel(notificationChannel);
+      if (subscriptionRef.current) {
+        supabase.removeChannel(subscriptionRef.current.orders);
+        supabase.removeChannel(subscriptionRef.current.notifications);
+        subscriptionRef.current = null;
+      }
     };
   }, [soundEnabled, toast]);
 
