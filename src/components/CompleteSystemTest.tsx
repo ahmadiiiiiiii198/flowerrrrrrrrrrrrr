@@ -66,7 +66,7 @@ const CompleteSystemTest = () => {
       
       if (catError) throw new Error(`Categories verification failed: ${catError.message}`);
       
-      const expectedSlugs = ['fiori-piante', 'fiori-finti', 'matrimoni', 'funerali'];
+      const expectedSlugs = ['naturale', 'finti'];
       const existingSlugs = categories?.map(cat => cat.slug) || [];
       const missingCategories = expectedSlugs.filter(slug => !existingSlugs.includes(slug));
       

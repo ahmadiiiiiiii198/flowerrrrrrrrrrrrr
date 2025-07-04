@@ -138,15 +138,6 @@ const Products = () => {
         return 'Naturale';
       case 'finti':
         return 'Finti';
-      // Legacy support
-      case 'fiori-piante':
-        return 'Fiori & Piante';
-      case 'fiori-finti':
-        return 'Fiori Finti';
-      case 'matrimoni':
-        return 'Matrimoni';
-      case 'funerali':
-        return 'Funerali';
       default:
         return categorySlug;
     }

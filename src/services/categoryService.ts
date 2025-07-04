@@ -5,9 +5,9 @@ import { Category, CategoryContent } from '@/types/category';
 const defaultCategories: Category[] = [
   {
     id: "1",
-    name: "Fiori & Piante",
-    slug: "fiori-piante",
-    description: "Fiori freschi e piante di qualità premium",
+    name: "Naturale",
+    slug: "naturale",
+    description: "Fiori e piante naturali freschi di qualità premium",
     image_url: "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
     images: [
       "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
@@ -29,9 +29,9 @@ const defaultCategories: Category[] = [
   },
   {
     id: "2",
-    name: "Fiori Finti",
-    slug: "fiori-finti",
-    description: "Eleganti composizioni artificiali",
+    name: "Finti",
+    slug: "finti",
+    description: "Eleganti composizioni artificiali di alta qualità",
     image_url: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
     images: [
       "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
@@ -51,56 +51,6 @@ const defaultCategories: Category[] = [
     color: "from-amber-400 to-peach-500",
     is_active: true,
     sort_order: 2
-  },
-  {
-    id: "3",
-    name: "Matrimoni",
-    slug: "matrimoni",
-    description: "Allestimenti floreali per il giorno speciale",
-    image_url: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-      "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-      "https://images.unsplash.com/photo-1606800052052-a08af7148866?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-      "https://images.unsplash.com/photo-1521543298264-785fba19d562?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
-    ],
-    explanation: "Rendiamo unico il giorno più importante della tua vita con allestimenti floreali personalizzati per matrimoni.",
-    features: [
-      "Consulenza personalizzata",
-      "Bouquet sposa e damigelle",
-      "Allestimenti chiesa e location",
-      "Centrotavola e decorazioni",
-      "Addobbi floreali completi",
-      "Servizio completo per matrimoni"
-    ],
-    color: "from-rose-400 to-pink-500",
-    is_active: true,
-    sort_order: 3
-  },
-  {
-    id: "4",
-    name: "Funerali",
-    slug: "funerali",
-    description: "Composizioni di cordoglio e commemorazione",
-    image_url: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-      "https://images.unsplash.com/photo-1595207759571-3a4df3c49230?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-      "https://images.unsplash.com/photo-1490750967868-88aa4486c946?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-      "https://images.unsplash.com/photo-1583160247711-2191776b4b91?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
-    ],
-    explanation: "Nel momento del dolore, offriamo composizioni floreali sobrie ed eleganti per onorare la memoria dei tuoi cari.",
-    features: [
-      "Composizioni tradizionali e moderne",
-      "Corone e cuscini floreali",
-      "Mazzi di cordoglio",
-      "Consegna tempestiva",
-      "Servizio discreto e rispettoso",
-      "Personalizzazione su richiesta"
-    ],
-    color: "from-sage-400 to-emerald-500",
-    is_active: true,
-    sort_order: 4
   }
 ];
 
