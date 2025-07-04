@@ -25,6 +25,7 @@ import ContactInfoEditor from '@/components/admin/ContactInfoEditor';
 import ContactMessagesManager from '@/components/admin/ContactMessagesManager';
 import HeroImageFixer from '@/components/admin/HeroImageFixer';
 import HoursSettings from '@/components/admin/HoursSettings';
+import BusinessHoursDebug from '@/components/BusinessHoursDebug';
 
 // import TestOrderButton from '@/components/TestOrderButton';
 import { testDatabaseConnection } from '@/utils/initializeDatabase';
@@ -353,8 +354,9 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="hours" className="space-y-2 md:space-y-4 animate-fade-in-up">
-            <div className="animate-fade-in-right animate-stagger-2">
+            <div className="space-y-4 animate-fade-in-right animate-stagger-2">
               <HoursSettings />
+              <BusinessHoursDebug />
             </div>
           </TabsContent>
 

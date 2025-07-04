@@ -262,7 +262,15 @@ class BusinessHoursService {
   clearCache(): void {
     this.cachedHours = null;
     this.lastFetch = 0;
-    console.log('🗑️ Business hours cache cleared');
+    console.log('🗑️ Business hours cache cleared - frontend will fetch fresh data');
+
+    // Dispatch a custom event to notify all components that business hours have been updated
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('businessHoursUpdated', {
+        detail: { timestamp: Date.now() }
+      }));
+      console.log('📡 Business hours update event dispatched to all components');
+    }
   }
 }
 

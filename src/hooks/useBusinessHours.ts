@@ -99,6 +99,22 @@ export const useBusinessHours = (autoRefresh: boolean = true): UseBusinessHoursR
     return () => clearInterval(interval);
   }, [autoRefresh, checkBusinessStatus]);
 
+  // Listen for business hours updates from admin panel
+  useEffect(() => {
+    const handleBusinessHoursUpdate = (event: CustomEvent) => {
+      console.log('📡 Received business hours update event, refreshing...', event.detail);
+      checkBusinessStatus();
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('businessHoursUpdated', handleBusinessHoursUpdate as EventListener);
+
+      return () => {
+        window.removeEventListener('businessHoursUpdated', handleBusinessHoursUpdate as EventListener);
+      };
+    }
+  }, [checkBusinessStatus]);
+
   return {
     isOpen,
     isLoading,

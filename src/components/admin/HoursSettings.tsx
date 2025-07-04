@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { Clock, Save, Loader2, RefreshCw, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { businessHoursService } from '@/services/businessHoursService';
 
 interface DayHours {
   isOpen: boolean;
@@ -124,6 +125,11 @@ const HoursSettings = () => {
       if (error) throw error;
 
       console.log('✅ Hours settings saved successfully');
+
+      // 🔥 CRITICAL FIX: Clear business hours cache so frontend picks up changes immediately
+      console.log('🗑️ Clearing business hours cache to apply changes immediately...');
+      businessHoursService.clearCache();
+
       toast({
         title: '✅ Orari Salvati',
         description: 'Gli orari di apertura sono stati aggiornati con successo',
@@ -226,6 +232,17 @@ const HoursSettings = () => {
     });
   };
 
+  // Force refresh business hours cache and reload settings
+  const forceRefreshHours = async () => {
+    console.log('🔄 Force refreshing business hours...');
+    businessHoursService.clearCache();
+    await loadHoursSettings();
+    toast({
+      title: '🔄 Orari Aggiornati',
+      description: 'Gli orari sono stati ricaricati dal database',
+    });
+  };
+
   // Load settings on component mount
   useEffect(() => {
     loadHoursSettings();
@@ -260,12 +277,17 @@ const HoursSettings = () => {
           
           <div className="flex flex-wrap gap-2">
             <Button
-              onClick={loadHoursSettings}
+              onClick={forceRefreshHours}
               variant="outline"
               size="sm"
+              disabled={isLoading}
               className="flex items-center gap-2"
             >
-              <RefreshCw className="w-4 h-4" />
+              {isLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4" />
+              )}
               Ricarica
             </Button>
             
