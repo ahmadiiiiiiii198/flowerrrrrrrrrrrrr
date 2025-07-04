@@ -148,40 +148,6 @@ const Categories = () => {
         ],
         labels: categoryGalleries.fiori_finti?.labels || [],
         icon: <Sparkles className="text-amber-500" size={28} />
-      },
-      {
-        title: "Matrimoni",
-        description: "Allestimenti floreali per il giorno speciale",
-        images: categoryGalleries.matrimoni?.images || defaultImages.matrimoni,
-        explanation: "Rendiamo unico il giorno più importante della tua vita con allestimenti floreali personalizzati per matrimoni. Bouquet da sposa, centrotavola, archi floreali e decorazioni per chiesa e location: tutto viene progettato su misura per raccontare la vostra storia d'amore con i fiori.",
-        features: [
-          "Bouquet da sposa personalizzati",
-          "Centrotavola eleganti",
-          "Archi floreali per cerimonie",
-          "Decorazioni per chiesa",
-          "Allestimenti per location",
-          "Progettazione su misura",
-          "Consulenza personalizzata",
-          "Servizio completo matrimoni"
-        ],
-        labels: categoryGalleries.matrimoni?.labels || [],
-        icon: <Heart className="text-rose-500" size={28} />
-      },
-      {
-        title: "Funerali",
-        description: "Composizioni di cordoglio e commemorazione",
-        images: categoryGalleries.funerali?.images || defaultImages.funerali,
-        explanation: "Nel momento del dolore, offriamo composizioni floreali sobrie ed eleganti per onorare la memoria dei tuoi cari.",
-        features: [
-          "Composizioni tradizionali e moderne",
-          "Corone e cuscini floreali",
-          "Mazzi di cordoglio",
-          "Consegna tempestiva",
-          "Servizio discreto e rispettoso",
-          "Personalizzazione su richiesta"
-        ],
-        labels: categoryGalleries.funerali?.labels || [],
-        icon: <Users className="text-sage-500" size={28} />
       }
     ];
   };

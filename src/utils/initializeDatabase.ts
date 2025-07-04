@@ -143,57 +143,63 @@ export async function initializeDatabase(): Promise<boolean> {
       },
       // Category content sections
       {
-        section_key: 'category_matrimoni_images',
-        section_name: 'Category Images: Matrimoni',
+        section_key: 'category_naturale_images',
+        section_name: 'Category Images: Naturale',
         content_type: 'json',
         content_value: JSON.stringify([]), // Empty array to prevent default images
         metadata: { section: 'categories' },
         is_active: true
       },
       {
-        section_key: 'category_matrimoni_features',
-        section_name: 'Matrimoni - Features',
+        section_key: 'category_naturale_features',
+        section_name: 'Naturale - Features',
         content_type: 'json',
         content_value: JSON.stringify([
-          "Consulenza personalizzata",
-          "Bouquet sposa e damigelle",
-          "Allestimenti chiesa e location",
-          "Centrotavola e decorazioni",
-          "Addobbi floreali completi",
-          "Servizio completo per matrimoni"
+          "Fiori freschi tagliati quotidianamente",
+          "Piante da interno e esterno",
+          "Composizioni personalizzate",
+          "Garanzia di freschezza",
+          "Cura e manutenzione inclusa"
         ]),
         metadata: { section: 'categories' },
         is_active: true
       },
       {
-        section_key: 'category_matrimoni_explanation',
-        section_name: 'Matrimoni - Explanation',
+        section_key: 'category_naturale_explanation',
+        section_name: 'Naturale - Explanation',
         content_type: 'textarea',
-        content_value: "Rendiamo unico il giorno più importante della tua vita con allestimenti floreali personalizzati per matrimoni. Bouquet da sposa, centrotavola, archi floreali e decorazioni per chiesa e location: tutto viene progettato su misura per raccontare la vostra storia d'amore con i fiori.",
+        content_value: "Da Francesco Fiori & Piante, troverai un'ampia scelta di fiori freschi di stagione e piante ornamentali per ogni ambiente. Che tu stia cercando una pianta verde per il tuo salotto o un mazzo colorato per sorprendere una persona cara, siamo qui per consigliarti con passione e competenza.",
         metadata: { section: 'categories' },
         is_active: true
       },
       {
-        section_key: 'category_fiori_piante_images',
-        section_name: 'Category Images: Fiori & Piante',
+        section_key: 'category_finti_images',
+        section_name: 'Category Images: Finti',
         content_type: 'json',
         content_value: JSON.stringify([]), // Empty array to prevent default images
         metadata: { section: 'categories' },
         is_active: true
       },
       {
-        section_key: 'category_fiori_finti_images',
-        section_name: 'Category Images: Fiori Finti',
+        section_key: 'category_finti_features',
+        section_name: 'Finti - Features',
         content_type: 'json',
-        content_value: JSON.stringify([]), // Empty array to prevent default images
+        content_value: JSON.stringify([
+          "Materiali di alta qualità",
+          "Aspetto realistico",
+          "Nessuna manutenzione richiesta",
+          "Durata illimitata",
+          "Resistenti agli allergeni",
+          "Perfetti per ogni ambiente"
+        ]),
         metadata: { section: 'categories' },
         is_active: true
       },
       {
-        section_key: 'category_funerali_images',
-        section_name: 'Category Images: Funerali',
-        content_type: 'json',
-        content_value: JSON.stringify([]), // Empty array to prevent default images
+        section_key: 'category_finti_explanation',
+        section_name: 'Finti - Explanation',
+        content_type: 'textarea',
+        content_value: "Per chi desidera la bellezza dei fiori senza pensieri, proponiamo una collezione curata di fiori artificiali di alta qualità. Realistici, eleganti e duraturi, i nostri fiori finti sono perfetti per decorazioni durature, uffici, ristoranti o spazi in cui la manutenzione è difficile.",
         metadata: { section: 'categories' },
         is_active: true
       }
@@ -275,7 +281,7 @@ async function initializeDefaultSettings(): Promise<boolean> {
           backgroundImage: "",
           backgroundColor: "#FEF7CD",
           paragraphs: [
-            "Francesco Fiori & Piante offre composizioni floreali per ogni occasione, dai funerali ai matrimoni. Troverai fiori freschi, piante da interno ed esterno, fiori finti di alta qualità e servizi su misura. Situati all'interno del Mercato di Porta Palazzo a Torino, portiamo esperienza artigianale e passione per la bellezza naturale."
+            "Francesco Fiori & Piante offre composizioni floreali per ogni occasione. Troverai fiori freschi, piante naturali e composizioni artificiali di alta qualità. Situati all'interno del Mercato di Porta Palazzo a Torino, portiamo esperienza artigianale e passione per la bellezza naturale."
           ]
         }
       },

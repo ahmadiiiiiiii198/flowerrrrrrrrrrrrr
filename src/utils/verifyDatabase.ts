@@ -38,7 +38,7 @@ export async function verifyCategoriesData(): Promise<DatabaseVerificationResult
     }
 
     // Check for required category slugs
-    const expectedSlugs = ['matrimoni', 'fiori-piante', 'fiori-finti', 'funerali'];
+    const expectedSlugs = ['naturale', 'finti'];
     const existingSlugs = data.map(cat => cat.slug);
     const missingCategories = expectedSlugs.filter(slug => !existingSlugs.includes(slug));
 
@@ -111,7 +111,7 @@ export async function verifyProductsData(): Promise<DatabaseVerificationResult> 
       return acc;
     }, {} as Record<string, any[]>);
 
-    const expectedCategories = ['matrimoni', 'fiori-piante', 'fiori-finti', 'funerali'];
+    const expectedCategories = ['naturale', 'finti'];
     const categoriesWithProducts = Object.keys(productsByCategory);
     const categoriesWithoutProducts = expectedCategories.filter(cat => !categoriesWithProducts.includes(cat));
 
