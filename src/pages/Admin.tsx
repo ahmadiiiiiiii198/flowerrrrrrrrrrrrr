@@ -181,11 +181,11 @@ const Admin = () => {
   }, {} as Record<string, ContentSection[]>);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 animate-fade-in-up">
-      {/* Mobile-first header with proper spacing */}
-      <div className="pt-16 md:pt-20 pb-4 md:pb-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 animate-fade-in-up admin-panel">
+      {/* Fixed navbar spacing - improved with CSS class */}
+      <div className="pb-4 md:pb-8">
         <div className="container mx-auto px-3 md:px-4">
-          <div className="mb-4 md:mb-8 animate-fade-in-down">
+          <div className="mb-6 md:mb-8 animate-fade-in-down">
             <div className="flex flex-col gap-3 md:gap-4">
               <div className="text-center md:text-left animate-fade-in-left">
                 <h1 className="text-xl md:text-3xl font-bold text-gray-900 mb-1 md:mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -235,11 +235,12 @@ const Admin = () => {
           </div>
         )}
 
-        <Tabs defaultValue="phone" className="space-y-3 md:space-y-6 animate-scale-in">
-          {/* Mobile-first Card-based Navigation */}
+        <Tabs defaultValue="phone" className="space-y-4 md:space-y-6 animate-scale-in">
+          {/* Mobile-first Card-based Navigation - improved spacing */}
           <div className="block md:hidden">
-            {/* Mobile Card Grid Navigation */}
-            <TabsList className="grid grid-cols-2 gap-2 mb-4 h-auto bg-transparent p-0">
+            {/* Mobile Card Grid Navigation with better spacing */}
+            <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg p-3 border border-gray-200 mb-6">
+              <TabsList className="grid grid-cols-2 gap-2 h-auto bg-transparent p-0">
               <TabsTrigger value="phone" className="flex flex-col items-center gap-2 p-3 bg-white/90 rounded-lg shadow-sm border border-blue-200 hover:bg-blue-50 transition-all duration-200 hover-scale data-[state=active]:bg-blue-100">
                 <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                   <span className="text-blue-600 text-sm">📞</span>
@@ -324,27 +325,30 @@ const Admin = () => {
                 </div>
                 <span className="text-xs font-medium text-gray-700">{t('music')}</span>
               </TabsTrigger>
-            </TabsList>
+              </TabsList>
+            </div>
           </div>
 
-          {/* Desktop Horizontal Tabs */}
+          {/* Desktop Horizontal Tabs - improved responsive layout */}
           <div className="hidden md:block">
-            <TabsList className="grid grid-cols-6 lg:grid-cols-14 w-full gap-1 p-1 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg">
-              <TabsTrigger value="phone" className="text-sm px-3 py-2 hover-scale">Telefono</TabsTrigger>
-              <TabsTrigger value="hours" className="text-sm px-3 py-2 hover-scale">Orari</TabsTrigger>
-              <TabsTrigger value="hero" className="text-sm px-3 py-2 hover-scale">Hero</TabsTrigger>
-              <TabsTrigger value="logo" className="text-sm px-3 py-2 hover-scale">Logo</TabsTrigger>
-              <TabsTrigger value="categories" className="text-sm px-3 py-2 hover-scale">Categorie</TabsTrigger>
-              <TabsTrigger value="category-pics" className="text-sm px-3 py-2 hover-scale">{t('pictures')}</TabsTrigger>
-              <TabsTrigger value="products" className="text-sm px-3 py-2 hover-scale">{t('products')}</TabsTrigger>
-              <TabsTrigger value="gallery" className="text-sm px-3 py-2 hover-scale">{t('gallery')}</TabsTrigger>
-              <TabsTrigger value="about" className="text-sm px-3 py-2 hover-scale">{t('about')}</TabsTrigger>
-              <TabsTrigger value="orders" className="text-sm px-3 py-2 hover-scale">{t('orders')}</TabsTrigger>
-              <TabsTrigger value="shipping" className="text-sm px-3 py-2 hover-scale">{t('shipping')}</TabsTrigger>
-              <TabsTrigger value="stripe" className="text-sm px-3 py-2 hover-scale">{t('stripe')}</TabsTrigger>
-              <TabsTrigger value="contact-messages" className="text-sm px-3 py-2 hover-scale">Messaggi</TabsTrigger>
-              <TabsTrigger value="notifications" className="text-sm px-3 py-2 hover-scale">{t('music')}</TabsTrigger>
-            </TabsList>
+            <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg p-2 border border-gray-200 admin-tabs-container">
+              <TabsList className="grid grid-cols-4 lg:grid-cols-7 xl:grid-cols-14 w-full gap-1 p-1 bg-transparent">
+              <TabsTrigger value="phone" className="text-sm px-3 py-2 hover-scale admin-tab-trigger">Telefono</TabsTrigger>
+              <TabsTrigger value="hours" className="text-sm px-3 py-2 hover-scale admin-tab-trigger">Orari</TabsTrigger>
+              <TabsTrigger value="hero" className="text-sm px-3 py-2 hover-scale admin-tab-trigger">Hero</TabsTrigger>
+              <TabsTrigger value="logo" className="text-sm px-3 py-2 hover-scale admin-tab-trigger">Logo</TabsTrigger>
+              <TabsTrigger value="categories" className="text-sm px-3 py-2 hover-scale admin-tab-trigger">Categorie</TabsTrigger>
+              <TabsTrigger value="category-pics" className="text-sm px-3 py-2 hover-scale admin-tab-trigger">{t('pictures')}</TabsTrigger>
+              <TabsTrigger value="products" className="text-sm px-3 py-2 hover-scale admin-tab-trigger">{t('products')}</TabsTrigger>
+              <TabsTrigger value="gallery" className="text-sm px-3 py-2 hover-scale admin-tab-trigger">{t('gallery')}</TabsTrigger>
+              <TabsTrigger value="about" className="text-sm px-3 py-2 hover-scale admin-tab-trigger">{t('about')}</TabsTrigger>
+              <TabsTrigger value="orders" className="text-sm px-3 py-2 hover-scale admin-tab-trigger">{t('orders')}</TabsTrigger>
+              <TabsTrigger value="shipping" className="text-sm px-3 py-2 hover-scale admin-tab-trigger">{t('shipping')}</TabsTrigger>
+              <TabsTrigger value="stripe" className="text-sm px-3 py-2 hover-scale admin-tab-trigger">{t('stripe')}</TabsTrigger>
+              <TabsTrigger value="contact-messages" className="text-sm px-3 py-2 hover-scale admin-tab-trigger">Messaggi</TabsTrigger>
+              <TabsTrigger value="notifications" className="text-sm px-3 py-2 hover-scale admin-tab-trigger">{t('music')}</TabsTrigger>
+              </TabsList>
+            </div>
           </div>
 
           <TabsContent value="phone" className="space-y-2 md:space-y-4 animate-fade-in-up">
