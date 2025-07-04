@@ -100,8 +100,10 @@ const ProductsAdmin = () => {
   });
 
   // Fetch categories
-  const { data: categories, isLoading: categoriesLoading, error: categoriesError } = useQuery({
+  const { data: categories, isLoading: categoriesLoading, error: categoriesError, refetch: refetchCategories } = useQuery({
     queryKey: ['admin-categories'],
+    staleTime: 0, // Always fetch fresh data
+    cacheTime: 0, // Don't cache the results
     queryFn: async () => {
       console.log('[ProductsAdmin] Fetching categories...');
       const { data, error } = await supabase
@@ -134,6 +136,7 @@ const ProductsAdmin = () => {
       }
 
       console.log('[ProductsAdmin] Categories loaded:', data);
+      console.log('[ProductsAdmin] Active categories for dropdown:', data.map(cat => ({ name: cat.name, slug: cat.slug, active: cat.is_active })));
       return data as DatabaseCategory[];
     }
   });
@@ -488,7 +491,19 @@ const ProductsAdmin = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 <div className="space-y-1 md:space-y-2">
-                  <Label htmlFor="category_id" className="text-sm font-medium">Category *</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="category_id" className="text-sm font-medium">Category *</Label>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => refetchCategories()}
+                      className="h-6 px-2 text-xs"
+                      disabled={categoriesLoading}
+                    >
+                      {categoriesLoading ? 'Loading...' : 'Refresh'}
+                    </Button>
+                  </div>
                   <Select
                     value={formData.category_id}
                     onValueChange={(value) => setFormData(prev => ({ ...prev, category_id: value }))}
@@ -505,11 +520,16 @@ const ProductsAdmin = () => {
                         ))
                       ) : (
                         <SelectItem value="" disabled className="text-sm md:text-base">
-                          No categories available - Initialize first
+                          {categoriesLoading ? 'Loading categories...' : 'No categories available'}
                         </SelectItem>
                       )}
                     </SelectContent>
                   </Select>
+                  {categories && categories.length > 0 && (
+                    <p className="text-xs text-gray-500">
+                      Available: {categories.map(cat => cat.name).join(', ')}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-1 md:space-y-2">
                   <Label htmlFor="sort_order" className="text-sm font-medium">Sort Order</Label>
