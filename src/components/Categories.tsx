@@ -47,7 +47,7 @@ const Categories = () => {
       console.log('[Categories] Loading category galleries from database...');
 
       // Load all category gallery data
-      const categoryKeys = ['matrimoni', 'fiori_piante', 'fiori_finti', 'funerali'];
+      const categoryKeys = ['naturale', 'finti'];
       const galleries = {};
 
       for (const categoryKey of categoryKeys) {
@@ -103,37 +103,25 @@ const Categories = () => {
   // Create categories with database images or fallback to default images
   const getCategories = () => {
     const defaultImages = {
-      fiori_piante: [
+      naturale: [
         "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
         "https://images.unsplash.com/photo-1440342359743-84fcb8c21f21?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
         "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
         "https://images.unsplash.com/photo-1518335935020-cfd6580c1ab4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
       ],
-      fiori_finti: [
+      finti: [
         "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
         "https://images.unsplash.com/photo-1502780402662-acc01917738e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
         "https://images.unsplash.com/photo-1454391304352-2bf4678b1a7a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
         "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
-      ],
-      matrimoni: [
-        "https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-        "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-        "https://images.unsplash.com/photo-1606800052052-a08af7148866?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-        "https://images.unsplash.com/photo-1521543298264-785fba19d562?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
-      ],
-      funerali: [
-        "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-        "https://images.unsplash.com/photo-1595207759571-3a4df3c49230?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-        "https://images.unsplash.com/photo-1490750967868-88aa4486c946?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-        "https://images.unsplash.com/photo-1583160247711-2191776b4b91?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
       ]
     };
 
     return [
       {
-        title: "Fiori & Piante",
+        title: "Naturale",
         description: "Fiori freschi e piante di qualità premium",
-        images: categoryGalleries.fiori_piante?.images || defaultImages.fiori_piante,
+        images: categoryGalleries.naturale?.images || defaultImages.naturale,
         explanation: "Da Francesco Fiori & Piante, troverai un'ampia scelta di fiori freschi di stagione e piante ornamentali per ogni ambiente. Che tu stia cercando una pianta verde per il tuo salotto o un mazzo colorato per sorprendere una persona cara, siamo qui per consigliarti con passione e competenza.",
         features: [
           "Fiori freschi tagliati quotidianamente",
@@ -142,13 +130,13 @@ const Categories = () => {
           "Garanzia di freschezza",
           "Cura e manutenzione inclusa"
         ],
-        labels: categoryGalleries.fiori_piante?.labels || [],
+        labels: categoryGalleries.naturale?.labels || [],
         icon: <Flower className="text-emerald-500" size={28} />
       },
       {
-        title: "Fiori Finti",
+        title: "Finti",
         description: "Eleganti composizioni artificiali",
-        images: categoryGalleries.fiori_finti?.images || defaultImages.fiori_finti,
+        images: categoryGalleries.finti?.images || defaultImages.finti,
         explanation: "Per chi desidera la bellezza dei fiori senza pensieri, proponiamo una collezione curata di fiori artificiali di alta qualità.",
         features: [
           "Materiali di alta qualità",

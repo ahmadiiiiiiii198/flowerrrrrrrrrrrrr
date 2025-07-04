@@ -28,10 +28,8 @@ const CategoriesGalleryAdmin = () => {
   const { toast } = useToast();
 
   const categories = [
-    { key: 'matrimoni', name: 'Matrimoni', title: 'Matrimoni' },
-    { key: 'fiori_piante', name: 'Fiori & Piante', title: 'Fiori & Piante' },
-    { key: 'fiori_finti', name: 'Fiori Finti', title: 'Fiori Finti' },
-    { key: 'funerali', name: 'Funerali', title: 'Funerali' }
+    { key: 'naturale', name: 'Naturale', title: 'Naturale' },
+    { key: 'finti', name: 'Finti', title: 'Finti' }
   ];
 
   useEffect(() => {
@@ -239,8 +237,8 @@ const CategoriesGalleryAdmin = () => {
         </div>
       </div>
 
-      <Tabs defaultValue="matrimoni" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+      <Tabs defaultValue="naturale" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2">
           {categories.map(category => (
             <TabsTrigger key={category.key} value={category.key}>
               {category.title}

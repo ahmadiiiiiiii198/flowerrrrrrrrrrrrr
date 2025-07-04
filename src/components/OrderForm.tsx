@@ -64,10 +64,8 @@ const OrderForm = () => {
   });
 
   const categories = [
-    { value: 'matrimoni', label: 'Matrimoni - Wedding Arrangements' },
-    { value: 'fiori_piante', label: 'Fiori & Piante - Fresh Flowers & Plants' },
-    { value: 'fiori_finti', label: 'Fiori Finti - Artificial Flowers' },
-    { value: 'funerali', label: 'Funerali - Funeral Arrangements' }
+    { value: 'naturale', label: 'Naturale - Fiori e Piante Naturali' },
+    { value: 'finti', label: 'Finti - Composizioni Artificiali' }
   ];
 
   const handleInputChange = (field: string, value: any) => {
