@@ -92,6 +92,11 @@ const Products = () => {
   // Icon mapping for categories
   const getIconForCategory = (categorySlug: string) => {
     switch (categorySlug) {
+      case 'naturale':
+        return <Flower className="text-emerald-500" size={28} />;
+      case 'finti':
+        return <Sparkles className="text-amber-500" size={28} />;
+      // Legacy support
       case 'fiori-piante':
         return <Flower className="text-emerald-500" size={28} />;
       case 'fiori-finti':
@@ -108,6 +113,11 @@ const Products = () => {
   // Color mapping for categories
   const getColorForCategory = (categorySlug: string) => {
     switch (categorySlug) {
+      case 'naturale':
+        return 'from-emerald-400 to-green-500';
+      case 'finti':
+        return 'from-amber-400 to-orange-500';
+      // Legacy support
       case 'fiori-piante':
         return 'from-peach-400 to-coral-500';
       case 'fiori-finti':
@@ -124,6 +134,11 @@ const Products = () => {
   // Category display names
   const getCategoryDisplayName = (categorySlug: string) => {
     switch (categorySlug) {
+      case 'naturale':
+        return 'Naturale';
+      case 'finti':
+        return 'Finti';
+      // Legacy support
       case 'fiori-piante':
         return 'Fiori & Piante';
       case 'fiori-finti':
@@ -150,7 +165,7 @@ const Products = () => {
     );
   }
 
-  const categoryOrder = ['matrimoni', 'fiori-piante', 'fiori-finti', 'funerali'];
+  const categoryOrder = ['naturale', 'finti'];
   const sortedCategories = categoryOrder.filter(slug => products[slug] && products[slug].length > 0);
 
   return (

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Hours Frontend Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-card {
+            background: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Business Hours Frontend Test</h1>
+    <p>This page tests the business hours functionality directly in the browser to verify if the frontend is working correctly.</p>
+
+    <div class="test-card">
+        <h2>🔧 Test Controls</h2>
+        <button onclick="testBusinessHours()">Test Business Hours</button>
+        <button onclick="clearCache()">Clear Cache</button>
+        <button onclick="testOrderValidation()">Test Order Validation</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <div class="test-card">
+        <h2>📊 Test Results</h2>
+        <div id="status" class="status warning">Click "Test Business Hours" to start testing</div>
+    </div>
+
+    <div class="test-card">
+        <h2>📝 Test Log</h2>
+        <div id="log" class="log">Ready to test...\n</div>
+    </div>
+
+    <script type="module">
+        // Import Supabase client
+        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js@2';
+
+        // Get environment variables (you'll need to replace these with your actual values)
+        const SUPABASE_URL = 'https://ixqjqjqjqjqjqjqjqjqj.supabase.co'; // Replace with your URL
+        const SUPABASE_ANON_KEY = 'your-anon-key'; // Replace with your key
+
+        // For testing, we'll use the same logic as the frontend service
+        class BusinessHoursService {
+            constructor() {
+                this.cachedHours = null;
+                this.lastFetch = 0;
+                this.CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+                this.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+
+            async getBusinessHours() {
+                const now = Date.now();
+                
+                // Return cached data if still valid
+                if (this.cachedHours && (now - this.lastFetch) < this.CACHE_DURATION) {
+                    this.log('📋 Using cached business hours');
+                    return this.cachedHours;
+                }
+
+                try {
+                    this.log('🕒 Fetching business hours from database...');
+                    
+                    const { data, error } = await this.supabase
+                        .from('settings')
+                        .select('value')
+                        .eq('key', 'businessHours')
+                        .single();
+
+                    if (error) {
+                        this.log('❌ Error fetching business hours: ' + error.message);
+                        return this.getDefaultHours();
+                    }
+
+                    if (data?.value) {
+                        this.cachedHours = data.value;
+                        this.lastFetch = now;
+                        this.log('✅ Business hours loaded from database');
+                        return this.cachedHours;
+                    }
+
+                    return this.getDefaultHours();
+                } catch (error) {
+                    this.log('❌ Failed to fetch business hours: ' + error.message);
+                    return this.getDefaultHours();
+                }
+            }
+
+            getDefaultHours() {
+                this.log('📋 Using default business hours');
+                return {
+                    monday: { isOpen: true, openTime: '08:00', closeTime: '19:00' },
+                    tuesday: { isOpen: true, openTime: '08:00', closeTime: '19:00' },
+                    wednesday: { isOpen: true, openTime: '08:00', closeTime: '19:00' },
+                    thursday: { isOpen: true, openTime: '08:00', closeTime: '19:00' },
+                    friday: { isOpen: true, openTime: '08:00', closeTime: '19:00' },
+                    saturday: { isOpen: true, openTime: '08:00', closeTime: '19:00' },
+                    sunday: { isOpen: true, openTime: '08:00', closeTime: '19:00' }
+                };
+            }
+
+            async isBusinessOpen(checkTime) {
+                const hours = await this.getBusinessHours();
+                const now = checkTime || new Date();
+                
+                // Get current day of week (0 = Sunday, 1 = Monday, etc.)
+                const dayOfWeek = now.getDay();
+                const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+                const currentDay = dayNames[dayOfWeek];
+                
+                const todayHours = hours[currentDay];
+                
+                this.log(`📅 Checking ${currentDay.toUpperCase()} (day ${dayOfWeek})`);
+                this.log(`🕐 Today's settings: ${JSON.stringify(todayHours)}`);
+                
+                // Check if business is open today
+                if (!todayHours.isOpen) {
+                    return {
+                        isOpen: false,
+                        message: 'Siamo chiusi oggi. Puoi effettuare ordini durante i nostri orari di apertura.',
+                        todayHours
+                    };
+                }
+
+                // Check if current time is within business hours
+                const currentTime = this.formatTime(now);
+                const isWithinHours = this.isTimeWithinRange(currentTime, todayHours.openTime, todayHours.closeTime);
+                
+                this.log(`🕒 Current time: ${currentTime}`);
+                this.log(`⏰ Business hours: ${todayHours.openTime} - ${todayHours.closeTime}`);
+                this.log(`✅ Within hours: ${isWithinHours}`);
+                
+                if (isWithinHours) {
+                    return {
+                        isOpen: true,
+                        message: 'Siamo aperti! Puoi effettuare il tuo ordine.',
+                        todayHours
+                    };
+                } else {
+                    return {
+                        isOpen: false,
+                        message: `Siamo chiusi. Orari di oggi: ${todayHours.openTime}-${todayHours.closeTime}`,
+                        todayHours
+                    };
+                }
+            }
+
+            formatTime(date) {
+                return date.toTimeString().slice(0, 5); // HH:MM format
+            }
+
+            isTimeWithinRange(currentTime, openTime, closeTime) {
+                return currentTime >= openTime && currentTime <= closeTime;
+            }
+
+            async validateOrderTime(orderTime) {
+                const checkTime = orderTime || new Date();
+                const result = await this.isBusinessOpen(checkTime);
+                
+                if (result.isOpen) {
+                    return {
+                        valid: true,
+                        message: 'Ordine valido - siamo aperti!'
+                    };
+                } else {
+                    return {
+                        valid: false,
+                        message: result.message
+                    };
+                }
+            }
+
+            clearCache() {
+                this.cachedHours = null;
+                this.lastFetch = 0;
+                this.log('🗑️ Business hours cache cleared');
+            }
+
+            log(message) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logElement = document.getElementById('log');
+                logElement.textContent += `[${timestamp}] ${message}\n`;
+                logElement.scrollTop = logElement.scrollHeight;
+            }
+        }
+
+        // Create global instance
+        window.businessHoursService = new BusinessHoursService();
+
+        // Global test functions
+        window.testBusinessHours = async function() {
+            const statusEl = document.getElementById('status');
+            const service = window.businessHoursService;
+            
+            try {
+                service.log('🧪 Starting business hours test...');
+                
+                const result = await service.isBusinessOpen();
+                
+                service.log('📊 Test Results:');
+                service.log(`- Business is open: ${result.isOpen ? 'YES' : 'NO'}`);
+                service.log(`- Message: ${result.message}`);
+                
+                if (result.isOpen) {
+                    statusEl.className = 'status success';
+                    statusEl.textContent = '✅ Business is OPEN - Orders should be allowed';
+                } else {
+                    statusEl.className = 'status error';
+                    statusEl.textContent = '❌ Business is CLOSED - Orders not allowed: ' + result.message;
+                }
+                
+            } catch (error) {
+                service.log('❌ Test failed: ' + error.message);
+                statusEl.className = 'status error';
+                statusEl.textContent = '❌ Test failed: ' + error.message;
+            }
+        };
+
+        window.testOrderValidation = async function() {
+            const service = window.businessHoursService;
+            
+            try {
+                service.log('🧪 Testing order validation...');
+                
+                const validation = await service.validateOrderTime();
+                
+                service.log('📊 Order Validation Results:');
+                service.log(`- Valid: ${validation.valid ? 'YES' : 'NO'}`);
+                service.log(`- Message: ${validation.message}`);
+                
+                if (validation.valid) {
+                    service.log('✅ Orders should be ALLOWED');
+                } else {
+                    service.log('❌ Orders should be BLOCKED');
+                    service.log('🚨 This is why checkout shows "Ordini non disponibili"');
+                }
+                
+            } catch (error) {
+                service.log('❌ Order validation test failed: ' + error.message);
+            }
+        };
+
+        window.clearCache = function() {
+            window.businessHoursService.clearCache();
+            document.getElementById('status').className = 'status warning';
+            document.getElementById('status').textContent = 'Cache cleared - click "Test Business Hours" to reload';
+        };
+
+        window.clearLog = function() {
+            document.getElementById('log').textContent = 'Log cleared...\n';
+        };
+
+        // Auto-run test on page load
+        setTimeout(() => {
+            window.businessHoursService.log('🚀 Page loaded - ready for testing');
+            window.businessHoursService.log('⚠️ Note: You need to update SUPABASE_URL and SUPABASE_ANON_KEY in the script');
+        }, 100);
+    </script>
+</body>
+</html>

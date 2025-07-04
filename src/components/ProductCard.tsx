@@ -68,6 +68,22 @@ const ProductCard: React.FC<ProductCardProps> = ({
         />
         <div className="absolute inset-0 bg-gradient-to-t from-peach-900/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
+        {/* Category badge - top right */}
+        {product && product.category && (
+          <div className="absolute top-3 right-3">
+            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold shadow-lg backdrop-blur-sm transition-all duration-200 ${
+              product.category.toLowerCase() === 'naturale'
+                ? 'bg-emerald-500/90 text-white border border-emerald-400/50'
+                : product.category.toLowerCase() === 'finti'
+                ? 'bg-amber-500/90 text-white border border-amber-400/50'
+                : 'bg-peach-500/90 text-white border border-peach-400/50'
+            }`}>
+              <Tag size={10} />
+              {product.category}
+            </span>
+          </div>
+        )}
+
         {/* Stock indicator */}
         {product && (
           <div className="absolute top-3 left-3">
@@ -144,10 +160,17 @@ const ProductCard: React.FC<ProductCardProps> = ({
           )}
         </div>
 
-        {/* Category badge */}
-        {product && (
+        {/* Category badge - Enhanced styling */}
+        {product && product.category && (
           <div className="mt-3">
-            <span className="inline-block bg-peach-100 text-peach-800 px-2 py-1 rounded-full text-xs font-medium">
+            <span className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm transition-all duration-200 hover:shadow-md ${
+              product.category.toLowerCase() === 'naturale'
+                ? 'bg-emerald-100 text-emerald-800 border border-emerald-200 hover:bg-emerald-200'
+                : product.category.toLowerCase() === 'finti'
+                ? 'bg-amber-100 text-amber-800 border border-amber-200 hover:bg-amber-200'
+                : 'bg-peach-100 text-peach-800 border border-peach-200 hover:bg-peach-200'
+            }`}>
+              <Tag size={12} />
               {product.category}
             </span>
           </div>
